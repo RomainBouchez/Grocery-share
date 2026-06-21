@@ -12,10 +12,9 @@ services:
       - NODE_ENV=production
     volumes:
       - grocyshare-data:/data
-    # Accès direct : http://<ip-du-pi>:3000
-    # (commente ce bloc "ports" si tu passes par Traefik)
+    # Accès direct : http://<ip-du-pi>:3015
     ports:
-      - "3000:3000"
+      - "3015:3000"
 
     # --- Traefik (optionnel) ---------------------------------------------
     # Décommente si tu utilises déjà Traefik comme reverse proxy.

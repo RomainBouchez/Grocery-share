@@ -89,7 +89,7 @@ docker compose up -d --build
 docker compose logs -f
 ```
 
-L'app est alors accessible sur **http://<ip-du-pi>:3000**.
+L'app est alors accessible sur **http://<ip-du-pi>:3015**.
 
 - La base **SQLite est persistée** dans le volume Docker `grocyshare-data`
   (`/data/grocyshare.db`) : elle survit aux `docker compose up --build`.
