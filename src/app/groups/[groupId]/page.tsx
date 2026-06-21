@@ -60,6 +60,15 @@ export default async function GroupPage({
 
   const memberViews = group.members.map((m) => ({ userId: m.user.id, name: m.user.name }));
 
+  // N1 — autocomplete : base d'aliments perso de l'utilisateur (plus achetés d'abord).
+  const myProducts = await prisma.userProduct.findMany({
+    where: { userId: user.id },
+    orderBy: [{ buyCount: "desc" }, { lastBoughtAt: "desc" }],
+    select: { label: true },
+    take: 100,
+  });
+  const suggestions = myProducts.map((p) => p.label);
+
   const pending = itemViews.filter((i) => i.status !== "bought");
   const bought = itemViews.filter((i) => i.status === "bought");
 
@@ -81,7 +90,7 @@ export default async function GroupPage({
         </div>
 
         <div className="mb-3">
-          <AddItemForm groupId={groupId} />
+          <AddItemForm groupId={groupId} suggestions={suggestions} />
         </div>
 
         <Link

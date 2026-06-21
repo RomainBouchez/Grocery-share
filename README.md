@@ -7,8 +7,9 @@ Application web responsive (PWA) de gestion de courses en groupe :
 - **Listes collaboratives multi-groupes** (famille, coloc, amis…)
 - **Système de parts** façon Tricount sur chaque article (ajout de n'importe quel membre)
 - **Scan de ticket** : photo → Claude (CLI `claude -p`) extrait les articles + prix → fuzzy matching
+- **Base d'aliments perso + autocomplete** : alimentée à chaque ticket validé
 - *(à venir)* Tricount automatique : soldes & remboursements
-- *(à venir)* Suggestions basées sur l'historique et les rythmes d'achat
+- *(à venir)* Suggestions rythmiques (« 📅 Articles à prévoir »)
 
 ## Stack
 
@@ -64,7 +65,7 @@ Le schéma complet (`prisma/schema.prisma`) couvre déjà toutes les phases du p
 1. **MVP** ✅ — Auth + Groupes + Liste collaborative + Système de parts
 2. **V3** ✅ — Scan de ticket (OCR via `claude -p`) + fuzzy matching + retour de courses
 3. **V2** — Tricount automatique : calcul des soldes & remboursements
-4. **V4** — Suggestions intelligentes + rythmes d'achat
+4. **V4** — Suggestions : base perso + autocomplete ✅ · rythmes d'achat (à venir)
 
 ## Scan de ticket (OCR)
 
