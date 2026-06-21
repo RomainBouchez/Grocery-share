@@ -10,8 +10,14 @@ services:
       # Secret de signature des sessions — défini dans le fichier .env (voir ci-dessous).
       - SESSION_SECRET=${SESSION_SECRET:?Définis SESSION_SECRET dans .env}
       - NODE_ENV=production
+      # Photos de ticket écrites dans le volume persistant.
+      - UPLOAD_DIR=/data/uploads
     volumes:
       - grocyshare-data:/data
+      # OCR : partage l'authentification du CLI Claude du Pi avec le conteneur.
+      # Connecte-toi d'abord sur le Pi avec `claude` (une fois), puis monte le dossier.
+      - ${HOME}/.claude:/root/.claude
+      - ${HOME}/.claude.json:/root/.claude.json
     # Accès direct : http://<ip-du-pi>:3015
     ports:
       - "3015:3000"

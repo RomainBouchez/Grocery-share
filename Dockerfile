@@ -26,6 +26,9 @@ RUN npm run build
 FROM base AS runner
 ENV NODE_ENV=production
 ENV PORT=3000
+# CLI Claude Code : requis pour le scan de ticket OCR (`claude -p`).
+# L'authentification se fait en montant ~/.claude dans le conteneur (cf. compose).
+RUN npm install -g @anthropic-ai/claude-code && rm -rf /root/.npm
 # On conserve node_modules (inclut la CLI Prisma) pour appliquer le schéma au démarrage.
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next

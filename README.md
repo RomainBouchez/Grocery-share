@@ -5,9 +5,9 @@
 Application web responsive (PWA) de gestion de courses en groupe :
 
 - **Listes collaboratives multi-groupes** (famille, coloc, amis…)
-- **Système de parts** façon Tricount sur chaque article
-- *(à venir)* Tricount automatique au retour de courses
-- *(à venir)* Scan de ticket via Claude Vision + fuzzy matching
+- **Système de parts** façon Tricount sur chaque article (ajout de n'importe quel membre)
+- **Scan de ticket** : photo → Claude (CLI `claude -p`) extrait les articles + prix → fuzzy matching
+- *(à venir)* Tricount automatique : soldes & remboursements
 - *(à venir)* Suggestions basées sur l'historique et les rythmes d'achat
 
 ## Stack
@@ -62,9 +62,24 @@ Le schéma complet (`prisma/schema.prisma`) couvre déjà toutes les phases du p
 ## Feuille de route
 
 1. **MVP** ✅ — Auth + Groupes + Liste collaborative + Système de parts
-2. **V2** — Retour de courses manuel + Tricount (soldes & remboursements)
-3. **V3** — OCR ticket (Claude Vision `claude-sonnet-4-6`) + fuzzy matching
+2. **V3** ✅ — Scan de ticket (OCR via `claude -p`) + fuzzy matching + retour de courses
+3. **V2** — Tricount automatique : calcul des soldes & remboursements
 4. **V4** — Suggestions intelligentes + rythmes d'achat
+
+## Scan de ticket (OCR)
+
+Le retour de courses (« 🧾 J'ai fait les courses ») envoie la photo du ticket au
+**CLI Claude Code** en mode non-interactif (`claude -p`), qui lit l'image et renvoie
+les articles + prix en JSON. Un **fuzzy matching** maison les rapproche ensuite de la
+liste planifiée (seuil configurable via `MATCH_THRESHOLD`).
+
+> ⚠️ L'OCR exige que le binaire **`claude` soit installé et authentifié** dans
+> l'environnement qui exécute l'app.
+>
+> - **Sans Docker** : `npm i -g @anthropic-ai/claude-code` puis `claude` (login) une fois.
+> - **Avec Docker** : l'image installe déjà le CLI. Connecte-toi une fois sur le Pi
+>   avec `claude`, puis le `docker-compose.yml` monte `~/.claude` et `~/.claude.json`
+>   dans le conteneur pour partager l'authentification.
 
 ## Déploiement sur Raspberry Pi 🍓
 

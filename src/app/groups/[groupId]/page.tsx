@@ -80,9 +80,16 @@ export default async function GroupPage({
           </p>
         </div>
 
-        <div className="mb-5">
+        <div className="mb-3">
           <AddItemForm groupId={groupId} />
         </div>
+
+        <Link
+          href={`/groups/${groupId}/receipt`}
+          className="mb-5 flex items-center justify-center gap-2 rounded-lg border border-green-600 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700 hover:bg-green-100"
+        >
+          🧾 J&apos;ai fait les courses
+        </Link>
 
         {pending.length === 0 && bought.length === 0 ? (
           <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500">
