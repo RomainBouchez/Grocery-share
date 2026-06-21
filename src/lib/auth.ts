@@ -21,7 +21,11 @@ export async function createSession(userId: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // Cookie `Secure` uniquement si on est servi en HTTPS (reverse proxy).
+    // En accès direct HTTP (LAN, http://<ip>:3015) le navigateur jette un
+    // cookie Secure, ce qui casse la session. Défaut : non-secure.
+    // Passer COOKIE_SECURE=true derrière un proxy HTTPS.
+    secure: process.env.COOKIE_SECURE === "true",
     sameSite: "lax",
     path: "/",
     expires: expiresAt,
