@@ -1,0 +1,183 @@
+// GrocyShare — schéma de base de données
+// SQLite via Prisma : léger, parfait pour un Raspberry Pi.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Utilisateurs & auth
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  memberships     GroupMember[]
+  addedItems      ListItem[]        @relation("ItemAddedBy")
+  participations  ItemParticipant[]
+  receiptsPaid    Receipt[]         @relation("ReceiptPaidBy")
+  balancesFrom    Balance[]         @relation("BalanceFrom")
+  balancesTo      Balance[]         @relation("BalanceTo")
+  products        UserProduct[]
+  sessions        Session[]
+}
+
+// Session simple par cookie (auth « magic link / code PIN » à brancher ensuite).
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Groupes
+// ---------------------------------------------------------------------------
+
+model Group {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique // code court pour rejoindre par lien/code
+  createdAt  DateTime @default(now())
+
+  members  GroupMember[]
+  lists    ShoppingList[]
+  balances Balance[]
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  userId   String
+  groupId  String
+  role     String   @default("member") // "owner" | "member"
+  joinedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+}
+
+// ---------------------------------------------------------------------------
+// Listes de courses & articles
+// ---------------------------------------------------------------------------
+
+model ShoppingList {
+  id        String   @id @default(cuid())
+  groupId   String
+  status    String   @default("planning") // "planning" | "shopping" | "done"
+  createdAt DateTime @default(now())
+
+  group    Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  items    ListItem[]
+  receipts Receipt[]
+
+  @@index([groupId])
+}
+
+model ListItem {
+  id            String   @id @default(cuid())
+  listId        String
+  label         String
+  addedByUserId String
+  status        String   @default("pending") // "pending" | "bought" | "skipped"
+  createdAt     DateTime @default(now())
+
+  list         ShoppingList      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  addedBy      User              @relation("ItemAddedBy", fields: [addedByUserId], references: [id])
+  participants ItemParticipant[]
+  receiptItems ReceiptItem[]
+
+  @@index([listId])
+}
+
+// Qui participe à un article et avec combien de parts (façon Tricount).
+model ItemParticipant {
+  id     String @id @default(cuid())
+  itemId String
+  userId String
+  parts  Int    @default(1)
+
+  item ListItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, userId])
+  @@index([itemId])
+}
+
+// ---------------------------------------------------------------------------
+// Retour de courses : ticket & Tricount (V2 / V3)
+// ---------------------------------------------------------------------------
+
+model Receipt {
+  id           String   @id @default(cuid())
+  listId       String
+  paidByUserId String
+  totalAmount  Float    @default(0)
+  photoUrl     String?
+  createdAt    DateTime @default(now())
+
+  list   ShoppingList  @relation(fields: [listId], references: [id], onDelete: Cascade)
+  paidBy User          @relation("ReceiptPaidBy", fields: [paidByUserId], references: [id])
+  items  ReceiptItem[]
+
+  @@index([listId])
+}
+
+model ReceiptItem {
+  id            String  @id @default(cuid())
+  receiptId     String
+  rawLabel      String
+  matchedItemId String?
+  price         Float
+
+  receipt     Receipt   @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  matchedItem ListItem? @relation(fields: [matchedItemId], references: [id])
+
+  @@index([receiptId])
+}
+
+model Balance {
+  id         String  @id @default(cuid())
+  groupId    String
+  fromUserId String
+  toUserId   String
+  amount     Float
+  settled    Boolean @default(false)
+
+  group    Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fromUser User  @relation("BalanceFrom", fields: [fromUserId], references: [id])
+  toUser   User  @relation("BalanceTo", fields: [toUserId], references: [id])
+
+  @@index([groupId])
+}
+
+// ---------------------------------------------------------------------------
+// Suggestions : base d'aliments perso (V4)
+// ---------------------------------------------------------------------------
+
+model UserProduct {
+  id           String   @id @default(cuid())
+  userId       String
+  label        String
+  lastBoughtAt DateTime?
+  buyCount     Int      @default(1)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, label])
+  @@index([userId])
+}
