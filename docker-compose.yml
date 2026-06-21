@@ -1,0 +1,36 @@
+services:
+  grocyshare:
+    build: .
+    image: grocyshare:latest
+    container_name: grocyshare
+    restart: unless-stopped
+    environment:
+      # SQLite stocké dans le volume (persiste entre les redéploiements).
+      - DATABASE_URL=file:/data/grocyshare.db
+      # Secret de signature des sessions — défini dans le fichier .env (voir ci-dessous).
+      - SESSION_SECRET=${SESSION_SECRET:?Définis SESSION_SECRET dans .env}
+      - NODE_ENV=production
+    volumes:
+      - grocyshare-data:/data
+    # Accès direct : http://<ip-du-pi>:3000
+    # (commente ce bloc "ports" si tu passes par Traefik)
+    ports:
+      - "3000:3000"
+
+    # --- Traefik (optionnel) ---------------------------------------------
+    # Décommente si tu utilises déjà Traefik comme reverse proxy.
+    # networks:
+    #   - traefik
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.grocyshare.rule=Host(`grocyshare.romainbouchez.fr`)"
+    #   - "traefik.http.routers.grocyshare.entrypoints=websecure"
+    #   - "traefik.http.routers.grocyshare.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.grocyshare.loadbalancer.server.port=3000"
+
+volumes:
+  grocyshare-data:
+
+# networks:
+#   traefik:
+#     external: true
