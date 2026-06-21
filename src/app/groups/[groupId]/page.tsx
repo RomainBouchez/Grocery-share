@@ -58,6 +58,8 @@ export default async function GroupPage({
     })),
   }));
 
+  const memberViews = group.members.map((m) => ({ userId: m.user.id, name: m.user.name }));
+
   const pending = itemViews.filter((i) => i.status !== "bought");
   const bought = itemViews.filter((i) => i.status === "bought");
 
@@ -90,7 +92,12 @@ export default async function GroupPage({
           <>
             <ul className="flex flex-col gap-2">
               {pending.map((item) => (
-                <ItemCard key={item.id} item={item} currentUserId={user.id} />
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  currentUserId={user.id}
+                  members={memberViews}
+                />
               ))}
             </ul>
 
@@ -101,7 +108,12 @@ export default async function GroupPage({
                 </h2>
                 <ul className="flex flex-col gap-2">
                   {bought.map((item) => (
-                    <ItemCard key={item.id} item={item} currentUserId={user.id} />
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      currentUserId={user.id}
+                      members={memberViews}
+                    />
                   ))}
                 </ul>
               </>

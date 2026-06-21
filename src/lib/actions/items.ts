@@ -57,20 +57,29 @@ async function loadItemAndAuthorize(userId: string, itemId: string) {
 }
 
 /** Rejoint un article avec un nombre de parts (ajout ou mise à jour). */
+/**
+ * Définit les parts d'un participant sur un article (style Tricount).
+ * N'importe quel membre du groupe peut ajouter/retirer/ajuster n'importe quel
+ * autre membre. Sans `userId`, on agit sur l'utilisateur courant.
+ */
 export async function setParticipation(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const actor = await requireUser();
   const itemId = String(formData.get("itemId") ?? "");
+  const targetUserId = String(formData.get("userId") ?? "") || actor.id;
   const parts = Math.max(0, Math.min(99, parseInt(String(formData.get("parts") ?? "1"), 10) || 0));
 
-  const item = await loadItemAndAuthorize(user.id, itemId);
+  // L'auteur de l'action doit appartenir au groupe…
+  const item = await loadItemAndAuthorize(actor.id, itemId);
+  // …et la personne ajoutée aussi (on ne met que des membres du groupe sur un article).
+  await assertMembership(targetUserId, item.list.groupId);
 
   if (parts <= 0) {
-    // 0 part = se retirer de l'article.
-    await prisma.itemParticipant.deleteMany({ where: { itemId, userId: user.id } });
+    // 0 part = retirer la personne de l'article.
+    await prisma.itemParticipant.deleteMany({ where: { itemId, userId: targetUserId } });
   } else {
     await prisma.itemParticipant.upsert({
-      where: { itemId_userId: { itemId, userId: user.id } },
-      create: { itemId, userId: user.id, parts },
+      where: { itemId_userId: { itemId, userId: targetUserId } },
+      create: { itemId, userId: targetUserId, parts },
       update: { parts },
     });
   }
