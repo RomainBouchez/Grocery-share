@@ -41,7 +41,7 @@ function coerceLines(parsed: unknown): OcrLine[] {
   return lines;
 }
 
-/** Regroupe les lignes avec le même libellé (insensible à la casse) en additionnant leurs prix. */
+/** Regroupe les lignes avec le même libellé (insensible à la casse) en additionnant leurs prix et en comptant la quantité. */
 function mergeOcrDuplicates(lines: OcrLine[]): OcrLine[] {
   const map = new Map<string, OcrLine>();
   for (const line of lines) {
@@ -49,6 +49,7 @@ function mergeOcrDuplicates(lines: OcrLine[]): OcrLine[] {
     const existing = map.get(key);
     if (existing) {
       existing.prix = Math.round((existing.prix + line.prix) * 100) / 100;
+      existing.quantity = (existing.quantity ?? 1) + 1;
     } else {
       map.set(key, { ...line });
     }

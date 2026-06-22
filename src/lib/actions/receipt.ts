@@ -39,11 +39,12 @@ async function recordPurchases(
 export type DraftMatch = {
   rawLabel: string;
   price: number;
+  quantity?: number;
   itemId: string;
   itemLabel: string;
   score: number;
 };
-export type DraftExtra = { rawLabel: string; price: number };
+export type DraftExtra = { rawLabel: string; price: number; quantity?: number };
 
 export type ScanDraft = {
   ok: true;
@@ -120,6 +121,7 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
   const matched: DraftMatch[] = result.matches.map((m) => ({
     rawLabel: lines[m.ocrIndex].label,
     price: lines[m.ocrIndex].prix,
+    quantity: lines[m.ocrIndex].quantity,
     itemId: m.itemId,
     itemLabel: labelById.get(m.itemId) ?? "",
     score: Math.round(m.score * 100) / 100,
@@ -127,6 +129,7 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
   const extras: DraftExtra[] = result.extras.map((i) => ({
     rawLabel: lines[i].label,
     price: lines[i].prix,
+    quantity: lines[i].quantity,
   }));
   const total = lines.reduce((s, l) => s + l.prix, 0);
 

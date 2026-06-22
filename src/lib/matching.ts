@@ -71,7 +71,7 @@ export function similarity(planned: string, ocr: string): number {
   return Math.max(diceCoefficient(planned, ocr), tokenContainment(planned, ocr));
 }
 
-export type OcrLine = { label: string; prix: number };
+export type OcrLine = { label: string; prix: number; quantity?: number };
 export type PlannedItem = { id: string; label: string };
 
 export type MatchResult = {

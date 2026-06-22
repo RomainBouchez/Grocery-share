@@ -164,6 +164,11 @@ export function ReceiptScanner({
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-medium text-neutral-900">
                       ✅ {m.itemLabel}
+                      {m.quantity && m.quantity > 1 && (
+                        <span className="ml-1.5 rounded-full bg-green-100 px-1.5 py-0.5 text-xs font-semibold text-green-700">
+                          x{m.quantity}
+                        </span>
+                      )}
                     </span>
                     <span className="block truncate text-xs text-neutral-400">{m.rawLabel}</span>
                   </span>
@@ -198,6 +203,11 @@ export function ReceiptScanner({
                     />
                     <span className="truncate text-sm font-medium text-neutral-900">
                       {e.rawLabel}
+                      {e.quantity && e.quantity > 1 && (
+                        <span className="ml-1.5 rounded-full bg-neutral-100 px-1.5 py-0.5 text-xs font-semibold text-neutral-600">
+                          x{e.quantity}
+                        </span>
+                      )}
                     </span>
                   </label>
                   <span className="shrink-0 text-sm font-semibold">{formatEuro(e.price)}</span>
