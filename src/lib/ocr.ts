@@ -41,6 +41,21 @@ function coerceLines(parsed: unknown): OcrLine[] {
   return lines;
 }
 
+/** Regroupe les lignes avec le même libellé (insensible à la casse) en additionnant leurs prix. */
+function mergeOcrDuplicates(lines: OcrLine[]): OcrLine[] {
+  const map = new Map<string, OcrLine>();
+  for (const line of lines) {
+    const key = line.label.trim().toUpperCase();
+    const existing = map.get(key);
+    if (existing) {
+      existing.prix = Math.round((existing.prix + line.prix) * 100) / 100;
+    } else {
+      map.set(key, { ...line });
+    }
+  }
+  return Array.from(map.values());
+}
+
 /**
  * Lance `claude -p` sur l'image du ticket et renvoie les lignes extraites.
  * Le CLI Claude Code lit l'image via son outil Read : on exécute donc le
@@ -76,5 +91,5 @@ export async function extractReceiptItems(imagePath: string): Promise<OcrLine[]>
     });
   });
 
-  return coerceLines(extractJsonArray(stdout));
+  return mergeOcrDuplicates(coerceLines(extractJsonArray(stdout)));
 }
