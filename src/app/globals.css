@@ -3,6 +3,31 @@
 :root {
   --background: #f7f7f5;
   --foreground: #1c1b1a;
+
+  /* Cartful design tokens */
+  --bg:            #0D0D0F;
+  --surface:       #15151A;
+  --text-strong:   rgba(255,255,255,0.97);
+  --text:          rgba(255,255,255,0.92);
+  --text-muted:    rgba(255,255,255,0.55);
+  --text-faint:    rgba(255,255,255,0.35);
+  --hairline:      rgba(255,255,255,0.08);
+  --accent:        #5BD08A;
+  --accent-soft:   rgba(91,208,138,0.14);
+  --accent-text:   #9FE3BD;
+  --tag-orange:    #F0813F;
+  --tag-yellow:    #F0C53F;
+  --tag-green:     #5BD08A;
+  --tag-purple:    #C99BF0;
+  --tag-blue:      #7E91FF;
+  --glass-bg:      rgba(255,255,255,0.045);
+  --glass-bg-2:    rgba(255,255,255,0.06);
+  --glass-border:  rgba(255,255,255,0.10);
+  --glass-hi:      inset 0 1px 0 rgba(255,255,255,0.10);
+  --glass-shadow:  0 30px 70px rgba(0,0,0,0.55);
+  --blur:          24px;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px; --r-pill: 999px;
+  --font: 'Hanken Grotesk', system-ui, sans-serif;
 }
 
 @theme inline {
@@ -11,14 +36,74 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+@keyframes cf-floatA { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes cf-floatB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes cf-floatC { 0%,100%{transform:translateY(0)} 50%{transform:translateY(10px)} }
+@keyframes cf-pop    { 0%{transform:scale(.4)} 55%{transform:scale(1.22)} 100%{transform:scale(1)} }
+@keyframes cf-ripple { to{transform:scale(1); opacity:0} }
+@keyframes cf-slidein{ from{opacity:0; transform:translateY(-7px)} to{opacity:1; transform:none} }
+
+[data-check] { position:relative; transition:background .2s ease, border-color .2s ease; }
+[data-reveal] { opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease; }
+[data-reveal][data-shown="1"] { opacity:1; transform:none; }
+::selection { background: rgba(91,208,138,0.28); }
+
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  /* Confort sur mobile, l'app étant utilisée au supermarché. */
   overscroll-behavior-y: none;
+}
+
+/* Landing page responsive layout */
+.cf-nav          { padding: 18px 40px; }
+.cf-hero         { padding: 96px 40px 40px; }
+.cf-hero-title   { font-size: 78px; }
+.cf-hero-subtitle{ font-size: 21px; }
+.cf-hero-btns    { flex-direction: row; }
+.cf-cards-fan    { height: 560px; margin-top: 64px; }
+.cf-card-left    { display: block; }
+.cf-card-right   { display: block; }
+.cf-trust        { padding: 28px 40px; gap: 42px; }
+.cf-features     { padding: 130px 40px 40px; }
+.cf-feature-grid { grid-template-columns: 1fr 1fr; gap: 64px; margin-bottom: 120px; }
+.cf-how-wrap     { padding: 80px 60px; }
+.cf-how-grid     { grid-template-columns: repeat(3,1fr); }
+.cf-cta-title    { font-size: 58px; }
+.cf-cta-btns     { flex-direction: row; }
+.cf-footer-inner { flex-direction: row; }
+.cf-feature-flip { order: 0; }
+
+@media (max-width: 900px) {
+  .cf-nav          { padding: 14px 24px; }
+  .cf-hero         { padding: 52px 24px 0; }
+  .cf-hero-title   { font-size: 46px; }
+  .cf-hero-subtitle{ font-size: 17px; }
+  .cf-hero-btns    { flex-direction: column; align-items: stretch; }
+  .cf-hero-btns a  { justify-content: center; }
+  .cf-cards-fan    { height: 400px; margin-top: 36px; }
+  .cf-card-left    { display: none !important; }
+  .cf-card-right   { display: none !important; }
+  .cf-trust        { padding: 20px 24px; gap: 16px; flex-wrap: wrap; }
+  .cf-features     { padding: 64px 24px 24px; }
+  .cf-feature-grid { grid-template-columns: 1fr; gap: 28px; margin-bottom: 64px; }
+  .cf-feature-flip { order: -1; }
+  .cf-how-wrap     { padding: 40px 24px; }
+  .cf-how-grid     { grid-template-columns: 1fr; }
+  .cf-cta-title    { font-size: 36px; }
+  .cf-cta-btns     { flex-direction: column; align-items: stretch; }
+  .cf-cta-btns a   { justify-content: center; }
+  .cf-footer-inner { flex-direction: column; align-items: center; text-align: center; }
+  .cf-footer-links { flex-wrap: wrap; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .cf-hero-title   { font-size: 32px; line-height: 1.05; }
+  .cf-cta-title    { font-size: 26px; }
+  .cf-cards-fan    { height: 340px; }
 }

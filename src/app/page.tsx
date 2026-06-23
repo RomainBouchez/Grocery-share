@@ -1,23 +1,37 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { AppHeader } from "@/components/AppHeader";
-import { CreateGroupForm, JoinGroupForm } from "@/components/GroupForms";
+import { LandingPage } from "@/components/LandingPage";
+import { HomeDashboard, type GroupData, type MemberPreview } from "@/components/HomeDashboard";
+import { TabBar } from "@/components/TabBar";
+import { initials } from "@/lib/utils";
+
+const COLORS = ["#F0813F", "#7E91FF", "#C99BF0", "#5BD08A", "#F0C53F"];
+function avatarColor(s: string) {
+  let h = 0;
+  for (const c of s) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+  return COLORS[h % COLORS.length];
+}
 
 export default async function HomePage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) return <LandingPage />;
 
   const memberships = await prisma.groupMember.findMany({
     where: { userId: user.id },
     include: {
       group: {
         include: {
-          _count: { select: { members: true } },
+          members: { include: { user: true } },
           lists: {
             where: { status: { in: ["planning", "shopping"] } },
-            include: { _count: { select: { items: true } } },
+            include: {
+              items: {
+                include: { addedBy: true },
+                orderBy: [{ status: "asc" }, { createdAt: "asc" }],
+              },
+            },
+            take: 1,
+            orderBy: { createdAt: "desc" },
           },
         },
       },
@@ -25,57 +39,37 @@ export default async function HomePage() {
     orderBy: { joinedAt: "asc" },
   });
 
+  const groups: GroupData[] = memberships.map(({ group }) => {
+    const list = group.lists[0];
+    const allItems = list?.items ?? [];
+    const pending = allItems.filter(i => i.status !== "bought");
+    const bought = allItems.filter(i => i.status === "bought");
+
+    const topMembers: MemberPreview[] = group.members.slice(0, 3).map(m => ({
+      initials: initials(m.user.name),
+      color: avatarColor(m.user.id),
+    }));
+
+    return {
+      id: group.id,
+      name: group.name,
+      color: avatarColor(group.id),
+      memberCount: group.members.length,
+      topMembers,
+      pendingItems: pending.slice(0, 3).map(i => ({
+        id: i.id, label: i.label, addedByName: i.addedBy.name,
+      })),
+      totalItems: allItems.length,
+      boughtItems: bought.length,
+    };
+  });
+
+  const [featured, ...others] = groups;
+
   return (
     <>
-      <AppHeader userName={user.name} />
-      <main className="mx-auto w-full max-w-2xl px-5 py-6">
-        <h1 className="mb-1 text-xl font-bold text-neutral-900">Tes groupes</h1>
-        <p className="mb-5 text-sm text-neutral-500">
-          Salut {user.name} 👋 — choisis un groupe ou crées-en un nouveau.
-        </p>
-
-        {memberships.length > 0 ? (
-          <ul className="mb-8 flex flex-col gap-3">
-            {memberships.map(({ group, role }) => {
-              const activeItems = group.lists.reduce((n, l) => n + l._count.items, 0);
-              return (
-                <li key={group.id}>
-                  <Link
-                    href={`/groups/${group.id}`}
-                    className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition hover:border-green-300 hover:shadow"
-                  >
-                    <div>
-                      <div className="font-semibold text-neutral-900">{group.name}</div>
-                      <div className="text-sm text-neutral-500">
-                        {group._count.members} membre{group._count.members > 1 ? "s" : ""}
-                        {" · "}
-                        {activeItems} article{activeItems > 1 ? "s" : ""} en cours
-                        {role === "owner" && " · admin"}
-                      </div>
-                    </div>
-                    <span className="text-neutral-300">›</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="mb-8 rounded-xl border border-dashed border-neutral-300 bg-white p-6 text-center text-sm text-neutral-500">
-            Tu n&apos;es encore dans aucun groupe. Crée-en un ou rejoins celui d&apos;un ami.
-          </p>
-        )}
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <section className="rounded-xl border border-neutral-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold text-neutral-800">Nouveau groupe</h2>
-            <CreateGroupForm />
-          </section>
-          <section className="rounded-xl border border-neutral-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold text-neutral-800">Rejoindre un groupe</h2>
-            <JoinGroupForm />
-          </section>
-        </div>
-      </main>
+      <HomeDashboard userName={user.name} featured={featured ?? null} others={others} />
+      <TabBar />
     </>
   );
 }

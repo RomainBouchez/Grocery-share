@@ -12,7 +12,7 @@ export function InviteCode({ code }: { code: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // clipboard indisponible (http non sécurisé) : on ignore silencieusement.
+      // clipboard unavailable on http
     }
   }
 
@@ -20,10 +20,17 @@ export function InviteCode({ code }: { code: string }) {
     <button
       onClick={copy}
       title="Copier le lien d'invitation"
-      className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-200"
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        padding: "4px 10px", borderRadius: 999, cursor: "pointer",
+        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.13)",
+        fontSize: 12, fontWeight: 700, fontFamily: "inherit",
+        color: copied ? "#9FE3BD" : "rgba(255,255,255,0.55)",
+        letterSpacing: "0.05em", transition: "color .2s",
+      }}
     >
-      <span className="tracking-widest">{code}</span>
-      <span className="text-neutral-400">{copied ? "✓ copié" : "🔗"}</span>
+      <span>{code}</span>
+      <span style={{ opacity: 0.8 }}>{copied ? "✓" : "🔗"}</span>
     </button>
   );
 }

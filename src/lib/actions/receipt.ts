@@ -10,8 +10,9 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
-import { extractReceiptItems } from "@/lib/ocr";
-import { matchReceiptToList } from "@/lib/matching";
+import { extractAndMatchReceipt, extractReceiptItems } from "@/lib/ocr";
+import { matchReceiptWithClaude } from "@/lib/matchClaude";
+import type { MatchResult, OcrLine } from "@/lib/matching";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR ?? path.join(os.tmpdir(), "grocyshare-uploads");
 
@@ -100,22 +101,29 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
   await mkdir(UPLOAD_DIR, { recursive: true });
   await writeFile(filepath, Buffer.from(await photo.arrayBuffer()));
 
-  let lines;
-  try {
-    lines = await extractReceiptItems(filepath);
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Échec de l'analyse du ticket." };
-  }
-  if (lines.length === 0) {
-    return { ok: false, error: "Aucun article détecté sur le ticket." };
-  }
-
   const plannedItems = await prisma.listItem.findMany({
     where: { listId: list.id, status: { not: "bought" } },
     select: { id: true, label: true },
   });
 
-  const result = matchReceiptToList(lines, plannedItems);
+  // Lecture + matching en UN seul appel (un seul démarrage du CLI ≈ moitié du
+  // temps). Repli sur deux appels séparés si l'appel combiné échoue.
+  let lines: OcrLine[];
+  let result: MatchResult;
+  try {
+    ({ lines, result } = await extractAndMatchReceipt(filepath, plannedItems));
+  } catch {
+    try {
+      lines = await extractReceiptItems(filepath);
+      result = await matchReceiptWithClaude(lines, plannedItems);
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : "Échec de l'analyse du ticket." };
+    }
+  }
+  if (lines.length === 0) {
+    return { ok: false, error: "Aucun article détecté sur le ticket." };
+  }
+
   const labelById = new Map(plannedItems.map((p) => [p.id, p.label]));
 
   const matched: DraftMatch[] = result.matches.map((m) => ({
