@@ -4,13 +4,7 @@ import { LandingPage } from "@/components/LandingPage";
 import { HomeDashboard, type GroupData, type MemberPreview } from "@/components/HomeDashboard";
 import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
-
-const COLORS = ["#F0813F", "#7E91FF", "#C99BF0", "#5BD08A", "#F0C53F"];
-function avatarColor(s: string) {
-  let h = 0;
-  for (const c of s) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-  return COLORS[h % COLORS.length];
-}
+import { colorFor } from "@/lib/ui";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -47,13 +41,14 @@ export default async function HomePage() {
 
     const topMembers: MemberPreview[] = group.members.slice(0, 3).map(m => ({
       initials: initials(m.user.name),
-      color: avatarColor(m.user.id),
+      color: colorFor(m.user.id, m.user.color),
     }));
 
     return {
       id: group.id,
       name: group.name,
-      color: avatarColor(group.id),
+      color: colorFor(group.id, group.color),
+      icon: group.icon,
       memberCount: group.members.length,
       topMembers,
       pendingItems: pending.slice(0, 3).map(i => ({
@@ -68,7 +63,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HomeDashboard userName={user.name} featured={featured ?? null} others={others} />
+      <HomeDashboard userName={user.name} userColor={colorFor(user.id, user.color)} featured={featured ?? null} others={others} />
       <TabBar />
     </>
   );

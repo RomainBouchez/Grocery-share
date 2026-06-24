@@ -24,14 +24,13 @@ export default async function ReceiptPage({
   const FF = "var(--font-hanken,'Hanken Grotesk',system-ui,sans-serif)";
 
   return (
-    <div style={{ fontFamily: FF, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#0D0D0F", color: "rgba(255,255,255,0.92)", position: "relative" }}>
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, background: "radial-gradient(420px 280px at 60% 0%, rgba(91,208,138,0.07), transparent 60%)" }} />
+    <div style={{ fontFamily: FF, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: "#1B1A16", position: "relative" }}>
       <div style={{ position: "relative", zIndex: 1, padding: "44px 18px 40px", maxWidth: 560, margin: "0 auto" }}>
-        <Link href={`/groups/${groupId}`} style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 18 }}>
+        <Link href={`/groups/${groupId}`} style={{ fontSize: 13, fontWeight: 700, color: "#807C72", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 18 }}>
           ‹ Retour à la liste
         </Link>
-        <h1 style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>J&apos;ai fait les courses</h1>
-        <p style={{ margin: "0 0 24px", fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>
+        <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 900, letterSpacing: "-0.035em" }}>J&apos;ai fait les courses</h1>
+        <p style={{ margin: "0 0 24px", fontSize: 13, fontWeight: 500, color: "#807C72", lineHeight: 1.5 }}>
           Prends le ticket en photo — Claude en extrait les articles et les prix, puis on les rapproche de la liste.
         </p>
         <ReceiptScanner groupId={groupId} members={members} currentUserId={user.id} />

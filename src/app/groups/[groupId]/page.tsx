@@ -7,15 +7,12 @@ import { InviteCode } from "@/components/InviteCode";
 import { AddItemForm } from "@/components/AddItemForm";
 import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
-
-const COLORS = ["#F0813F", "#7E91FF", "#C99BF0", "#5BD08A", "#F0C53F"];
-function avatarColor(s: string) {
-  let h = 0;
-  for (const c of s) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-  return COLORS[h % COLORS.length];
-}
-
-const FF = "var(--font-hanken,'Hanken Grotesk',system-ui,sans-serif)";
+import { Cart3 } from "@/lib/icons";
+import { GroupAppearance } from "@/components/GroupAppearance";
+import {
+  colorFor, avatarStyle, tintForColor,
+  ACCENT, INK_STRONG, INK_MUTED, INK_FAINT, HAIRLINE, FONT,
+} from "@/lib/ui";
 
 export default async function GroupPage({
   params,
@@ -67,82 +64,73 @@ export default async function GroupPage({
   const pending = itemViews.filter(i => i.status !== "bought");
   const bought = itemViews.filter(i => i.status === "bought");
   const pct = itemViews.length > 0 ? Math.round((bought.length / itemViews.length) * 100) : 0;
-  const groupColor = avatarColor(group.id);
+  const t = tintForColor(colorFor(group.id, group.color));
 
   return (
-    <div style={{ fontFamily: FF, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#0D0D0F", color: "rgba(255,255,255,0.92)", position: "relative" }}>
-      {/* Ambient glow */}
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, background: `radial-gradient(400px 280px at 60% 0%, ${groupColor}18, transparent 60%)` }} />
-
-      <div style={{ position: "relative", zIndex: 1, paddingBottom: 160 }}>
+    <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG, position: "relative" }}>
+      <div style={{ position: "relative", zIndex: 1, paddingBottom: 170 }}>
         {/* Header */}
-        <div style={{ padding: "44px 18px 0", marginBottom: 20 }}>
-          <Link href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 14 }}>
+        <div style={{ padding: "44px 18px 0", marginBottom: 18 }}>
+          <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: INK_MUTED, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 16 }}>
             ‹ Groupes
           </Link>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: groupColor, display: "block" }} />
-                <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.03em" }}>{group.name}</h1>
-              </div>
-              {/* Members row */}
-              <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-                {group.members.slice(0, 4).map((m, i) => (
-                  <div key={m.user.id} title={m.user.name} style={{
-                    width: 26, height: 26, borderRadius: "50%",
-                    background: avatarColor(m.user.id),
-                    color: avatarColor(m.user.id) === "#5BD08A" ? "#0D0D0F" : "#fff",
-                    fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center",
-                    border: "2px solid #0D0D0F", marginLeft: i > 0 ? -7 : 0,
-                  }}>
-                    {initials(m.user.name)}
-                  </div>
-                ))}
-                {group.members.length > 4 && (
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginLeft: 6 }}>+{group.members.length - 4}</span>
-                )}
-                <div style={{ marginLeft: 10 }}>
-                  <InviteCode code={group.inviteCode} />
+          <GroupAppearance groupId={groupId} name={group.name} color={colorFor(group.id, group.color)} icon={group.icon}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {group.members.slice(0, 4).map((m, i) => (
+                <div key={m.user.id} title={m.user.name} style={{ ...avatarStyle(colorFor(m.user.id, m.user.color), 30), marginLeft: i > 0 ? -9 : 0 }}>
+                  {initials(m.user.name)}
                 </div>
-              </div>
+              ))}
+              {group.members.length > 4 && (
+                <span style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT, marginLeft: 6 }}>+{group.members.length - 4}</span>
+              )}
             </div>
+          </GroupAppearance>
+
+          <div style={{ marginTop: 14 }}>
+            <InviteCode code={group.inviteCode} />
           </div>
 
           {/* Progress bar */}
           {itemViews.length > 0 && (
             <div style={{ marginTop: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>{pending.length} restant{pending.length !== 1 ? "s" : ""}</span>
-                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>{pct}%</span>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9 }}>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: INK_MUTED }}>{pending.length} à acheter</span>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: t.text }}>{bought.length} / {itemViews.length} fait</span>
               </div>
-              <div style={{ height: 5, borderRadius: 999, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
-                <div style={{ width: `${pct}%`, height: "100%", background: "#5BD08A", transition: "width .4s" }} />
+              <div style={{ height: 9, borderRadius: 999, background: t.tint, overflow: "hidden" }}>
+                <div style={{ width: `${pct}%`, height: "100%", borderRadius: 999, background: t.text, boxShadow: "inset 0 -1.5px 0 rgba(0,0,0,0.1)", transition: "width .4s" }} />
               </div>
             </div>
           )}
-        </div>
 
-        {/* Faire les courses button */}
-        <div style={{ padding: "0 18px 4px" }}>
+          {/* Faire les courses button */}
           <Link href={`/groups/${groupId}/receipt`} style={{
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            padding: "14px", borderRadius: 14, textDecoration: "none",
-            background: "rgba(91,208,138,0.12)", border: "1px solid rgba(91,208,138,0.32)",
-            color: "#5BD08A", fontSize: 15, fontWeight: 700,
+            width: "100%", boxSizing: "border-box", marginTop: 16,
+            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
+            padding: "15px", borderRadius: 16, textDecoration: "none",
+            background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 800,
+            border: "1.5px solid rgba(0,0,0,0.06)",
+            boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
           }}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="6" width="18" height="14" rx="2" /><path d="M9 6V4a3 3 0 0 1 6 0v2" />
-            </svg>
+            <Cart3 weight="Bold" size={18} color="#fff" />
             J&apos;ai fait les courses
           </Link>
         </div>
 
         {/* Items */}
-        <div style={{ padding: "16px 18px 0" }}>
+        <div style={{ padding: "8px 18px 0" }}>
           {pending.length === 0 && bought.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "48px 0", background: "rgba(255,255,255,0.03)", borderRadius: 18, border: "1px dashed rgba(255,255,255,0.10)" }}>
-              <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.4)" }}>Liste vide. Ajoute le premier article ci-dessous.</p>
+            <div style={{ textAlign: "center", padding: "40px 20px", background: "#fff", borderRadius: 22, border: "2px dashed rgba(28,25,20,0.14)" }}>
+              <p style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 800, color: INK_STRONG }}>Liste vide</p>
+              <p style={{ margin: "0 0 18px", fontSize: 13, fontWeight: 600, color: INK_MUTED }}>
+                Ajoute un article ci-dessous{group.members.length <= 1 ? " — ou invite quelqu'un d'abord." : "."}
+              </p>
+              {group.members.length <= 1 && (
+                <div style={{ maxWidth: 280, margin: "0 auto" }}>
+                  <InviteCode code={group.inviteCode} variant="primary" />
+                </div>
+              )}
             </div>
           ) : (
             <>
@@ -156,12 +144,12 @@ export default async function GroupPage({
 
               {bought.length > 0 && (
                 <>
-                  <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", margin: "18px 4px 10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: INK_FAINT, margin: "20px 4px 12px", paddingTop: 14, borderTop: `1.5px solid ${HAIRLINE}` }}>
                     Dans le panier ({bought.length})
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {bought.map(item => (
-                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} />
+                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} gap={8} />
                     ))}
                   </div>
                 </>
@@ -173,12 +161,14 @@ export default async function GroupPage({
 
       {/* Sticky add bar */}
       <div style={{
-        position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 40,
-        padding: "14px 18px 80px",
-        background: "rgba(13,13,15,0.82)",
-        backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)",
-        borderTop: "1px solid rgba(255,255,255,0.07)",
-        fontFamily: FF,
+        position: "fixed", left: 16, right: 16, bottom: 116, zIndex: 40,
+        maxWidth: 460, margin: "0 auto",
+        padding: "8px 8px 8px 8px",
+        background: "rgba(252,251,249,0.92)",
+        backdropFilter: "saturate(150%) blur(18px)", WebkitBackdropFilter: "saturate(150%) blur(18px)",
+        border: "1.5px solid #FFFFFF", borderRadius: 20,
+        boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 10px 30px rgba(30,26,20,0.12)",
+        fontFamily: FONT,
       }}>
         <AddItemForm groupId={groupId} suggestions={suggestions} />
       </div>

@@ -29,24 +29,13 @@ export function AddItemForm({
         list={suggestions.length > 0 ? "product-suggestions" : undefined}
         style={{
           flex: 1, minWidth: 0,
-          padding: "14px 16px",
-          borderRadius: 13,
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.10)",
-          color: "rgba(255,255,255,0.92)",
-          fontSize: 15,
+          padding: "12px 4px 12px 12px",
+          border: "none",
+          background: "transparent",
+          color: "#1B1A16",
+          fontSize: 15, fontWeight: 600,
           fontFamily: "inherit",
           outline: "none",
-        }}
-        onFocus={e => {
-          e.currentTarget.style.borderColor = "rgba(91,208,138,0.5)";
-          e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(91,208,138,0.12)";
-        }}
-        onBlur={e => {
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
-          e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-          e.currentTarget.style.boxShadow = "none";
         }}
       />
       {suggestions.length > 0 && (
@@ -56,19 +45,20 @@ export function AddItemForm({
       )}
       <button
         type="submit"
+        aria-label="Ajouter"
         style={{
           flexShrink: 0,
-          width: 48, height: 48,
-          borderRadius: 13,
-          border: "none",
+          width: 46, height: 46,
+          borderRadius: 14,
+          border: "1.5px solid rgba(0,0,0,0.06)",
           cursor: "pointer",
-          background: "#5BD08A",
-          color: "#0D0D0F",
+          background: "#2FB36A",
+          color: "#fff",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "inset 0 1.4px 0.6px rgba(255,255,255,0.45), 0 8px 20px rgba(91,208,138,0.3)",
+          boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
         }}
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D0F" strokeWidth="2.6" strokeLinecap="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.8" strokeLinecap="round">
           <path d="M12 5v14M5 12h14" />
         </svg>
       </button>

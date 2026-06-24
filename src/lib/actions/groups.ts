@@ -5,13 +5,20 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { generateInviteCode } from "@/lib/utils";
+import { AVATAR_COLORS } from "@/lib/ui";
+import { GROUP_ICONS } from "@/lib/groupIcons";
 
 export type ActionResult = { error: string } | undefined;
+
+const cleanColor = (c: string) => (AVATAR_COLORS.includes(c) ? c : null);
+const cleanIcon = (i: string) => (GROUP_ICONS.includes(i) ? i : null);
 
 /** Crée un groupe, y ajoute le créateur (owner) et ouvre une liste en planning. */
 export async function createGroup(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   const user = await requireUser();
   const name = String(formData.get("name") ?? "").trim();
+  const color = cleanColor(String(formData.get("color") ?? ""));
+  const icon = cleanIcon(String(formData.get("icon") ?? ""));
 
   if (!name) return { error: "Donne un nom au groupe." };
 
@@ -26,6 +33,8 @@ export async function createGroup(_prev: ActionResult, formData: FormData): Prom
   const group = await prisma.group.create({
     data: {
       name,
+      color,
+      icon,
       inviteCode,
       members: { create: { userId: user.id, role: "owner" } },
       lists: { create: { status: "planning" } },
@@ -34,6 +43,25 @@ export async function createGroup(_prev: ActionResult, formData: FormData): Prom
 
   revalidatePath("/");
   redirect(`/groups/${group.id}`);
+}
+
+/** Met à jour l'apparence (couleur + icône) d'un groupe dont l'utilisateur est membre. */
+export async function updateGroupAppearance(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const groupId = String(formData.get("groupId") ?? "");
+  const color = cleanColor(String(formData.get("color") ?? ""));
+  const icon = cleanIcon(String(formData.get("icon") ?? ""));
+  if (!groupId || (!color && !icon)) return;
+
+  await assertMembership(user.id, groupId);
+  await prisma.group.update({
+    where: { id: groupId },
+    data: { ...(color ? { color } : {}), ...(icon ? { icon } : {}) },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/listes");
+  revalidatePath(`/groups/${groupId}`);
 }
 
 /** Rejoint un groupe via son code d'invitation. */

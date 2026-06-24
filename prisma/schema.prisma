@@ -18,6 +18,7 @@ model User {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
+  color     String?  // couleur d'avatar choisie (sinon dérivée de l'id)
   createdAt DateTime @default(now())
 
   memberships     GroupMember[]
@@ -49,6 +50,8 @@ model Session {
 model Group {
   id         String   @id @default(cuid())
   name       String
+  color      String?  // couleur de la pastille (sinon dérivée de l'id)
+  icon       String?  // nom d'icône Solar (sinon "Home")
   inviteCode String   @unique // code court pour rejoindre par lien/code
   createdAt  DateTime @default(now())
 

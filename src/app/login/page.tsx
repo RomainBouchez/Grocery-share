@@ -2,14 +2,21 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { LoginForm } from "@/components/LoginForm";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
+
   const user = await getCurrentUser();
-  if (user) redirect("/");
+  if (user) redirect(safeNext ?? "/");
 
   return (
     <main style={{
       minHeight: "100dvh",
-      background: "#0D0D0F",
+      background: "#F5F5F5",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -18,50 +25,40 @@ export default async function LoginPage() {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Ambient glows */}
-      <div style={{
-        position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
-        background: "radial-gradient(700px 600px at 50% 10%, rgba(91,208,138,0.07), transparent 65%), radial-gradient(600px 500px at 85% 80%, rgba(120,140,255,0.05), transparent 60%), radial-gradient(800px 500px at 10% 60%, rgba(255,255,255,0.04), transparent 65%)",
-      }} />
-
       <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 420 }}>
         {/* Logo + branding */}
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{
-            width: 56, height: 56, borderRadius: "50%",
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 24px rgba(0,0,0,0.5)",
-            backdropFilter: "blur(12px)",
+            width: 56, height: 56, borderRadius: 18,
+            background: "#FFFFFF", border: "1.5px solid #fff",
+            boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 6px 16px rgba(30,26,20,0.1)",
             display: "flex", alignItems: "center", justifyContent: "center",
             margin: "0 auto 20px",
           }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.92)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2FB36A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 6L9 17l-5-5" />
             </svg>
           </div>
-          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, letterSpacing: "-0.025em", color: "rgba(255,255,255,0.97)" }}>
+          <h1 style={{ margin: 0, fontSize: 30, fontWeight: 900, letterSpacing: "-0.035em", color: "#1B1A16" }}>
             SharedCart
           </h1>
-          <p style={{ margin: "8px 0 0", fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>
+          <p style={{ margin: "8px 0 0", fontSize: 15, fontWeight: 500, color: "#807C72", lineHeight: 1.4 }}>
             Une liste. Tout votre foyer. En temps réel.
           </p>
         </div>
 
-        {/* Glass card */}
+        {/* Card */}
         <div style={{
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.13)",
+          background: "#FFFFFF",
+          border: "2.5px solid #fff",
           borderRadius: 24,
           padding: "32px 28px",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.16), 0 40px 90px rgba(0,0,0,0.6)",
+          boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 2px 4px rgba(30,26,20,0.04), 0 18px 40px rgba(30,26,20,0.09)",
         }}>
-          <LoginForm />
+          <LoginForm next={safeNext} />
         </div>
 
-        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "rgba(255,255,255,0.25)" }}>
+        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, fontWeight: 600, color: "#A8A498" }}>
           © 2026 SharedCart · Gratuit pour toujours
         </p>
       </div>

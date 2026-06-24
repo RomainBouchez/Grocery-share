@@ -1,39 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f7f5;
-  --foreground: #1c1b1a;
+  --background: #F5F5F5;
+  --foreground: #1B1A16;
 
-  /* Cartful design tokens */
-  --bg:            #0D0D0F;
-  --surface:       #15151A;
-  --text-strong:   rgba(255,255,255,0.97);
-  --text:          rgba(255,255,255,0.92);
-  --text-muted:    rgba(255,255,255,0.55);
-  --text-faint:    rgba(255,255,255,0.35);
-  --hairline:      rgba(255,255,255,0.08);
-  --accent:        #5BD08A;
-  --accent-soft:   rgba(91,208,138,0.14);
-  --accent-text:   #9FE3BD;
+  /* Tokens « Soft Light / Pillboard » (v2) — réf. Identité Visuelle v2 */
+  /* fonds & encre */
+  --bg:            #F5F5F5;
+  --card:          #FFFFFF;
+  --ink-strong:    #1B1A16;
+  --ink:           #2B2A25;
+  --ink-muted:     #807C72;
+  --ink-faint:     #A8A498;
+  --hairline:      #ECE9E3;
+
+  /* accent */
+  --accent:        #2FB36A;
+  --accent-soft:   #E2F5EB;
+  --accent-text:   #1E8F55;
+
+  /* teintes catégorielles (tint / texte) */
+  --violet: #ECEAFE; --violet-text: #7B6EF6;
+  --sky:    #E1F1FD; --sky-text:    #1F95E8;
+  --coral:  #FDE7E3; --coral-text:  #E8503A;
+  --amber:  #FDF0D6; --amber-text:  #D9921C;
+  --green:  #E2F5EB; --green-text:  #2FB36A;
+
+  /* avatars / tags */
   --tag-orange:    #F0813F;
   --tag-yellow:    #F0C53F;
-  --tag-green:     #5BD08A;
+  --tag-green:     #2FB36A;
   --tag-purple:    #C99BF0;
   --tag-blue:      #7E91FF;
-  --glass-bg:      rgba(255,255,255,0.045);
-  --glass-bg-2:    rgba(255,255,255,0.06);
-  --glass-border:  rgba(255,255,255,0.10);
-  --glass-hi:      inset 0 1px 0 rgba(255,255,255,0.10);
-  --glass-shadow:  0 30px 70px rgba(0,0,0,0.55);
-  --blur:          24px;
-  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px; --r-pill: 999px;
+
+  /* relief carte */
+  --card-border:  2.5px solid #FFFFFF;
+  --card-shadow:  0 0 0 1px rgba(30,26,20,0.05),
+                  0 2px 4px rgba(30,26,20,0.04),
+                  0 18px 40px rgba(30,26,20,0.09);
+
+  --r-sm: 9px; --r-md: 14px; --r-lg: 22px; --r-xl: 26px; --r-pill: 999px;
   --font: 'Hanken Grotesk', system-ui, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-hanken, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
 }
 
 @keyframes cf-floatA { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
@@ -42,11 +55,14 @@
 @keyframes cf-pop    { 0%{transform:scale(.4)} 55%{transform:scale(1.22)} 100%{transform:scale(1)} }
 @keyframes cf-ripple { to{transform:scale(1); opacity:0} }
 @keyframes cf-slidein{ from{opacity:0; transform:translateY(-7px)} to{opacity:1; transform:none} }
+@keyframes cf-expand { from{opacity:0; transform:translateY(-10px) scale(.97)} to{opacity:1; transform:none} }
+@keyframes cf-collapse { from{opacity:1; transform:none} to{opacity:0; transform:translateY(-10px) scale(.97)} }
+@media (prefers-reduced-motion: reduce){ [data-ga-panel]{ animation:none !important } }
 
 [data-check] { position:relative; transition:background .2s ease, border-color .2s ease; }
 [data-reveal] { opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease; }
 [data-reveal][data-shown="1"] { opacity:1; transform:none; }
-::selection { background: rgba(91,208,138,0.28); }
+::selection { background: rgba(47,179,106,0.2); }
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -54,9 +70,10 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-hanken, 'Hanken Grotesk', system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
 }
 

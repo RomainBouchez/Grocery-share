@@ -2,62 +2,51 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logout } from "@/lib/actions/auth";
+import { Home, ChecklistMinimalistic, UserRounded } from "@/lib/icons";
+import { ACCENT, INK_FAINT, FONT } from "@/lib/ui";
 
-const A = "#5BD08A";
-const AT = "#9FE3BD";
-const I = "rgba(255,255,255,0.5)";
-
-const F: React.CSSProperties = {
-  fontFamily: "var(--font-hanken,'Hanken Grotesk',system-ui,sans-serif)",
-  WebkitFontSmoothing: "antialiased",
+const tab: React.CSSProperties = {
+  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
+  flex: 1, minHeight: 48, textDecoration: "none", fontFamily: FONT,
 };
+
+function label(active: boolean): React.CSSProperties {
+  return { fontSize: 10, fontWeight: active ? 800 : 700, color: active ? ACCENT : INK_FAINT };
+}
 
 export function TabBar() {
   const p = usePathname();
   const onGroups = p === "/";
   const onListes = p === "/listes" || p.startsWith("/groups");
-
-  const tab = (active: boolean): React.CSSProperties => ({
-    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-    width: 60, textDecoration: "none", ...F,
-  });
+  const onProfile = p.startsWith("/profile");
 
   return (
     <div style={{
-      position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50,
-      padding: "12px 22px 24px",
-      background: "rgba(13,13,15,0.72)",
+      position: "fixed", left: 16, right: 16, bottom: 16, zIndex: 50,
+      maxWidth: 460, margin: "0 auto",
+      padding: "13px 14px 14px",
+      background: "rgba(252,251,249,0.86)",
       backdropFilter: "saturate(150%) blur(18px)",
       WebkitBackdropFilter: "saturate(150%) blur(18px)",
-      borderTop: "1px solid rgba(255,255,255,0.07)",
-      display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-      ...F,
+      border: "1.5px solid #FFFFFF", borderRadius: 26,
+      boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 10px 30px rgba(30,26,20,0.12)",
+      display: "flex", justifyContent: "space-between", alignItems: "center",
+      fontFamily: FONT,
     }}>
-      <Link href="/" style={tab(onGroups)}>
-        <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={onGroups ? A : I} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        </svg>
-        <span style={{ fontSize: 10, fontWeight: onGroups ? 700 : 400, color: onGroups ? AT : I }}>Groupes</span>
+      <Link href="/" style={tab} aria-label="Groupes">
+        <Home weight={onGroups ? "Bold" : "Linear"} size={24} color={onGroups ? ACCENT : INK_FAINT} />
+        <span style={label(onGroups)}>Groupes</span>
       </Link>
 
-      <Link href="/listes" style={tab(onListes)}>
-        <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={onListes ? A : I} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 11l3 3L22 4" />
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-        </svg>
-        <span style={{ fontSize: 10, fontWeight: onListes ? 700 : 400, color: onListes ? AT : I }}>Listes</span>
+      <Link href="/listes" style={tab} aria-label="Listes">
+        <ChecklistMinimalistic weight={onListes ? "Bold" : "Linear"} size={24} color={onListes ? ACCENT : INK_FAINT} />
+        <span style={label(onListes)}>Listes</span>
       </Link>
 
-      <form action={logout} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, width: 60 }}>
-        <button type="submit" style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, ...F }}>
-          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={I} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-          <span style={{ fontSize: 10, color: I }}>Réglages</span>
-        </button>
-      </form>
+      <Link href="/profile" style={tab} aria-label="Profil">
+        <UserRounded weight={onProfile ? "Bold" : "Linear"} size={24} color={onProfile ? ACCENT : INK_FAINT} />
+        <span style={label(onProfile)}>Profil</span>
+      </Link>
     </div>
   );
 }

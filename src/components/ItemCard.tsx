@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect, useLayoutEffect, type CSSProperties } from "react";
 import { setParticipation, setItemStatus, deleteItem } from "@/lib/actions/items";
 import { initials } from "@/lib/utils";
+import {
+  btnDanger, checkbox, cardSm, memberChip, avatarStyle,
+  tintForColor, avatarColor, ACCENT, ACCENT_TEXT, ACCENT_SOFT,
+  INK, INK_STRONG, INK_MUTED, INK_FAINT, INK_DONE, HAIRLINE,
+} from "@/lib/ui";
 
 export type ParticipantView = { userId: string; name: string; parts: number };
 export type MemberView = { userId: string; name: string };
@@ -12,20 +17,19 @@ export type ItemView = {
   participants: ParticipantView[];
 };
 
-const PART_COLORS = ["#F0813F", "#7E91FF", "#C99BF0", "#5BD08A", "#F0C53F"];
-function pColor(s: string) {
-  let h = 0;
-  for (const c of s) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-  return PART_COLORS[h % PART_COLORS.length];
-}
-
 export function ItemCard({
-  item, currentUserId, members,
+  item, currentUserId, members, gap = 10,
 }: {
-  item: ItemView; currentUserId: string; members: MemberView[];
+  item: ItemView; currentUserId: string; members: MemberView[]; gap?: number;
 }) {
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
+  // Animation d'écrasement à la suppression : mesure → hauteur fixe → 0 + scaleY.
+  const [collapse, setCollapse] = useState<{ h: number; phase: "start" | "end" } | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const delTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (delTimer.current) clearTimeout(delTimer.current); }, []);
 
   const totalParts = item.participants.reduce((n, p) => n + p.parts, 0);
   const isBought = item.status === "bought";
@@ -41,59 +45,107 @@ export function ItemCard({
     call(setParticipation, { itemId: item.id, userId, parts: String(Math.max(0, next)) });
   }
 
+  function handleDelete() {
+    const h = rootRef.current?.offsetHeight ?? 0;
+    setCollapse({ h, phase: "start" });          // fige la hauteur courante → joue le collapse
+    // suppression réelle après l'animation, pour que le collapse aille à son terme
+    delTimer.current = setTimeout(() => call(deleteItem, { itemId: item.id }), 300);
+  }
+
+  // Passe en phase "end" à la frame suivante → déclenche la transition.
+  useLayoutEffect(() => {
+    if (collapse?.phase !== "start") return;
+    const id = requestAnimationFrame(() => setCollapse(c => (c ? { ...c, phase: "end" } : c)));
+    return () => cancelAnimationFrame(id);
+  }, [collapse?.phase]);
+
+  const end = collapse?.phase === "end";
+  const collapseStyle: CSSProperties = collapse
+    ? {
+        height: end ? 0 : collapse.h,
+        marginTop: end ? -gap : 0,
+        opacity: end ? 0 : 1,
+        transform: end ? "scaleY(0)" : "scaleY(1)",
+        transformOrigin: "center",
+        overflow: "hidden",
+        pointerEvents: "none",
+        // collapse aussi padding + bordure → hauteur réelle = 0 (sinon ~28px résiduels
+        // qui font « sauter » l'item du dessous au démontage).
+        paddingTop: end ? 0 : undefined,
+        paddingBottom: end ? 0 : undefined,
+        borderTopWidth: end ? 0 : undefined,
+        borderBottomWidth: end ? 0 : undefined,
+        transition: "height .26s ease, margin-top .26s ease, opacity .2s ease, transform .26s ease, padding .26s ease, border-width .26s ease",
+      }
+    : {};
+
   return (
-    <div style={{
+    <div ref={rootRef} style={{
+      ...cardSm,
       padding: "13px 14px",
-      borderRadius: 14,
-      background: isBought ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.04)",
-      border: `1px solid ${isBought ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.10)"}`,
-      opacity: pending ? 0.6 : 1,
+      borderRadius: 16,
+      opacity: pending ? 0.6 : isBought ? 0.66 : 1,
       transition: "opacity .2s",
+      ...collapseStyle,
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <span
           onClick={() => call(setItemStatus, { itemId: item.id, status: isBought ? "pending" : "bought" })}
-          style={{
-            width: 22, height: 22, borderRadius: 7, flexShrink: 0, cursor: "pointer",
-            background: isBought ? "#5BD08A" : "transparent",
-            border: isBought ? "none" : "1.5px solid rgba(255,255,255,0.22)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "background .2s, border-color .2s",
-          }}
+          style={checkbox(isBought, 24)}
         >
-          {isBought && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0D0D0F" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
+          {isBought && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
         </span>
-        <span style={{ flex: 1, fontSize: 16, color: isBought ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.92)", textDecoration: isBought ? "line-through" : "none" }}>
+        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: isBought ? INK_DONE : INK, textDecoration: isBought ? "line-through" : "none" }}>
           {item.label}
         </span>
         {item.addedByUserId === currentUserId && (
-          <button
-            onClick={() => call(deleteItem, { itemId: item.id })}
-            style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.25)", fontSize: 16, padding: "0 2px" }}
-          >
-            ×
-          </button>
+          confirmDel ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+              <button
+                onClick={handleDelete}
+                aria-label={`Confirmer la suppression de ${item.label}`}
+                style={{ ...btnDanger, minHeight: 34, padding: "6px 12px", fontSize: 12 }}
+              >
+                Supprimer
+              </button>
+              <button
+                onClick={() => setConfirmDel(false)}
+                aria-label="Annuler"
+                style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: INK_FAINT, fontSize: 18, lineHeight: 1, padding: "4px 6px" }}
+              >
+                ×
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDel(true)}
+              aria-label={`Supprimer ${item.label}`}
+              style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: INK_FAINT, fontSize: 18, lineHeight: 1, padding: "4px 6px" }}
+            >
+              ×
+            </button>
+          )
         )}
       </div>
 
       {/* Participants badges */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, marginTop: 10, paddingLeft: 34 }}>
-        {item.participants.map(p => (
-          <span key={p.userId} style={{
-            display: "inline-flex", alignItems: "center", gap: 4,
-            padding: "3px 8px", borderRadius: 999, fontSize: 11, fontWeight: 700,
-            background: `${pColor(p.userId)}22`, color: pColor(p.userId),
-          }}>
-            {p.name.split(" ")[0]}
-            {totalParts > 0 && <span style={{ opacity: 0.7 }}>{p.parts}/{totalParts}</span>}
-          </span>
-        ))}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, marginTop: 10, paddingLeft: 36 }}>
+        {item.participants.map(p => {
+          const t = tintForColor(avatarColor(p.userId));
+          return (
+            <span key={p.userId} style={memberChip(t)}>
+              <span style={{ ...avatarStyle(t.avatar, 14), border: "none", fontSize: 8 }}>{p.name[0]?.toUpperCase()}</span>
+              {p.name.split(" ")[0]}
+              {totalParts > 0 && <span style={{ opacity: 0.7 }}>{p.parts}/{totalParts}</span>}
+            </span>
+          );
+        })}
         {item.participants.length === 0 && (
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>personne pour l&apos;instant</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>personne pour l&apos;instant</span>
         )}
         <button
           onClick={() => setEditing(v => !v)}
-          style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: "rgba(91,208,138,0.8)", fontFamily: "inherit", padding: "2px 4px" }}
+          style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 800, color: ACCENT_TEXT, fontFamily: "inherit", padding: "2px 4px" }}
         >
           {editing ? "Fermer" : "Qui participe ?"}
         </button>
@@ -101,34 +153,32 @@ export function ItemCard({
 
       {/* Participant editor */}
       {editing && (
-        <div style={{ marginTop: 10, marginLeft: 34, padding: 12, borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ marginTop: 10, marginLeft: 36, padding: 12, borderRadius: 14, background: "#F5F5F5", border: `1.5px solid ${HAIRLINE}` }}>
           {members.map(m => {
             const parts = partsByUser.get(m.userId) ?? 0;
             const isMe = m.userId === currentUserId;
-            const c = pColor(m.userId);
+            const c = avatarColor(m.userId);
             return (
-              <div key={m.userId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div key={m.userId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "8px 0", borderBottom: `1px solid ${HAIRLINE}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                  <span style={{ width: 26, height: 26, borderRadius: "50%", background: c, color: c === "#5BD08A" ? "#0D0D0F" : "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {initials(m.name)}
-                  </span>
-                  <span style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", truncate: "ellipsis" }}>
-                    {m.name}{isMe && <span style={{ color: "rgba(255,255,255,0.4)" }}> (toi)</span>}
+                  <span style={avatarStyle(c, 26)}>{initials(m.name)}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: INK, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {m.name}{isMe && <span style={{ color: INK_FAINT }}> (toi)</span>}
                   </span>
                 </div>
                 {parts > 0 ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginRight: 4 }}>{totalParts > 0 && `${parts}/${totalParts}`}</span>
-                    <div style={{ display: "flex", alignItems: "center", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)", overflow: "hidden" }}>
-                      <button onClick={() => setPartsFor(m.userId, parts - 1)} style={{ padding: "4px 10px", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontFamily: "inherit" }}>−</button>
-                      <span style={{ width: 20, textAlign: "center", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>{parts}</span>
-                      <button onClick={() => setPartsFor(m.userId, parts + 1)} style={{ padding: "4px 10px", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontFamily: "inherit" }}>+</button>
+                    <span style={{ fontSize: 11, color: INK_FAINT, marginRight: 4 }}>{totalParts > 0 && `${parts}/${totalParts}`}</span>
+                    <div style={{ display: "flex", alignItems: "center", borderRadius: 10, border: `1.5px solid ${HAIRLINE}`, background: "#fff", overflow: "hidden" }}>
+                      <button onClick={() => setPartsFor(m.userId, parts - 1)} style={{ padding: "4px 10px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700 }}>−</button>
+                      <span style={{ width: 20, textAlign: "center", fontSize: 14, fontWeight: 800, color: INK_STRONG }}>{parts}</span>
+                      <button onClick={() => setPartsFor(m.userId, parts + 1)} style={{ padding: "4px 10px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700 }}>+</button>
                     </div>
                   </div>
                 ) : (
                   <button
                     onClick={() => setPartsFor(m.userId, 1)}
-                    style={{ padding: "5px 12px", borderRadius: 999, border: "1px solid rgba(91,208,138,0.4)", background: "rgba(91,208,138,0.08)", color: "#9FE3BD", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+                    style={{ padding: "5px 12px", borderRadius: 999, border: `1.5px solid rgba(47,179,106,0.4)`, background: ACCENT_SOFT, color: ACCENT, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}
                   >
                     + Ajouter
                   </button>

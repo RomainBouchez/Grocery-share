@@ -4,7 +4,7 @@ import "./globals.css";
 
 const hanken = Hanken_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-hanken",
   display: "swap",
 });
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#5BD08A",
+  themeColor: "#F5F5F5",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

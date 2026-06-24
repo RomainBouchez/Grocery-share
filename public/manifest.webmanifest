@@ -4,8 +4,8 @@
   "description": "Liste de courses collaborative avec parts façon Tricount.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f7f5",
-  "theme_color": "#16a34a",
+  "background_color": "#F5F5F5",
+  "theme_color": "#2FB36A",
   "icons": [
     {
       "src": "/icon.svg",
