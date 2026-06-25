@@ -15,11 +15,12 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  color     String?  // couleur d'avatar choisie (sinon dérivée de l'id)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String?  // hash scrypt "salt:clé" — null pour les comptes hérités (à définir à la 1re connexion)
+  color        String?  // couleur d'avatar choisie (sinon dérivée de l'id)
+  createdAt    DateTime @default(now())
 
   memberships     GroupMember[]
   addedItems      ListItem[]        @relation("ItemAddedBy")
