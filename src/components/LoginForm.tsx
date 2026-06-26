@@ -76,7 +76,7 @@ function LoginFields({ next }: { next?: string }) {
 
       <label style={LABEL_STYLE}>
         Email
-        <SoftInput name="email" type="email" required autoComplete="email" placeholder="romain@exemple.fr" />
+        <SoftInput name="email" type="email" required autoComplete="email" placeholder="email@exemple.fr" />
       </label>
 
       <label style={LABEL_STYLE}>
@@ -102,12 +102,12 @@ function SignupFields({ next }: { next?: string }) {
 
       <label style={LABEL_STYLE}>
         Prénom
-        <SoftInput name="name" type="text" required autoComplete="name" placeholder="Romain" />
+        <SoftInput name="name" type="text" required autoComplete="name" placeholder="Ton prénom" />
       </label>
 
       <label style={LABEL_STYLE}>
         Email
-        <SoftInput name="email" type="email" required autoComplete="email" placeholder="romain@exemple.fr" />
+        <SoftInput name="email" type="email" required autoComplete="email" placeholder="email@exemple.fr" />
       </label>
 
       <label style={LABEL_STYLE}>
