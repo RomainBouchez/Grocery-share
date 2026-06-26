@@ -107,7 +107,7 @@ export function ItemCard({
                 aria-label={`Confirmer la suppression de ${item.label}`}
                 style={{ ...btnDanger, minHeight: 34, padding: "6px 14px", fontSize: 12, display: "inline-flex", alignItems: "center" }}
               >
-                <TrashBinMinimalistic weight="Bold" size={16} color="#fff" />
+                <TrashBinMinimalistic weight="Bold" size={16} color={INK_STRONG} />
               </button>
               <button
                 onClick={() => setConfirmDel(false)}
