@@ -7,7 +7,7 @@ import { initials } from "@/lib/utils";
 import {
   btnDanger, checkbox, cardSm, memberChip, avatarStyle,
   tintForColor, avatarColor, ACCENT, ACCENT_TEXT, ACCENT_SOFT,
-  INK, INK_STRONG, INK_MUTED, INK_FAINT, INK_DONE, HAIRLINE,
+  INK, INK_STRONG, INK_MUTED, INK_FAINT, INK_DONE, HAIRLINE, DANGER,
 } from "@/lib/ui";
 
 export type ParticipantView = { userId: string; name: string; parts: number };
@@ -107,7 +107,7 @@ export function ItemCard({
                 aria-label={`Confirmer la suppression de ${item.label}`}
                 style={{ ...btnDanger, minHeight: 34, padding: "6px 14px", fontSize: 12, display: "inline-flex", alignItems: "center" }}
               >
-                <TrashBinMinimalistic weight="Bold" size={16} color={INK_STRONG} />
+                <TrashBinMinimalistic weight="Bold" size={16} color={DANGER} />
               </button>
               <button
                 onClick={() => setConfirmDel(false)}
