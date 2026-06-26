@@ -72,8 +72,11 @@ export async function compressImage(file: File, opts: CompressOptions = {}): Pro
   const maxDimension = opts.maxDimension ?? 1600;
 
   if (!file.type.startsWith("image/")) return file;
-  // Déjà sous la limite et pas démesuré → on n'altère pas la qualité.
-  if (file.size <= maxBytes) return file;
+  // Les photos iPhone sont en HEIC/HEIF : format que l'outil Read du CLI Claude
+  // ne sait pas décoder. On les ré-encode TOUJOURS en JPEG, même petites.
+  const isHeic = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
+  // Déjà un format web sous la limite et pas démesuré → on n'altère pas la qualité.
+  if (file.size <= maxBytes && !isHeic) return file;
 
   const bitmap = await loadBitmap(file);
   const { w: w0, h: h0 } = dimensions(bitmap);

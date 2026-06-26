@@ -2,6 +2,7 @@
 
 import { useTransition, useState, useRef } from "react";
 import { scanReceipt, confirmReceipt, type ScanDraft, type DraftExtra } from "@/lib/actions/receipt";
+import { compressImage } from "@/lib/compressImage";
 import { formatEuro } from "@/lib/utils";
 import { Camera } from "@/lib/icons";
 import {
@@ -48,9 +49,22 @@ export function ReceiptScanner({
 
   function handleScan(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const file = fileRef.current?.files?.[0];
     setScanError(null);
     startScan(async () => {
+      // Ré-encode en JPEG côté client (les photos iPhone sont en HEIC, illisible
+      // par l'OCR serveur). Repli sur le fichier brut si la conversion échoue.
+      const fd = new FormData();
+      fd.append("groupId", groupId);
+      if (file) {
+        let photo: File = file;
+        try {
+          photo = await compressImage(file);
+        } catch {
+          /* navigateur incapable de décoder le format → on envoie l'original */
+        }
+        fd.append("photo", photo);
+      }
       const result = await scanReceipt(undefined, fd);
       if (!result.ok) { setScanError(result.error); return; }
       const sel = new Set(result.matched.map(m => m.itemId));
