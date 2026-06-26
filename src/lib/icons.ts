@@ -22,4 +22,5 @@ export {
   CheckCircle,
   AddCircle,
   Scale,
+  TrashBinMinimalistic,
 } from "@solar-icons/react/ssr";

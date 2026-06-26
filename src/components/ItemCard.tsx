@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect, useLayoutEffect, type CSSProperties } from "react";
 import { setParticipation, setItemStatus, deleteItem } from "@/lib/actions/items";
+import { TrashBinMinimalistic } from "@/lib/icons";
 import { initials } from "@/lib/utils";
 import {
   btnDanger, checkbox, cardSm, memberChip, avatarStyle,
@@ -104,9 +105,9 @@ export function ItemCard({
               <button
                 onClick={handleDelete}
                 aria-label={`Confirmer la suppression de ${item.label}`}
-                style={{ ...btnDanger, minHeight: 34, padding: "6px 12px", fontSize: 12 }}
+                style={{ ...btnDanger, minHeight: 34, padding: "6px 14px", fontSize: 12, display: "inline-flex", alignItems: "center" }}
               >
-                Supprimer
+                <TrashBinMinimalistic weight="Bold" size={16} color="#fff" />
               </button>
               <button
                 onClick={() => setConfirmDel(false)}
