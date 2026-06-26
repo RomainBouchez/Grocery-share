@@ -5,7 +5,6 @@ import Link from "next/link";
 import { setItemStatus } from "@/lib/actions/items";
 import { createGroup, joinGroup, type ActionResult } from "@/lib/actions/groups";
 import { useActionState } from "react";
-import { ArrowRight } from "@/lib/icons";
 import { GroupIcon, DEFAULT_GROUP_ICON } from "@/lib/groupIcons";
 import { GroupCustomizer } from "@/components/GroupCustomizer";
 import {
@@ -86,7 +85,7 @@ export function HomeDashboard({
 
         {/* Featured group */}
         {featured && featTint ? (
-          <div style={{ ...card, borderRadius: 26, padding: 18, marginBottom: 16 }}>
+          <Link href={`/groups/${featured.id}`} style={{ ...card, borderRadius: 26, padding: 18, marginBottom: 16, display: "block", textDecoration: "none", color: "inherit", cursor: "pointer" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={pastille(featTint)}>
@@ -116,7 +115,7 @@ export function HomeDashboard({
                   const t = tintFor(item.addedByName);
                   return (
                     <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 13 }}>
-                      <span onClick={() => toggleItem(item.id)} style={checkbox(done, 25)}>
+                      <span onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleItem(item.id); }} style={checkbox(done, 25)}>
                         {done && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
                       </span>
                       <span style={{ fontSize: 15.5, fontWeight: 600, color: done ? INK_DONE : INK, textDecoration: done ? "line-through" : "none" }}>{item.label}</span>
@@ -135,20 +134,16 @@ export function HomeDashboard({
             )}
 
             <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1.5px solid #F0ECE4" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
+              <div style={{ marginBottom: 9 }}>
                 <span style={{ fontSize: 12.5, fontWeight: 700, color: INK_FAINT }}>
                   {featured.totalItems} article{featured.totalItems !== 1 ? "s" : ""} · {Math.round((featured.boughtItems / Math.max(featured.totalItems, 1)) * 100)}% fait
                 </span>
-                <Link href={`/groups/${featured.id}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 800, color: ACCENT, textDecoration: "none" }}>
-                  Ouvrir
-                  <ArrowRight weight="Linear" size={15} color={ACCENT} />
-                </Link>
               </div>
               <div style={{ height: 9, borderRadius: 999, background: ACCENT_SOFT, overflow: "hidden" }}>
                 <div style={{ width: `${Math.round((featured.boughtItems / Math.max(featured.totalItems, 1)) * 100)}%`, height: "100%", borderRadius: 999, background: ACCENT, boxShadow: "inset 0 -1.5px 0 rgba(0,0,0,0.1)", transition: "width .4s ease" }} />
               </div>
             </div>
-          </div>
+          </Link>
         ) : (
           <div style={{ ...cardSm, padding: 24, marginBottom: 16, textAlign: "center" }}>
             <p style={{ fontSize: 14, fontWeight: 600, color: INK_MUTED, margin: 0 }}>Aucun groupe — crée-en un ou rejoins celui d&apos;un ami.</p>
