@@ -28,6 +28,9 @@ model User {
   receiptsPaid    Receipt[]         @relation("ReceiptPaidBy")
   balancesFrom    Balance[]         @relation("BalanceFrom")
   balancesTo      Balance[]         @relation("BalanceTo")
+  settlementsFrom     Settlement[]  @relation("SettlementFrom")
+  settlementsTo       Settlement[]  @relation("SettlementTo")
+  settlementsRecorded Settlement[]  @relation("SettlementBy")
   products        UserProduct[]
   sessions        Session[]
 }
@@ -54,11 +57,13 @@ model Group {
   color      String?  // couleur de la pastille (sinon dérivée de l'id)
   icon       String?  // nom d'icône Solar (sinon "Home")
   inviteCode String   @unique // code court pour rejoindre par lien/code
+  expenseSharingEnabled Boolean @default(false) // module « Tricount » (balance) activé pour ce groupe
   createdAt  DateTime @default(now())
 
-  members  GroupMember[]
-  lists    ShoppingList[]
-  balances Balance[]
+  members     GroupMember[]
+  lists       ShoppingList[]
+  balances    Balance[]
+  settlements Settlement[]
 }
 
 model GroupMember {
@@ -165,6 +170,26 @@ model Balance {
   group    Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
   fromUser User  @relation("BalanceFrom", fields: [fromUserId], references: [id])
   toUser   User  @relation("BalanceTo", fields: [toUserId], references: [id])
+
+  @@index([groupId])
+}
+
+// Journal des remboursements (façon Tricount). Append-only : un règlement = un
+// transfert de `fromUser` (débiteur) vers `toUser` (créancier). La balance reste
+// calculée en direct depuis les tickets ; chaque règlement vient l'éponger.
+model Settlement {
+  id          String   @id @default(cuid())
+  groupId     String
+  fromUserId  String   // a remboursé (débiteur)
+  toUserId    String   // a reçu (créancier)
+  amount      Float
+  createdById String   // qui a saisi le règlement (audit)
+  createdAt   DateTime @default(now())
+
+  group     Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fromUser  User  @relation("SettlementFrom", fields: [fromUserId], references: [id])
+  toUser    User  @relation("SettlementTo", fields: [toUserId], references: [id])
+  createdBy User  @relation("SettlementBy", fields: [createdById], references: [id])
 
   @@index([groupId])
 }

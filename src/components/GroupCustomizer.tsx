@@ -1,6 +1,6 @@
 "use client";
 
-import { AVATAR_COLORS, tintForColor, pastille, INK_FAINT } from "@/lib/ui";
+import { AVATAR_COLORS, tintForColor, pastille, INK_FAINT, INK, INK_MUTED, ACCENT, HAIRLINE } from "@/lib/ui";
 import { GROUP_ICONS, GroupIcon } from "@/lib/groupIcons";
 
 const subLabel: React.CSSProperties = {
@@ -10,11 +10,16 @@ const subLabel: React.CSSProperties = {
 
 export function GroupCustomizer({
   name, color, icon, onChange,
+  isOwner = false, expenseSharingEnabled = false, onToggleExpenseSharing,
 }: {
   name?: string;
   color: string;
   icon: string;
   onChange: (next: { color: string; icon: string }) => void;
+  // Module « Tricount » : rendu seulement si owner ET callback fourni.
+  isOwner?: boolean;
+  expenseSharingEnabled?: boolean;
+  onToggleExpenseSharing?: (next: boolean) => void;
 }) {
   const t = tintForColor(color);
 
@@ -87,6 +92,41 @@ export function GroupCustomizer({
           })}
         </div>
       </div>
+
+      {/* Partage des dépenses (module Tricount) — owner uniquement */}
+      {isOwner && onToggleExpenseSharing && (
+        <div>
+          <div style={subLabel}>Partage des dépenses</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>Balance du groupe</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: INK_MUTED, marginTop: 2 }}>
+                Calcule qui doit quoi à partir des tickets.
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={expenseSharingEnabled}
+              aria-label="Activer le partage des dépenses"
+              onClick={() => onToggleExpenseSharing(!expenseSharingEnabled)}
+              style={{
+                flexShrink: 0, width: 52, height: 30, borderRadius: 999, border: "none",
+                cursor: "pointer", padding: 3, position: "relative",
+                background: expenseSharingEnabled ? ACCENT : HAIRLINE,
+                transition: "background .2s ease",
+              }}
+            >
+              <span style={{
+                display: "block", width: 24, height: 24, borderRadius: "50%", background: "#fff",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+                transform: expenseSharingEnabled ? "translateX(22px)" : "translateX(0)",
+                transition: "transform .2s ease",
+              }} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

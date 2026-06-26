@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useLayoutEffect, useEffect, useTransition } from "react";
-import { updateGroupAppearance } from "@/lib/actions/groups";
+import { updateGroupAppearance, toggleExpenseSharing } from "@/lib/actions/groups";
 import { GroupCustomizer } from "./GroupCustomizer";
 import { GroupIcon, DEFAULT_GROUP_ICON } from "@/lib/groupIcons";
 import { card, pastille, tintForColor } from "@/lib/ui";
@@ -10,17 +10,21 @@ const EASE = "cubic-bezier(.4,0,.2,1)";
 
 export function GroupAppearance({
   groupId, name, color, icon, children,
+  isOwner = false, expenseSharingEnabled = false,
 }: {
   groupId: string;
   name: string;
   color: string;
   icon: string | null;
   children?: React.ReactNode;
+  isOwner?: boolean;
+  expenseSharingEnabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false); // présent le temps de l'animation
   const [c, setC] = useState(color);
   const [i, setI] = useState(icon ?? DEFAULT_GROUP_ICON);
+  const [expense, setExpense] = useState(expenseSharingEnabled); // état optimiste du toggle
   const [, startTransition] = useTransition();
   const wrapRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,6 +84,14 @@ export function GroupAppearance({
     startTransition(() => updateGroupAppearance(fd));
   }
 
+  function applyExpense(nextEnabled: boolean) {
+    setExpense(nextEnabled);
+    const fd = new FormData();
+    fd.append("groupId", groupId);
+    fd.append("enabled", String(nextEnabled));
+    startTransition(() => toggleExpenseSharing(fd));
+  }
+
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -108,7 +120,12 @@ export function GroupAppearance({
               transition: "opacity .25s ease",
             }}
           >
-            <GroupCustomizer name={name} color={c} icon={i} onChange={apply} />
+            <GroupCustomizer
+              name={name} color={c} icon={i} onChange={apply}
+              isOwner={isOwner}
+              expenseSharingEnabled={expense}
+              onToggleExpenseSharing={applyExpense}
+            />
           </div>
         </div>
       )}

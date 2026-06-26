@@ -21,4 +21,5 @@ export {
   LinkRound,
   CheckCircle,
   AddCircle,
+  Scale,
 } from "@solar-icons/react/ssr";

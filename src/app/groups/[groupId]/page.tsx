@@ -7,7 +7,7 @@ import { InviteCode } from "@/components/InviteCode";
 import { AddItemForm } from "@/components/AddItemForm";
 import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
-import { Cart3 } from "@/lib/icons";
+import { Cart3, Scale } from "@/lib/icons";
 import { GroupAppearance } from "@/components/GroupAppearance";
 import {
   colorFor, avatarStyle, tintForColor,
@@ -68,13 +68,13 @@ export default async function GroupPage({
 
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG, position: "relative" }}>
-      <div style={{ position: "relative", zIndex: 1, paddingBottom: 170 }}>
+      <div style={{ position: "relative", zIndex: 1, paddingBottom: 210 }}>
         {/* Header */}
         <div style={{ padding: "44px 18px 0", marginBottom: 18 }}>
           <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: INK_MUTED, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 16 }}>
             ‹ Groupes
           </Link>
-          <GroupAppearance groupId={groupId} name={group.name} color={colorFor(group.id, group.color)} icon={group.icon}>
+          <GroupAppearance groupId={groupId} name={group.name} color={colorFor(group.id, group.color)} icon={group.icon} isOwner={membership.role === "owner"} expenseSharingEnabled={group.expenseSharingEnabled}>
             <div style={{ display: "flex", alignItems: "center" }}>
               {group.members.slice(0, 4).map((m, i) => (
                 <div key={m.user.id} title={m.user.name} style={{ ...avatarStyle(colorFor(m.user.id, m.user.color), 30), marginLeft: i > 0 ? -9 : 0 }}>
@@ -116,6 +116,21 @@ export default async function GroupPage({
             <Cart3 weight="Bold" size={18} color="#fff" />
             J&apos;ai fait les courses
           </Link>
+
+          {/* Balance du groupe — uniquement si le module est activé */}
+          {group.expenseSharingEnabled && (
+            <Link href={`/groups/${groupId}/balances`} style={{
+              width: "100%", boxSizing: "border-box", marginTop: 10,
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
+              padding: "14px", borderRadius: 16, textDecoration: "none",
+              background: "#fff", color: INK_STRONG, fontSize: 15, fontWeight: 800,
+              border: `1.5px solid ${HAIRLINE}`,
+              boxShadow: "0 0 0 1px rgba(30,26,20,0.04), 0 6px 14px rgba(30,26,20,0.07)",
+            }}>
+              <Scale weight="Bold" size={18} color={INK_STRONG} />
+              Équilibre des comptes
+            </Link>
+          )}
         </div>
 
         {/* Items */}

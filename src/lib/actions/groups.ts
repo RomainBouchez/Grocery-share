@@ -95,3 +95,27 @@ export async function assertMembership(userId: string, groupId: string): Promise
   });
   if (!member) throw new Error("FORBIDDEN");
 }
+
+/** Vérifie que l'utilisateur est owner du groupe (helper d'autorisation). */
+export async function assertOwner(userId: string, groupId: string): Promise<void> {
+  const member = await prisma.groupMember.findUnique({
+    where: { userId_groupId: { userId, groupId } },
+  });
+  if (!member || member.role !== "owner") throw new Error("FORBIDDEN");
+}
+
+/** Active/désactive le module « Tricount » (balance) pour un groupe. Owner uniquement. */
+export async function toggleExpenseSharing(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const groupId = String(formData.get("groupId") ?? "");
+  const enabled = String(formData.get("enabled") ?? "") === "true";
+
+  await assertOwner(user.id, groupId);
+  await prisma.group.update({
+    where: { id: groupId },
+    data: { expenseSharingEnabled: enabled },
+  });
+
+  revalidatePath(`/groups/${groupId}`);
+  revalidatePath(`/groups/${groupId}/balances`);
+}
