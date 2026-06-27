@@ -3,11 +3,14 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { createSession, destroySession, getCurrentUser } from "@/lib/auth";
+import { createSession, destroySession, getCurrentUser, isAdminEmail } from "@/lib/auth";
 import { hashPassword, verifyPassword, MIN_PASSWORD_LENGTH } from "@/lib/password";
 import { AVATAR_COLORS } from "@/lib/ui";
 
-export type ActionResult = { error: string } | undefined;
+export type ActionResult =
+  | { error: string }
+  | { pending: string } // compte créé mais en attente d'activation par l'admin
+  | undefined;
 
 function isValidEmail(email: string): boolean {
   // Validation volontairement permissive : un seul "@" avec du texte autour.
@@ -62,6 +65,11 @@ export async function login(_prev: ActionResult, formData: FormData): Promise<Ac
     return { error: "Mot de passe incorrect." };
   }
 
+  // Compte non activé : l'admin doit le valider (l'admin lui-même est exempté).
+  if (!user.isActive && !isAdminEmail(user.email)) {
+    return { error: "Votre compte est en cours de vérification… Un administrateur doit l'activer." };
+  }
+
   await createSession(user.id);
   redirect(next);
 }
@@ -91,23 +99,35 @@ export async function signup(_prev: ActionResult, formData: FormData): Promise<A
 
   const existing = await prisma.user.findUnique({ where: { email } });
   const passwordHash = await hashPassword(password);
+  // L'admin (ADMIN_EMAIL) est actif d'office ; tout autre nouveau compte attend
+  // la validation d'un administrateur.
+  const active = isAdminEmail(email);
 
   let user;
   if (existing) {
     if (existing.passwordHash) {
       return { error: "Un compte existe déjà avec cet email. Connecte-toi." };
     }
-    // Compte hérité sans mot de passe : on le revendique avec ces identifiants.
+    // Compte hérité sans mot de passe : on le revendique avec ces identifiants
+    // (il était déjà actif, on n'y touche pas).
     user = await prisma.user.update({
       where: { id: existing.id },
       data: { name, passwordHash },
     });
   } else {
-    user = await prisma.user.create({ data: { name, email, passwordHash } });
+    user = await prisma.user.create({ data: { name, email, passwordHash, isActive: active } });
   }
 
-  await createSession(user.id);
-  redirect(next);
+  // Compte actif (admin ou compte hérité revendiqué) : connexion directe.
+  if (user.isActive) {
+    await createSession(user.id);
+    redirect(next);
+  }
+
+  return {
+    pending:
+      "Compte créé ! Un administrateur va l'activer prochainement. Tu pourras te connecter une fois ton compte vérifié.",
+  };
 }
 
 export async function logout(): Promise<void> {

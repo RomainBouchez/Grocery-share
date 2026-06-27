@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import Link from "next/link";
+import { getCurrentUser, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
 import { LogoutButton } from "@/components/LogoutButton";
 import { AvatarColorPicker } from "@/components/AvatarColorPicker";
 import { initials } from "@/lib/utils";
-import { colorFor, card, cardSm, INK_STRONG, INK_MUTED, INK_FAINT, FONT } from "@/lib/ui";
+import { colorFor, card, cardSm, INK_STRONG, INK_MUTED, INK_FAINT, ACCENT_TEXT, FONT } from "@/lib/ui";
 
 const FF = FONT;
 
@@ -40,10 +41,22 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div style={{ ...card, padding: 20, marginBottom: 24 }}>
+        <div style={{ ...card, padding: 20, marginBottom: 14 }}>
           <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: INK_FAINT, marginBottom: 16 }}>Couleur de ta photo</div>
           <AvatarColorPicker initials={initials(user.name)} current={color} />
         </div>
+
+        {isAdmin(user) && (
+          <Link href="/admin" style={{ textDecoration: "none" }}>
+            <div style={{ ...card, padding: "18px 20px", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 900, letterSpacing: "-0.02em", color: INK_STRONG }}>Administration</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: INK_MUTED }}>Activer / désactiver les comptes</div>
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 900, color: ACCENT_TEXT }}>→</span>
+            </div>
+          </Link>
+        )}
 
         <LogoutButton />
       </div>

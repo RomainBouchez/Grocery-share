@@ -70,3 +70,24 @@ export async function requireUser(): Promise<User> {
   if (!user) throw new Error("UNAUTHENTICATED");
   return user;
 }
+
+/**
+ * L'administrateur est désigné par la variable d'environnement ADMIN_EMAIL.
+ * Il est toujours considéré actif et contourne le contrôle d'activation.
+ */
+export function isAdminEmail(email: string | null | undefined): boolean {
+  const admin = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  if (!admin || !email) return false;
+  return email.trim().toLowerCase() === admin;
+}
+
+export function isAdmin(user: { email: string }): boolean {
+  return isAdminEmail(user.email);
+}
+
+/** Garantit un utilisateur admin (zones d'administration). */
+export async function requireAdmin(): Promise<User> {
+  const user = await requireUser();
+  if (!isAdmin(user)) throw new Error("FORBIDDEN");
+  return user;
+}
