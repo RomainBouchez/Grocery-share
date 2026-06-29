@@ -4,8 +4,9 @@
  */
 import type { ComponentType } from "react";
 import {
-  Leaf, Bone, Bottle, RollingPin, Box, Donut, Wineglass,
+  Bone, RollingPin, Box, Donut, Wineglass,
   Snowflake, Bath, Broom, Heart, Paw, Tag,
+  VegetablesIcon, MilkIcon, MeatIcon, BreadIcon,
 } from "@/lib/icons";
 
 // Les composants Solar attendent un `weight` typé (IconWeight). On reste permissif
@@ -16,7 +17,10 @@ type AnyIcon = ComponentType<any>;
 
 /** Registre nom d'icône → composant. Source unique pour le rendu des tags. */
 export const TAG_ICON: Record<string, AnyIcon> = {
-  Leaf, Bone, Bottle, RollingPin, Box, Donut, Wineglass,
+  // Clés = valeurs stockées en base (backward-compat) ; composants swappés.
+  Leaf: VegetablesIcon,
+  Bottle: MilkIcon,
+  Bone: MeatIcon, RollingPin: BreadIcon, Box, Donut, Wineglass,
   Snowflake, Bath, Broom, Heart, Paw, Tag,
 };
 

@@ -168,7 +168,7 @@ export function AddItemForm({
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {/* Row 1 : input + bouton ajouter */}
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <input

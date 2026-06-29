@@ -31,6 +31,40 @@ export async function createTag(formData: FormData): Promise<string | undefined>
   return tag.id;
 }
 
+/** Renomme un tag du groupe. */
+export async function renameTag(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const tagId = String(formData.get("tagId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  if (!tagId || !name) return;
+
+  const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+  if (!tag) return;
+  await assertMembership(user.id, tag.groupId);
+
+  await prisma.tag.update({ where: { id: tagId }, data: { name } });
+  revalidatePath(`/groups/${tag.groupId}`);
+}
+
+/** Supprime un tag du groupe (cascade articles + mémoire produit). */
+export async function deleteTag(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const tagId = String(formData.get("tagId") ?? "");
+  if (!tagId) return;
+
+  const tag = await prisma.tag.findUnique({ where: { id: tagId } });
+  if (!tag) return;
+  await assertMembership(user.id, tag.groupId);
+
+  await prisma.$transaction([
+    prisma.listItem.updateMany({ where: { tagId }, data: { tagId: null } }),
+    prisma.groupProductTag.deleteMany({ where: { tagId } }),
+    prisma.tag.delete({ where: { id: tagId } }),
+  ]);
+
+  revalidatePath(`/groups/${tag.groupId}`);
+}
+
 /** Affecte (ou retire) le tag d'un article + mémorise le rayon du produit. */
 export async function setItemTag(formData: FormData): Promise<void> {
   const user = await requireUser();

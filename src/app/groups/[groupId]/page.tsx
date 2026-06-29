@@ -176,18 +176,20 @@ export default async function GroupPage({
           {/* Je vais faire les courses (push PWA) */}
           <PushManager groupId={groupId} iAmShopping={iAmShopping} />
 
-          {/* Faire les courses button */}
-          <Link href={`/groups/${groupId}/receipt`} style={{
-            width: "100%", boxSizing: "border-box", marginTop: 10,
-            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
-            padding: "15px", borderRadius: 16, textDecoration: "none",
-            background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 800,
-            border: "1.5px solid rgba(0,0,0,0.06)",
-            boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
-          }}>
-            <Cart3 weight="Bold" size={18} color="#fff" />
-            J&apos;ai fait les courses
-          </Link>
+          {/* Faire les courses button — uniquement si partage de dépenses activé */}
+          {group.expenseSharingEnabled && (
+            <Link href={`/groups/${groupId}/receipt`} style={{
+              width: "100%", boxSizing: "border-box", marginTop: 10,
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
+              padding: "15px", borderRadius: 16, textDecoration: "none",
+              background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 800,
+              border: "1.5px solid rgba(0,0,0,0.06)",
+              boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
+            }}>
+              <Cart3 weight="Bold" size={18} color="#fff" />
+              J&apos;ai fait les courses
+            </Link>
+          )}
 
           {/* Balance du groupe — uniquement si le module est activé */}
           {group.expenseSharingEnabled && (

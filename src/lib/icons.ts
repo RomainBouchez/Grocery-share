@@ -23,7 +23,8 @@ export {
   AddCircle,
   Scale,
   TrashBinMinimalistic,
-  // — Rayons / tags —
+  Bell,
+  // — Rayons / tags (Solar) —
   Leaf,
   Bone,
   Bottle,
@@ -37,3 +38,6 @@ export {
   Paw,
   Tag,
 } from "@solar-icons/react/ssr";
+
+// — Icônes personnalisées SVG —
+export { VegetablesIcon, MilkIcon, MeatIcon, BreadIcon } from "@/lib/svgIcons";
