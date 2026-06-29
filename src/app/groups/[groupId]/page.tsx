@@ -10,8 +10,9 @@ import { initials } from "@/lib/utils";
 import { Cart3, Scale } from "@/lib/icons";
 import { GroupAppearance } from "@/components/GroupAppearance";
 import { PushManager } from "@/components/PushManager";
+import { PendingSections } from "@/components/PendingSections";
 import { ensureDefaultTags, getGroupTags } from "@/lib/serverTags";
-import { tagIcon, tagBg, type TagView } from "@/lib/tags";
+import { type TagView } from "@/lib/tags";
 import { resolveGroupColors } from "@/lib/colors";
 import {
   colorFor, avatarStyle, tintForColor,
@@ -223,38 +224,7 @@ export default async function GroupPage({
             </div>
           ) : (
             <>
-              {pendingGroups.map(({ tag, items: groupItems }) => {
-                const Icon = tag ? tagIcon(tag.icon) : null;
-                return (
-                  <div key={tag ? tag.id : "__none"} style={{ marginBottom: 14 }}>
-                    {/* En-tête de rayon */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "0 4px 8px" }}>
-                      {tag && Icon ? (
-                        <>
-                          <span style={{
-                            width: 22, height: 22, borderRadius: 7,
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            background: tagBg(tag.color),
-                          }}>
-                            <Icon size={13} weight="Bold" color={tag.color} />
-                          </span>
-                          <span style={{ fontSize: 12.5, fontWeight: 800, color: tag.color }}>{tag.name}</span>
-                        </>
-                      ) : (
-                        <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.03em", textTransform: "uppercase", color: INK_FAINT }}>
-                          Sans rayon
-                        </span>
-                      )}
-                      <span style={{ fontSize: 12, fontWeight: 700, color: INK_FAINT }}>· {groupItems.length}</span>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                      {groupItems.map(item => (
-                        <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+              <PendingSections groups={pendingGroups} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} />
 
               {bought.length > 0 && (
                 <>
@@ -274,7 +244,7 @@ export default async function GroupPage({
       </div>
 
       {/* Sticky add bar */}
-      <div style={{
+      <div id="add-item-bar" style={{
         position: "fixed", left: 16, right: 16, bottom: 116, zIndex: 40,
         maxWidth: 460, margin: "0 auto",
         padding: "8px 8px 8px 8px",

@@ -23,15 +23,23 @@ export type ItemView = {
 };
 
 export function ItemCard({
-  item, currentUserId, members, memberColors = {}, groupId, tags, gap = 10,
+  item, currentUserId, members, memberColors = {}, groupId, tags, gap = 10, onLeaving,
 }: {
   item: ItemView; currentUserId: string; members: MemberView[];
   memberColors?: Record<string, string>;
   groupId: string; tags: TagView[]; gap?: number;
+  /** Notifie le parent qu'un item quitte sa section (collapse qui démarre) →
+   *  permet de collapser le header de rayon en synchro si c'est le dernier. */
+  onLeaving?: (itemId: string) => void;
 }) {
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
+  // Coche affichée localement avant le collapse (feedback « validé » de 0,5 s).
+  const [justChecked, setJustChecked] = useState(false);
+  // Animation d'entrée : démarre replié/fondu puis se déploie au montage
+  // (carte qui apparaît dans « à acheter » ou « dans le panier »).
+  const [entered, setEntered] = useState(false);
   // Animation d'écrasement à la suppression : mesure → hauteur fixe → 0 + scaleY.
   const [collapse, setCollapse] = useState<{ h: number; phase: "start" | "end" } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -40,6 +48,8 @@ export function ItemCard({
 
   const totalParts = item.participants.reduce((n, p) => n + p.parts, 0);
   const isBought = item.status === "bought";
+  // Visuel « acheté » = état serveur OU coche locale en attente du collapse.
+  const showBought = isBought || justChecked;
   const partsByUser = new Map(item.participants.map(p => [p.userId, p.parts]));
 
   function call(fn: (fd: FormData) => Promise<void>, fields: Record<string, string>) {
@@ -52,11 +62,32 @@ export function ItemCard({
     call(setParticipation, { itemId: item.id, userId, parts: String(Math.max(0, next)) });
   }
 
-  function handleDelete() {
+  // Joue le collapse puis exécute l'action quand l'animation est terminée
+  // (suppression OU passage acheté/à acheter → l'item « quitte » sa section
+  // en douceur avant de réapparaître dans l'autre, au lieu de se téléporter).
+  function collapseThen(run: () => void) {
     const h = rootRef.current?.offsetHeight ?? 0;
-    setCollapse({ h, phase: "start" });          // fige la hauteur courante → joue le collapse
-    // suppression réelle après l'animation, pour que le collapse aille à son terme
-    delTimer.current = setTimeout(() => call(deleteItem, { itemId: item.id }), 300);
+    onLeaving?.(item.id);                 // header de rayon collapse en synchro
+    setCollapse({ h, phase: "start" });
+    delTimer.current = setTimeout(run, 280);
+  }
+
+  function handleDelete() {
+    collapseThen(() => call(deleteItem, { itemId: item.id }));
+  }
+
+  function toggleBought() {
+    if (collapse || justChecked) return; // anti double-clic pendant l'anim
+    if (isBought) {
+      collapseThen(() => call(setItemStatus, { itemId: item.id, status: "pending" }));
+    } else {
+      // 1) coche affichée 0,5 s en place  2) collapse  3) action serveur.
+      setJustChecked(true);
+      delTimer.current = setTimeout(
+        () => collapseThen(() => call(setItemStatus, { itemId: item.id, status: "bought" })),
+        500,
+      );
+    }
   }
 
   // Passe en phase "end" à la frame suivante → déclenche la transition.
@@ -65,6 +96,12 @@ export function ItemCard({
     const id = requestAnimationFrame(() => setCollapse(c => (c ? { ...c, phase: "end" } : c)));
     return () => cancelAnimationFrame(id);
   }, [collapse?.phase]);
+
+  // Déploie la carte à la frame suivant le montage → joue l'animation d'entrée.
+  useLayoutEffect(() => {
+    const id = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const end = collapse?.phase === "end";
   const collapseStyle: CSSProperties = collapse
@@ -86,26 +123,34 @@ export function ItemCard({
       }
     : {};
 
+  // État de départ de l'animation d'entrée (avant le 1er rAF post-montage).
+  const baseOpacity = pending ? 0.6 : showBought ? 0.66 : 1;
+  const entranceStyle: CSSProperties = !collapse && !entered
+    ? { opacity: 0, transform: "translateY(-10px) scale(0.97)" }
+    : {};
+
   return (
     <div ref={rootRef} style={{
       ...cardSm,
       padding: "13px 14px",
       borderRadius: 16,
-      opacity: pending ? 0.6 : isBought ? 0.66 : 1,
-      transition: "opacity .2s",
+      opacity: baseOpacity,
+      transform: "none",
+      transition: "opacity .28s ease, transform .28s ease",
       ...collapseStyle,
+      ...entranceStyle,
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <span
-          onClick={() => call(setItemStatus, { itemId: item.id, status: isBought ? "pending" : "bought" })}
-          style={checkbox(isBought, 24)}
+          onClick={toggleBought}
+          style={checkbox(showBought, 24)}
         >
-          {isBought && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
+          {showBought && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
         </span>
-        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: isBought ? INK_DONE : INK, textDecoration: isBought ? "line-through" : "none", display: "flex", alignItems: "center", gap: 5 }}>
+        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: showBought ? INK_DONE : INK, textDecoration: showBought ? "line-through" : "none", display: "flex", alignItems: "center", gap: 5 }}>
           {item.label}
           {item.quantity > 1 && (
-            <span style={{ fontSize: 12, fontWeight: 800, color: isBought ? INK_FAINT : ACCENT_TEXT, background: isBought ? "#F0EFEB" : ACCENT_SOFT, padding: "1px 6px", borderRadius: 8 }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: showBought ? INK_FAINT : ACCENT_TEXT, background: showBought ? "#F0EFEB" : ACCENT_SOFT, padding: "1px 6px", borderRadius: 8 }}>
               ×{item.quantity}
             </span>
           )}

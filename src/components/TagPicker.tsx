@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { setItemTag, createTag, deleteTag, renameTag } from "@/lib/actions/tags";
 import { tagIcon, tagBg, pickNewTagColor, TAG_ICON, type TagView } from "@/lib/tags";
 import { INK, INK_MUTED, INK_FAINT, HAIRLINE, CARD, FONT } from "@/lib/ui";
 
-type PopoverPos = { top?: number; bottom?: number; right: number };
+type PopoverPos = { top: number; right: number };
 
 const LONG_PRESS_MS = 500;
 
@@ -20,6 +20,8 @@ export function TagPicker({
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<PopoverPos>({ top: 0, right: 0 });
+  const orientRef = useRef<"down" | "up">("down");
+  const flipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [query, setQuery] = useState("");
   const [contextMenuId, setContextMenuId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -59,46 +61,72 @@ export function TagPicker({
     if (renamingId) renameInputRef.current?.focus();
   }, [renamingId]);
 
-  function computePos(): PopoverPos | null {
-    if (!triggerRef.current) return null;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
+  // Position ancrée toujours par `top` (calculé selon l'orientation) → le flip
+  // bas↔haut devient transitionnable. La hauteur du popover sert pour l'ancrage
+  // « au-dessus ». Estimation à l'ouverture, corrigée après montage.
+  function computeTop(popH: number): PopoverPos & { orient: "down" | "up" } {
+    const rect = triggerRef.current!.getBoundingClientRect();
     const right = window.innerWidth - rect.right;
-    return spaceBelow < 300
-      ? { bottom: window.innerHeight - rect.top + 6, right }
-      : { top: rect.bottom + 6, right };
+    // Plancher = bord haut de la barre « Ajouter un article » (ou bas du viewport).
+    const bar = typeof document !== "undefined" ? document.getElementById("add-item-bar") : null;
+    const floor = bar ? bar.getBoundingClientRect().top : window.innerHeight;
+    // Bascule au-dessus s'il n'y a pas la place de tenir sous la puce (popover + marge).
+    const orient = floor - rect.bottom < popH + 12 ? "up" : "down";
+    const top = orient === "down" ? rect.bottom + 6 : rect.top - popH - 6;
+    return { top, right, orient };
   }
 
   function openPopover() {
-    const p = computePos();
-    if (p) setPos(p);
+    if (!triggerRef.current) return;
+    const p = computeTop(290); // hauteur estimée (corrigée au montage)
+    orientRef.current = p.orient;
+    setPos({ top: p.top, right: p.right });
     setOpen(true);
   }
 
-  // Le popover suit la puce déclencheuse au scroll / resize — mise à jour
-  // impérative (DOM direct + rAF) pour éviter un re-render React par event.
+  // Repositionne avec la hauteur réelle ; anime le `top` uniquement quand
+  // l'orientation bascule (flip), sinon mise à jour instantanée (scroll fluide).
+  function place() {
+    const el = popoverRef.current;
+    if (!el || !triggerRef.current) return;
+    const p = computeTop(el.offsetHeight);
+    const flipped = p.orient !== orientRef.current;
+    orientRef.current = p.orient;
+    if (flipped) {
+      el.style.transition = "top .2s ease";
+      if (flipTimer.current) clearTimeout(flipTimer.current);
+      flipTimer.current = setTimeout(() => {
+        if (popoverRef.current) popoverRef.current.style.transition = "none";
+      }, 220);
+    }
+    el.style.top = `${p.top}px`;
+    el.style.right = `${p.right}px`;
+  }
+
+  // Corrige la position avec la hauteur mesurée (montage + changements de contenu
+  // qui modifient la hauteur → ré-ancrage instantané, sans animation).
+  useLayoutEffect(() => {
+    if (open) place();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, query, contextMenuId, confirmDeleteId, renamingId]);
+
+  // Suit la puce au scroll / resize — rAF + DOM direct (pas de re-render React).
   useEffect(() => {
     if (!open) return;
     let raf = 0;
     const onMove = () => {
       if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        const el = popoverRef.current;
-        const p = computePos();
-        if (!el || !p) return;
-        el.style.top = p.top != null ? `${p.top}px` : "auto";
-        el.style.bottom = p.bottom != null ? `${p.bottom}px` : "auto";
-        el.style.right = `${p.right}px`;
-      });
+      raf = requestAnimationFrame(() => { raf = 0; place(); });
     };
     window.addEventListener("scroll", onMove, true);
     window.addEventListener("resize", onMove);
     return () => {
       if (raf) cancelAnimationFrame(raf);
+      if (flipTimer.current) clearTimeout(flipTimer.current);
       window.removeEventListener("scroll", onMove, true);
       window.removeEventListener("resize", onMove);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   // Long press handlers
@@ -181,7 +209,6 @@ export function TagPicker({
       style={{
         position: "fixed",
         top: pos.top,
-        bottom: pos.bottom,
         right: pos.right,
         zIndex: 200,
         width: 230, maxHeight: 310, overflowY: "auto",
