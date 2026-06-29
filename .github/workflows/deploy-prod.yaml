@@ -1,0 +1,46 @@
+name: Deploy Prod (Raspberry Pi)
+
+# Déploie GrocyShare sur le Raspberry Pi à chaque push sur main (ou à la
+# demande via "Run workflow"). Le job tourne sur un self-hosted runner installé
+# sur le Pi ; il exécute deploy.sh qui synchronise le code, (ré)installe les
+# deps si besoin, pousse le schéma Prisma, rebuild Next.js, redémarre le service
+# systemd et smoke-teste l'app. Cf. DEPLOY.md pour la mise en place.
+
+on:
+  push:
+    branches: [main]
+    # Ne déclenche pas pour des changements purement docs (économise un build).
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  workflow_dispatch: {} # bouton "Run workflow" dans l'onglet Actions
+
+# Un seul déploiement à la fois ; on n'annule jamais celui en cours (sinon on
+# risque de couper un build/restart à mi-chemin).
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Le runner doit être installé sur le Pi avec les labels self-hosted + rasp.
+    runs-on: [self-hosted, rasp]
+    # Gate + variables de déploiement (Settings > Environments > "Rasp Deploy Prod").
+    environment: "Rasp Deploy Prod"
+    timeout-minutes: 25
+
+    steps:
+      # Copie stable de deploy.sh (évite que le script soit modifié pendant son
+      # exécution par le reset --hard qu'il fait sur APP_DIR).
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Déploiement
+        env:
+          APP_DIR: ${{ vars.APP_DIR }}
+          SERVICE: ${{ vars.SERVICE }}
+          PORT: ${{ vars.PORT }}
+          BRANCH: ${{ vars.BRANCH }}
+          NODE_BIN: ${{ vars.NODE_BIN }}
+          FORCE_BUILD: ${{ vars.FORCE_BUILD }}
+        run: bash deploy.sh
