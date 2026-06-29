@@ -3,6 +3,8 @@
 import { useState, useTransition, useRef, useEffect, useLayoutEffect, type CSSProperties } from "react";
 import { setParticipation, setItemStatus, deleteItem } from "@/lib/actions/items";
 import { TrashBinMinimalistic } from "@/lib/icons";
+import { TagPicker } from "@/components/TagPicker";
+import type { TagView } from "@/lib/tags";
 import { initials } from "@/lib/utils";
 import {
   btnDanger, checkbox, cardSm, memberChip, avatarStyle,
@@ -15,13 +17,17 @@ export type MemberView = { userId: string; name: string };
 export type ItemView = {
   id: string; label: string; status: string;
   addedByUserId: string; addedByName: string;
+  tagId?: string | null;
+  quantity: number;
   participants: ParticipantView[];
 };
 
 export function ItemCard({
-  item, currentUserId, members, gap = 10,
+  item, currentUserId, members, memberColors = {}, groupId, tags, gap = 10,
 }: {
-  item: ItemView; currentUserId: string; members: MemberView[]; gap?: number;
+  item: ItemView; currentUserId: string; members: MemberView[];
+  memberColors?: Record<string, string>;
+  groupId: string; tags: TagView[]; gap?: number;
 }) {
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
@@ -96,9 +102,15 @@ export function ItemCard({
         >
           {isBought && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
         </span>
-        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: isBought ? INK_DONE : INK, textDecoration: isBought ? "line-through" : "none" }}>
+        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: isBought ? INK_DONE : INK, textDecoration: isBought ? "line-through" : "none", display: "flex", alignItems: "center", gap: 5 }}>
           {item.label}
+          {item.quantity > 1 && (
+            <span style={{ fontSize: 12, fontWeight: 800, color: isBought ? INK_FAINT : ACCENT_TEXT, background: isBought ? "#F0EFEB" : ACCENT_SOFT, padding: "1px 6px", borderRadius: 8 }}>
+              ×{item.quantity}
+            </span>
+          )}
         </span>
+        <TagPicker itemId={item.id} groupId={groupId} currentTagId={item.tagId} tags={tags} />
         {item.addedByUserId === currentUserId && (
           confirmDel ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -132,7 +144,7 @@ export function ItemCard({
       {/* Participants badges */}
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, marginTop: 10, paddingLeft: 36 }}>
         {item.participants.map(p => {
-          const t = tintForColor(avatarColor(p.userId));
+          const t = tintForColor(memberColors[p.userId] ?? avatarColor(p.userId));
           return (
             <span key={p.userId} style={memberChip(t)}>
               <span style={{ ...avatarStyle(t.avatar, 14), border: "none", fontSize: 8 }}>{p.name[0]?.toUpperCase()}</span>
@@ -158,7 +170,7 @@ export function ItemCard({
           {members.map(m => {
             const parts = partsByUser.get(m.userId) ?? 0;
             const isMe = m.userId === currentUserId;
-            const c = avatarColor(m.userId);
+            const c = memberColors[m.userId] ?? avatarColor(m.userId);
             return (
               <div key={m.userId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "8px 0", borderBottom: `1px solid ${HAIRLINE}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>

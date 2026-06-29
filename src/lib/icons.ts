@@ -23,4 +23,17 @@ export {
   AddCircle,
   Scale,
   TrashBinMinimalistic,
+  // — Rayons / tags —
+  Leaf,
+  Bone,
+  Bottle,
+  RollingPin,
+  Box,
+  Donut,
+  Wineglass,
+  Snowflake,
+  Bath,
+  Broom,
+  Paw,
+  Tag,
 } from "@solar-icons/react/ssr";

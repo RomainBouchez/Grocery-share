@@ -6,6 +6,7 @@ import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
 import { ArrowRight } from "@/lib/icons";
 import { GroupIcon } from "@/lib/groupIcons";
+import { resolveGroupColors } from "@/lib/colors";
 import {
   colorFor, avatarStyle, pastille, tintForColor, card, cardSm,
   ACCENT, INK_STRONG, INK_MUTED, INK_FAINT, FONT,
@@ -58,6 +59,7 @@ export default async function ListesPage() {
           const t = tintForColor(colorFor(group.id, group.color));
           const topMembers = group.members.slice(0, 3);
           const featured = idx === 0;
+          const gColors = resolveGroupColors(user.id, user.color, group.members.map(m => ({ id: m.user.id, color: m.user.color })));
 
           if (featured) {
             return (
@@ -70,7 +72,7 @@ export default async function ListesPage() {
                     </span>
                     <div style={{ display: "flex" }}>
                       {topMembers.map((m, i) => (
-                        <div key={m.user.id} style={{ ...avatarStyle(colorFor(m.user.id, m.user.color), 27), marginLeft: i > 0 ? -9 : 0 }}>{initials(m.user.name)}</div>
+                        <div key={m.user.id} style={{ ...avatarStyle(gColors.get(m.user.id) ?? colorFor(m.user.id, m.user.color), 27), marginLeft: i > 0 ? -9 : 0 }}>{initials(m.user.name)}</div>
                       ))}
                       {group.members.length > 3 && (
                         <div style={{ ...avatarStyle("#EFEBE3", 27), color: "#928E83", marginLeft: -9 }}>+{group.members.length - 3}</div>
@@ -105,7 +107,7 @@ export default async function ListesPage() {
                 </div>
                 <div style={{ display: "flex" }}>
                   {topMembers.slice(0, 2).map((m, i) => (
-                    <div key={m.user.id} style={{ ...avatarStyle(colorFor(m.user.id, m.user.color), 26), marginLeft: i > 0 ? -9 : 0 }}>{initials(m.user.name)}</div>
+                    <div key={m.user.id} style={{ ...avatarStyle(gColors.get(m.user.id) ?? colorFor(m.user.id, m.user.color), 26), marginLeft: i > 0 ? -9 : 0 }}>{initials(m.user.name)}</div>
                   ))}
                 </div>
               </div>

@@ -33,6 +33,21 @@ model User {
   settlementsRecorded Settlement[]  @relation("SettlementBy")
   products        UserProduct[]
   sessions        Session[]
+  pushSubscriptions PushSubscription[]
+}
+
+// Abonnement Web Push (PWA) d'un appareil/navigateur de l'utilisateur.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // Session simple par cookie (auth « magic link / code PIN » à brancher ensuite).
@@ -64,6 +79,40 @@ model Group {
   lists       ShoppingList[]
   balances    Balance[]
   settlements Settlement[]
+  tags        Tag[]
+  productTags GroupProductTag[]
+}
+
+// Tag/rayon par groupe (ex : « Fruits & légumes »). Partagé entre membres.
+model Tag {
+  id        String   @id @default(cuid())
+  groupId   String
+  name      String
+  icon      String   // nom d'icône Solar
+  color     String   // hex
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  group       Group             @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  items       ListItem[]
+  productTags GroupProductTag[]
+
+  @@unique([groupId, name])
+  @@index([groupId])
+}
+
+// Mémoire produit→tag par groupe : un libellé qui revient retrouve son rayon.
+model GroupProductTag {
+  id      String @id @default(cuid())
+  groupId String
+  label   String
+  tagId   String
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, label])
+  @@index([groupId])
 }
 
 model GroupMember {
@@ -88,6 +137,8 @@ model ShoppingList {
   id        String   @id @default(cuid())
   groupId   String
   status    String   @default("planning") // "planning" | "shopping" | "done"
+  shoppingByUserId  String?   // qui a déclaré « je vais faire les courses »
+  shoppingStartedAt DateTime? // depuis quand
   createdAt DateTime @default(now())
 
   group    Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
@@ -103,10 +154,13 @@ model ListItem {
   label         String
   addedByUserId String
   status        String   @default("pending") // "pending" | "bought" | "skipped"
+  tagId         String?
+  quantity      Int      @default(1)
   createdAt     DateTime @default(now())
 
   list         ShoppingList      @relation(fields: [listId], references: [id], onDelete: Cascade)
   addedBy      User              @relation("ItemAddedBy", fields: [addedByUserId], references: [id])
+  tag          Tag?              @relation(fields: [tagId], references: [id], onDelete: SetNull)
   participants ItemParticipant[]
   receiptItems ReceiptItem[]
 

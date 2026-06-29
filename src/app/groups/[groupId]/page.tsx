@@ -9,6 +9,10 @@ import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
 import { Cart3, Scale } from "@/lib/icons";
 import { GroupAppearance } from "@/components/GroupAppearance";
+import { PushManager } from "@/components/PushManager";
+import { ensureDefaultTags, getGroupTags } from "@/lib/serverTags";
+import { tagIcon, tagBg, type TagView } from "@/lib/tags";
+import { resolveGroupColors } from "@/lib/colors";
 import {
   colorFor, avatarStyle, tintForColor,
   ACCENT, INK_STRONG, INK_MUTED, INK_FAINT, HAIRLINE, FONT,
@@ -39,6 +43,16 @@ export default async function GroupPage({
     list = await prisma.shoppingList.create({ data: { groupId, status: "planning" } });
   }
 
+  const iAmShopping = list.shoppingByUserId === user.id;
+  const shoppingByOther: string | null = (() => {
+    if (!list.shoppingByUserId || list.shoppingByUserId === user.id) return null;
+    const m = group.members.find(m => m.user.id === list!.shoppingByUserId);
+    return m?.user.name ?? null;
+  })();
+
+  await ensureDefaultTags(groupId);
+  const tags = await getGroupTags(groupId);
+
   const items = await prisma.listItem.findMany({
     where: { listId: list.id },
     include: { addedBy: true, participants: { include: { user: true } } },
@@ -48,23 +62,65 @@ export default async function GroupPage({
   const itemViews: ItemView[] = items.map(it => ({
     id: it.id, label: it.label, status: it.status,
     addedByUserId: it.addedByUserId, addedByName: it.addedBy.name,
+    tagId: it.tagId,
+    quantity: it.quantity,
     participants: it.participants.map(p => ({ userId: p.userId, name: p.user.name, parts: p.parts })),
   }));
 
   const memberViews = group.members.map(m => ({ userId: m.user.id, name: m.user.name }));
 
-  const myProducts = await prisma.userProduct.findMany({
-    where: { userId: user.id },
-    orderBy: [{ buyCount: "desc" }, { lastBoughtAt: "desc" }],
-    select: { label: true },
-    take: 100,
-  });
+  // Couleurs personnelles (point de vue de l'utilisateur courant) : ma couleur
+  // épinglée, les autres distinctes et auto-assignées.
+  const colorMap = resolveGroupColors(
+    user.id, user.color,
+    group.members.map(m => ({ id: m.user.id, color: m.user.color })),
+  );
+  const memberColors: Record<string, string> = Object.fromEntries(colorMap);
+
+  const [myProducts, groupProductTags] = await Promise.all([
+    prisma.userProduct.findMany({
+      where: { userId: user.id },
+      orderBy: [{ buyCount: "desc" }, { lastBoughtAt: "desc" }],
+      select: { label: true },
+      take: 100,
+    }),
+    prisma.groupProductTag.findMany({
+      where: { groupId },
+      select: { label: true, tagId: true },
+    }),
+  ]);
   const suggestions = myProducts.map(p => p.label);
+  // label (lowercase) → tagId, pour l'auto-complétion du rayon dans le formulaire.
+  const productTagMap: Record<string, string> = Object.fromEntries(
+    groupProductTags.map(pt => [pt.label.toLowerCase(), pt.tagId]),
+  );
 
   const pending = itemViews.filter(i => i.status !== "bought");
   const bought = itemViews.filter(i => i.status === "bought");
   const pct = itemViews.length > 0 ? Math.round((bought.length / itemViews.length) * 100) : 0;
   const t = tintForColor(colorFor(group.id, group.color));
+
+  // Regroupe les articles « à acheter » par rayon (ordre des tags, sans-rayon en dernier).
+  const tagById = new Map(tags.map(tg => [tg.id, tg]));
+  const pendingGroups: { tag: TagView | null; items: ItemView[] }[] = [];
+  const indexOfTag = new Map<string, number>();
+  for (const it of pending) {
+    const tg = it.tagId ? tagById.get(it.tagId) ?? null : null;
+    const key = tg ? tg.id : "__none";
+    let idx = indexOfTag.get(key);
+    if (idx === undefined) {
+      idx = pendingGroups.length;
+      indexOfTag.set(key, idx);
+      pendingGroups.push({ tag: tg, items: [] });
+    }
+    pendingGroups[idx].items.push(it);
+  }
+  // Trie selon l'ordre des rayons (sort), « sans rayon » à la fin.
+  pendingGroups.sort((a, b) => {
+    const sa = a.tag ? tags.findIndex(x => x.id === a.tag!.id) : 9999;
+    const sb = b.tag ? tags.findIndex(x => x.id === b.tag!.id) : 9999;
+    return sa - sb;
+  });
 
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG, position: "relative" }}>
@@ -77,7 +133,7 @@ export default async function GroupPage({
           <GroupAppearance groupId={groupId} name={group.name} color={colorFor(group.id, group.color)} icon={group.icon} isOwner={membership.role === "owner"} expenseSharingEnabled={group.expenseSharingEnabled}>
             <div style={{ display: "flex", alignItems: "center" }}>
               {group.members.slice(0, 4).map((m, i) => (
-                <div key={m.user.id} title={m.user.name} style={{ ...avatarStyle(colorFor(m.user.id, m.user.color), 30), marginLeft: i > 0 ? -9 : 0 }}>
+                <div key={m.user.id} title={m.user.name} style={{ ...avatarStyle(memberColors[m.user.id] ?? colorFor(m.user.id, m.user.color), 30), marginLeft: i > 0 ? -9 : 0 }}>
                   {initials(m.user.name)}
                 </div>
               ))}
@@ -104,9 +160,25 @@ export default async function GroupPage({
             </div>
           )}
 
+          {/* Bandeau : quelqu'un d'autre est en train de faire les courses */}
+          {shoppingByOther && (
+            <div style={{
+              marginTop: 14, padding: "11px 14px", borderRadius: 14,
+              background: "#FFF8E7", border: "1.5px solid #F0D080",
+              display: "flex", alignItems: "center", gap: 8,
+              fontSize: 13.5, fontWeight: 700, color: "#7A5A00",
+            }}>
+              <span style={{ fontSize: 18 }}>🛒</span>
+              <span>{shoppingByOther.split(" ")[0]} fait les courses</span>
+            </div>
+          )}
+
+          {/* Je vais faire les courses (push PWA) */}
+          <PushManager groupId={groupId} iAmShopping={iAmShopping} />
+
           {/* Faire les courses button */}
           <Link href={`/groups/${groupId}/receipt`} style={{
-            width: "100%", boxSizing: "border-box", marginTop: 16,
+            width: "100%", boxSizing: "border-box", marginTop: 10,
             display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
             padding: "15px", borderRadius: 16, textDecoration: "none",
             background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 800,
@@ -149,13 +221,38 @@ export default async function GroupPage({
             </div>
           ) : (
             <>
-              {pending.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 6 }}>
-                  {pending.map(item => (
-                    <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} />
-                  ))}
-                </div>
-              )}
+              {pendingGroups.map(({ tag, items: groupItems }) => {
+                const Icon = tag ? tagIcon(tag.icon) : null;
+                return (
+                  <div key={tag ? tag.id : "__none"} style={{ marginBottom: 14 }}>
+                    {/* En-tête de rayon */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "0 4px 8px" }}>
+                      {tag && Icon ? (
+                        <>
+                          <span style={{
+                            width: 22, height: 22, borderRadius: 7,
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            background: tagBg(tag.color),
+                          }}>
+                            <Icon size={13} weight="Bold" color={tag.color} />
+                          </span>
+                          <span style={{ fontSize: 12.5, fontWeight: 800, color: tag.color }}>{tag.name}</span>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.03em", textTransform: "uppercase", color: INK_FAINT }}>
+                          Sans rayon
+                        </span>
+                      )}
+                      <span style={{ fontSize: 12, fontWeight: 700, color: INK_FAINT }}>· {groupItems.length}</span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {groupItems.map(item => (
+                        <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
 
               {bought.length > 0 && (
                 <>
@@ -164,7 +261,7 @@ export default async function GroupPage({
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {bought.map(item => (
-                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} gap={8} />
+                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} gap={8} />
                     ))}
                   </div>
                 </>
@@ -185,7 +282,7 @@ export default async function GroupPage({
         boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 10px 30px rgba(30,26,20,0.12)",
         fontFamily: FONT,
       }}>
-        <AddItemForm groupId={groupId} suggestions={suggestions} />
+        <AddItemForm groupId={groupId} suggestions={suggestions} tags={tags} productTagMap={productTagMap} />
       </div>
 
       <TabBar />

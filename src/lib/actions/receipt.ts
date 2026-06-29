@@ -221,6 +221,12 @@ export async function confirmReceipt(formData: FormData): Promise<void> {
     }
   });
 
+  // Courses terminées : efface l'annonce « je vais faire les courses ».
+  await prisma.shoppingList.update({
+    where: { id: list.id },
+    data: { shoppingByUserId: null, shoppingStartedAt: null, status: "planning" },
+  });
+
   revalidatePath(`/groups/${groupId}`);
   redirect(`/groups/${groupId}`);
 }

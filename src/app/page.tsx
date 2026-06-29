@@ -5,6 +5,7 @@ import { HomeDashboard, type GroupData, type MemberPreview } from "@/components/
 import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
 import { colorFor } from "@/lib/ui";
+import { resolveGroupColors } from "@/lib/colors";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -39,9 +40,10 @@ export default async function HomePage() {
     const pending = allItems.filter(i => i.status !== "bought");
     const bought = allItems.filter(i => i.status === "bought");
 
+    const gColors = resolveGroupColors(user.id, user.color, group.members.map(m => ({ id: m.user.id, color: m.user.color })));
     const topMembers: MemberPreview[] = group.members.slice(0, 3).map(m => ({
       initials: initials(m.user.name),
-      color: colorFor(m.user.id, m.user.color),
+      color: gColors.get(m.user.id) ?? colorFor(m.user.id, m.user.color),
     }));
 
     return {

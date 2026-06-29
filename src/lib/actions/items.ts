@@ -28,16 +28,36 @@ export async function addItem(_prev: ActionResult, formData: FormData): Promise<
   const user = await requireUser();
   const groupId = String(formData.get("groupId") ?? "");
   const label = String(formData.get("label") ?? "").trim();
+  const tagIdRaw = String(formData.get("tagId") ?? "").trim() || null;
+  const quantity = Math.max(1, Math.min(99, parseInt(String(formData.get("quantity") ?? "1"), 10) || 1));
 
   if (!label) return { error: "Indique le nom de l'article." };
 
   const list = await getActiveListForGroup(user.id, groupId);
+
+  // Mémoire produit→tag : tag du formulaire, sinon tag mémorisé pour ce libellé.
+  const remembered = tagIdRaw ? null : await prisma.groupProductTag.findUnique({
+    where: { groupId_label: { groupId, label } },
+    select: { tagId: true },
+  });
+  const finalTagId = tagIdRaw ?? remembered?.tagId ?? null;
+
+  // Si un tag est fourni au moment de l'ajout, mettre à jour la mémoire.
+  if (finalTagId) {
+    await prisma.groupProductTag.upsert({
+      where: { groupId_label: { groupId, label } },
+      create: { groupId, label, tagId: finalTagId },
+      update: { tagId: finalTagId },
+    });
+  }
 
   await prisma.listItem.create({
     data: {
       listId: list.id,
       label,
       addedByUserId: user.id,
+      tagId: finalTagId,
+      quantity,
       participants: { create: { userId: user.id, parts: 1 } },
     },
   });

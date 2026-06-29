@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { computeGroupBalances } from "@/lib/balances";
 import { recordSettlement } from "@/lib/actions/balances";
 import { formatEuro, initials } from "@/lib/utils";
+import { resolveGroupColors } from "@/lib/colors";
 import {
   avatarStyle, colorFor,
   ACCENT_TEXT, DANGER, INK, INK_STRONG, INK_MUTED, INK_FAINT, HAIRLINE, FONT,
@@ -28,6 +29,7 @@ export default async function BalancesPage({
   if (!membership.group.expenseSharingEnabled) notFound();
 
   const { nets, suggestions, everyoneSettled } = await computeGroupBalances(groupId);
+  const gColors = resolveGroupColors(user.id, user.color, nets.map(n => ({ id: n.userId, color: n.color })));
 
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG, position: "relative" }}>
@@ -49,7 +51,7 @@ export default async function BalancesPage({
             const sub = positive ? "on lui doit" : negative ? "doit" : "à jour";
             return (
               <div key={n.userId} style={{ display: "flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 16, border: `1.5px solid ${HAIRLINE}`, padding: "12px 14px" }}>
-                <span style={avatarStyle(colorFor(n.userId, n.color), 34)}>{initials(n.name)}</span>
+                <span style={avatarStyle(gColors.get(n.userId) ?? colorFor(n.userId, n.color), 34)}>{initials(n.name)}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: INK, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {n.name}{n.userId === user.id && <span style={{ color: INK_FAINT }}> (toi)</span>}
@@ -79,12 +81,12 @@ export default async function BalancesPage({
             {suggestions.map((s) => (
               <div key={`${s.fromUserId}-${s.toUserId}`} style={{ display: "flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 16, border: `1.5px solid ${HAIRLINE}`, padding: "12px 14px" }}>
                 <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ ...avatarStyle(colorFor(s.fromUserId), 26), fontSize: 10 }}>{initials(s.fromName)}</span>
+                  <span style={{ ...avatarStyle(gColors.get(s.fromUserId) ?? colorFor(s.fromUserId), 26), fontSize: 10 }}>{initials(s.fromName)}</span>
                   <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>{s.fromName.split(" ")[0]}</span>
                   <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>doit</span>
                   <span style={{ fontSize: 14, fontWeight: 900, color: INK_STRONG }}>{formatEuro(s.amount)}</span>
                   <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>à</span>
-                  <span style={{ ...avatarStyle(colorFor(s.toUserId), 26), fontSize: 10 }}>{initials(s.toName)}</span>
+                  <span style={{ ...avatarStyle(gColors.get(s.toUserId) ?? colorFor(s.toUserId), 26), fontSize: 10 }}>{initials(s.toName)}</span>
                   <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>{s.toName.split(" ")[0]}</span>
                 </div>
                 <form action={recordSettlement} style={{ flexShrink: 0 }}>
