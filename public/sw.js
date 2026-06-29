@@ -24,17 +24,23 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url ?? "/";
+  const path = event.notification.data?.url ?? "/";
+  const target = new URL(path, self.location.origin).href;
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (windowClients) => {
+      // Onglet déjà ouvert : on l'amène sur le bon groupe puis on le focus.
       for (const client of windowClients) {
-        if (client.url.includes(url) && "focus" in client) {
+        if ("focus" in client) {
+          if ("navigate" in client && client.url !== target) {
+            try { await client.navigate(target); } catch {}
+          }
           return client.focus();
         }
       }
+      // Sinon on ouvre une nouvelle fenêtre sur le groupe.
       if (clients.openWindow) {
-        return clients.openWindow(url);
+        return clients.openWindow(target);
       }
     }),
   );

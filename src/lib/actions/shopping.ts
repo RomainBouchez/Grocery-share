@@ -49,9 +49,13 @@ export async function announceGoShopping(groupId: string): Promise<void> {
 
   if (otherUserIds.length > 0) {
     const firstName = user.name.split(" ")[0];
+    // Nom de groupe robuste : trim, repli si vide, troncature si trop long.
+    const rawName = (membership.group.name ?? "").trim();
+    const safeName = rawName.length === 0 ? "ton groupe" : rawName;
+    const groupName = safeName.length > 40 ? `${safeName.slice(0, 39)}…` : safeName;
     await sendPushToUsers(otherUserIds, {
       title: "GrocyShare",
-      body: `🛒 ${firstName} fait les courses !`,
+      body: `${firstName} fait les courses (pour ${groupName}) ! Remplissez la liste de courses avec ce dont vous avez besoin`,
       url: `/groups/${groupId}`,
       tag: `shopping-${groupId}`,
     });
