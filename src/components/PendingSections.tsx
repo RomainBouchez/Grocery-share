@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { ItemCard, type ItemView, type MemberView } from "@/components/ItemCard";
 import { RayonGroup } from "@/components/RayonGroup";
+import { useTagName } from "@/lib/useTagName";
 import { tagIcon, tagBg, type TagView } from "@/lib/tags";
 import { INK_FAINT } from "@/lib/ui";
 
@@ -27,6 +28,7 @@ export function PendingSections({
   tags: TagView[];
 }) {
   const tr = useTranslations("tag");
+  const tagName = useTagName();
   const [entries, setEntries] = useState<Entry[]>(() =>
     groups.map(g => ({ key: keyOf(g), tag: g.tag, items: g.items, exiting: false })),
   );
@@ -92,7 +94,7 @@ export function PendingSections({
                   }}>
                     <Icon size={13} weight="Bold" color={e.tag.color} />
                   </span>
-                  <span style={{ fontSize: 12.5, fontWeight: 800, color: e.tag.color }}>{e.tag.name}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 800, color: e.tag.color }}>{tagName(e.tag.name)}</span>
                 </>
               ) : (
                 <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.03em", textTransform: "uppercase", color: INK_FAINT }}>

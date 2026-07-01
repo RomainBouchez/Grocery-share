@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 
 const hanken = Hanken_Grotesk({
@@ -11,13 +11,15 @@ const hanken = Hanken_Grotesk({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "SharedCart — one list your whole house shares",
-  description:
-    "Add groceries from anywhere. Whoever's heading to the store sees them the second you do.",
-  manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "SharedCart", statusBarStyle: "default" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+    manifest: "/manifest.webmanifest",
+    appleWebApp: { capable: true, title: "SharedCart", statusBarStyle: "default" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#F5F5F5",

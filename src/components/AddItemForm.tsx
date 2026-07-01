@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { addItem } from "@/lib/actions/items";
 import type { TagView } from "@/lib/tags";
 import { tagIcon, tagBg } from "@/lib/tags";
+import { useTagName } from "@/lib/useTagName";
 import { ACCENT, ACCENT_SOFT, ACCENT_TEXT, INK_FAINT, INK_MUTED, HAIRLINE } from "@/lib/ui";
 import { normalizeLoose } from "@/lib/matching";
 
@@ -20,6 +21,7 @@ export function AddItemForm({
   productTagMap?: Record<string, string>;
 }) {
   const tr = useTranslations();
+  const tagName = useTagName();
   const [inputValue, setInputValue] = useState("");
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [tagSetByUser, setTagSetByUser] = useState(false);
@@ -115,7 +117,7 @@ export function AddItemForm({
                     padding: "3px 8px", borderRadius: 10, background: tagBg(memTag.color),
                   }}>
                     <MemIcon size={10} weight="Bold" color={memTag.color} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: memTag.color }}>{memTag.name}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: memTag.color }}>{tagName(memTag.name)}</span>
                   </span>
                 )}
               </button>
@@ -163,7 +165,7 @@ export function AddItemForm({
                   }}
                 >
                   <Icon size={12} weight="Bold" color={tag.color} />
-                  <span style={{ fontSize: 12.5, fontWeight: 700, color: tag.color }}>{tag.name}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: tag.color }}>{tagName(tag.name)}</span>
                 </button>
               );
             })}
@@ -230,7 +232,7 @@ export function AddItemForm({
                 return (
                   <>
                     <Icon size={11} weight="Bold" color={selectedTag.color} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: selectedTag.color }}>{selectedTag.name}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: selectedTag.color }}>{tagName(selectedTag.name)}</span>
                   </>
                 );
               })()

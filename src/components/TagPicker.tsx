@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { createPortal } from "react-dom";
+import { useTagName } from "@/lib/useTagName";
 import { setItemTag, createTag, deleteTag, renameTag } from "@/lib/actions/tags";
 import { tagIcon, tagBg, pickNewTagColor, TAG_ICON, type TagView } from "@/lib/tags";
 import { INK, INK_MUTED, INK_FAINT, HAIRLINE, CARD, FONT } from "@/lib/ui";
@@ -20,6 +21,7 @@ export function TagPicker({
   tags: TagView[];
 }) {
   const tr = useTranslations();
+  const tagName = useTagName();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<PopoverPos>({ top: 0, right: 0 });
   const orientRef = useRef<"down" | "up">("down");
@@ -283,7 +285,7 @@ export function TagPicker({
                 <span style={{ width: 20, height: 20, borderRadius: 6, display: "inline-flex", alignItems: "center", justifyContent: "center", background: tagBg(t.color), flexShrink: 0 }}>
                   <Icon size={12} weight="Bold" color={t.color} />
                 </span>
-                <span style={{ fontSize: 12.5, fontWeight: 800, color: t.color, flex: 1 }}>{t.name}</span>
+                <span style={{ fontSize: 12.5, fontWeight: 800, color: t.color, flex: 1 }}>{tagName(t.name)}</span>
                 <button type="button" onClick={() => setContextMenuId(null)}
                   style={{ background: "none", border: "none", cursor: "pointer", color: INK_FAINT, fontSize: 14, lineHeight: 1, padding: "2px 4px" }}>×</button>
               </div>
@@ -325,7 +327,7 @@ export function TagPicker({
               <Icon size={13} weight="Bold" color={t.color} />
             </span>
             <span style={{ flex: 1, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {t.name}
+              {tagName(t.name)}
             </span>
             {on && <span style={{ color: t.color, fontSize: 13 }}>✓</span>}
           </button>
@@ -372,7 +374,7 @@ export function TagPicker({
         ref={triggerRef}
         type="button"
         onClick={() => open ? setOpen(false) : openPopover()}
-        aria-label={current ? tr("tag.aisleAria", { name: current.name }) : tr("tag.chooseAisle")}
+        aria-label={current ? tr("tag.aisleAria", { name: tagName(current.name) }) : tr("tag.chooseAisle")}
         style={{
           display: "inline-flex", alignItems: "center", gap: 5,
           padding: current ? "4px 9px 4px 7px" : "4px 9px",
@@ -387,7 +389,7 @@ export function TagPicker({
         {current && CurIcon ? (
           <>
             <CurIcon size={13} weight="Bold" color={current.color} />
-            {current.name}
+            {tagName(current.name)}
           </>
         ) : (
           tr("tag.addAisle")

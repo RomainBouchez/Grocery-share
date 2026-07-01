@@ -308,6 +308,26 @@
     "activate": "Enable",
     "deactivate": "Disable"
   },
+  "tags": {
+    "defaults": {
+      "Leaf": "Fruit & veg",
+      "Bone": "Meat & fish",
+      "Bottle": "Dairy & chilled",
+      "RollingPin": "Bakery",
+      "Box": "Savory groceries",
+      "Donut": "Sweet groceries",
+      "Wineglass": "Drinks",
+      "Snowflake": "Frozen",
+      "Bath": "Health & beauty",
+      "Broom": "Home & cleaning",
+      "Paw": "Pets",
+      "Tag": "Other"
+    }
+  },
+  "metadata": {
+    "title": "SharedCart — one list your whole house shares",
+    "description": "Add groceries from anywhere. Whoever's heading to the store sees them the second you jot them down."
+  },
   "profile": {
     "title": "Profile",
     "language": "Language",

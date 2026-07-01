@@ -308,6 +308,26 @@
     "activate": "Activer",
     "deactivate": "Désactiver"
   },
+  "tags": {
+    "defaults": {
+      "Leaf": "Fruits & légumes",
+      "Bone": "Viande & poisson",
+      "Bottle": "Crémerie & frais",
+      "RollingPin": "Boulangerie",
+      "Box": "Épicerie salée",
+      "Donut": "Épicerie sucrée",
+      "Wineglass": "Boissons",
+      "Snowflake": "Surgelés",
+      "Bath": "Hygiène & beauté",
+      "Broom": "Entretien & maison",
+      "Paw": "Animaux",
+      "Tag": "Autre"
+    }
+  },
+  "metadata": {
+    "title": "SharedCart — une seule liste que toute la maison partage",
+    "description": "Ajoute tes courses d'où tu veux. Celui qui part au magasin les voit à la seconde où tu les notes."
+  },
   "profile": {
     "title": "Profil",
     "language": "Langue",
