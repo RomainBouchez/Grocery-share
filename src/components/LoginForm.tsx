@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { login, signup, type ActionResult } from "@/lib/actions/auth";
 import { input, btnPrimary, INK_STRONG, INK_MUTED, INK_FAINT, DANGER, DANGER_SOFT, ACCENT_TEXT, ACCENT_SOFT, HAIRLINE, BG } from "@/lib/ui";
 
@@ -80,32 +81,34 @@ function SubmitBtn({ pending, label, pendingLabel }: { pending: boolean; label: 
 }
 
 function LoginFields({ next }: { next?: string }) {
+  const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(login, undefined);
   return (
     <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {next && <input type="hidden" name="next" value={next} />}
       <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: INK_MUTED, lineHeight: 1.4 }}>
-        Content de te revoir ! Connecte-toi pour retrouver tes listes.
+        {t("loginIntro")}
       </p>
 
       <label style={LABEL_STYLE}>
-        Email
-        <SoftInput name="email" type="email" required autoComplete="email" placeholder="email@exemple.fr" />
+        {t("email")}
+        <SoftInput name="email" type="email" required autoComplete="email" placeholder={t("emailPlaceholder")} />
       </label>
 
       <label style={LABEL_STYLE}>
-        Mot de passe
+        {t("password")}
         <SoftInput name="password" type="password" required autoComplete="current-password" placeholder="••••••••" />
       </label>
 
       {state && "error" in state && <ErrorBox message={state.error} />}
 
-      <SubmitBtn pending={pending} label="Se connecter" pendingLabel="Connexion…" />
+      <SubmitBtn pending={pending} label={t("signIn")} pendingLabel={t("signingIn")} />
     </form>
   );
 }
 
 function SignupFields({ next }: { next?: string }) {
+  const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(signup, undefined);
 
   // Inscription réussie mais en attente d'activation par l'admin.
@@ -117,40 +120,41 @@ function SignupFields({ next }: { next?: string }) {
     <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {next && <input type="hidden" name="next" value={next} />}
       <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: INK_MUTED, lineHeight: 1.4 }}>
-        Crée ton compte en quelques secondes.
+        {t("signupIntro")}
       </p>
 
       <label style={LABEL_STYLE}>
-        Prénom
-        <SoftInput name="name" type="text" required autoComplete="name" placeholder="Ton prénom" />
+        {t("firstName")}
+        <SoftInput name="name" type="text" required autoComplete="name" placeholder={t("firstNamePlaceholder")} />
       </label>
 
       <label style={LABEL_STYLE}>
-        Email
-        <SoftInput name="email" type="email" required autoComplete="email" placeholder="email@exemple.fr" />
+        {t("email")}
+        <SoftInput name="email" type="email" required autoComplete="email" placeholder={t("emailPlaceholder")} />
       </label>
 
       <label style={LABEL_STYLE}>
-        Mot de passe
-        <SoftInput name="password" type="password" required minLength={8} autoComplete="new-password" placeholder="8 caractères minimum" />
+        {t("password")}
+        <SoftInput name="password" type="password" required minLength={8} autoComplete="new-password" placeholder={t("passwordMinPlaceholder")} />
       </label>
 
       <label style={LABEL_STYLE}>
-        Confirmer le mot de passe
+        {t("confirmPassword")}
         <SoftInput name="confirm" type="password" required minLength={8} autoComplete="new-password" placeholder="••••••••" />
       </label>
 
       {state && "error" in state && <ErrorBox message={state.error} />}
 
-      <SubmitBtn pending={pending} label="Créer mon compte" pendingLabel="Création…" />
+      <SubmitBtn pending={pending} label={t("createAccount")} pendingLabel={t("creatingAccount")} />
     </form>
   );
 }
 
 export function LoginForm({ next, initialMode = "login" }: { next?: string; initialMode?: Mode }) {
+  const t = useTranslations("auth");
   const [mode, setMode] = useState<Mode>(initialMode);
 
-  const tab = (m: Mode, label: string): React.CSSProperties => ({
+  const tab = (m: Mode): React.CSSProperties => ({
     flex: 1, padding: "10px 12px", borderRadius: 12, border: "none", cursor: "pointer",
     fontFamily: "inherit", fontSize: 14, fontWeight: 800, letterSpacing: "-0.01em",
     background: mode === m ? "#FFFFFF" : "transparent",
@@ -166,33 +170,33 @@ export function LoginForm({ next, initialMode = "login" }: { next?: string; init
         display: "flex", gap: 4, padding: 4, borderRadius: 16,
         background: BG, border: `1.5px solid ${HAIRLINE}`,
       }}>
-        <button type="button" style={tab("login", "Connexion")} onClick={() => setMode("login")}>
-          Connexion
+        <button type="button" style={tab("login")} onClick={() => setMode("login")}>
+          {t("tabLogin")}
         </button>
-        <button type="button" style={tab("signup", "Inscription")} onClick={() => setMode("signup")}>
-          Inscription
+        <button type="button" style={tab("signup")} onClick={() => setMode("signup")}>
+          {t("tabSignup")}
         </button>
       </div>
 
       <h2 style={{ margin: 0, fontSize: 21, fontWeight: 900, letterSpacing: "-0.03em", color: INK_STRONG }}>
-        {mode === "login" ? "Connexion" : "Créer un compte"}
+        {mode === "login" ? t("headingLogin") : t("headingSignup")}
       </h2>
 
       {mode === "login" ? <LoginFields next={next} /> : <SignupFields next={next} />}
 
       <p style={{ margin: 0, textAlign: "center", fontSize: 13, fontWeight: 600, color: INK_MUTED }}>
         {mode === "login" ? (
-          <>Pas encore de compte ?{" "}
+          <>{t("noAccount")}{" "}
             <button type="button" onClick={() => setMode("signup")}
               style={{ background: "none", border: "none", cursor: "pointer", color: ACCENT_TEXT, fontWeight: 800, fontFamily: "inherit", fontSize: 13 }}>
-              Inscris-toi
+              {t("signUpLink")}
             </button>
           </>
         ) : (
-          <>Déjà un compte ?{" "}
+          <>{t("haveAccount")}{" "}
             <button type="button" onClick={() => setMode("login")}
               style={{ background: "none", border: "none", cursor: "pointer", color: ACCENT_TEXT, fontWeight: 800, fontFamily: "inherit", fontSize: 13 }}>
-              Connecte-toi
+              {t("signInLink")}
             </button>
           </>
         )}

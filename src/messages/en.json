@@ -7,6 +7,143 @@
     "confirm": "Confirm",
     "add": "Add"
   },
+  "auth": {
+    "tabLogin": "Sign in",
+    "tabSignup": "Sign up",
+    "headingLogin": "Sign in",
+    "headingSignup": "Create an account",
+    "loginIntro": "Good to see you again! Sign in to find your lists.",
+    "signupIntro": "Create your account in seconds.",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "firstName": "First name",
+    "firstNamePlaceholder": "Your first name",
+    "passwordMinPlaceholder": "8 characters minimum",
+    "confirmPassword": "Confirm password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "createAccount": "Create my account",
+    "creatingAccount": "Creating…",
+    "noAccount": "No account yet?",
+    "signUpLink": "Sign up",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "page": {
+      "tagline": "One list. Your whole home. In real time.",
+      "footer": "© {year} SharedCart · Free forever"
+    },
+    "errors": {
+      "invalidEmail": "Invalid email address.",
+      "missingPassword": "Enter your password.",
+      "noAccount": "No account with this email. Create an account.",
+      "legacyPasswordTooShort": "Choose a password of at least {min} characters.",
+      "wrongPassword": "Incorrect password.",
+      "accountPending": "Your account is being verified… An administrator must activate it.",
+      "missingFirstName": "Enter your first name.",
+      "passwordTooShort": "The password must be at least {min} characters.",
+      "passwordMismatch": "The passwords don't match.",
+      "accountExists": "An account already exists with this email. Sign in."
+    },
+    "signupPending": "Account created! An administrator will activate it soon. You'll be able to sign in once your account is verified."
+  },
+  "landing": {
+    "nav": {
+      "signIn": "Sign in",
+      "createAccount": "Create an account"
+    },
+    "hero": {
+      "badge": "Free for the whole house",
+      "title": "One list your whole house shares.",
+      "subtitle": "Add groceries from anywhere. Whoever's heading to the store sees them the second you jot them down.",
+      "ctaPrimary": "Create my account — free",
+      "ctaSecondary": "See how it works",
+      "freeForever": "Free forever · already have an account?"
+    },
+    "trust": {
+      "heading": "Built for the people you live with",
+      "couples": "Couples",
+      "families": "Families",
+      "roommates": "Roommates"
+    },
+    "features": {
+      "badge": "Why SharedCart",
+      "heading": "A grocery list that finally keeps up with the household.",
+      "instant": {
+        "badge": "Instant add",
+        "title": "Add from anywhere",
+        "desc": "Type the name, pick the aisle and quantity — the item lands on the shared list in an instant. The same field as in the app, shown here as a demo."
+      },
+      "realtime": {
+        "badge": "Real time",
+        "title": "Synced live",
+        "desc": "Check off an item and it moves to the cart for everyone at once. No refresh, no duplicates, no mix-ups at checkout.",
+        "shopping": "{name} is shopping",
+        "syncNote": "1 of 2 done · updated live on every phone"
+      },
+      "dedup": {
+        "badge": "No duplicates",
+        "title": "No more doubles",
+        "desc": "SharedCart spots when two people add the same thing and quietly merges it. Items stay sorted by aisle. One milk. Always.",
+        "alertTitle": "{name} also added “{item}”",
+        "alertSubtitle": "Merged into a single item"
+      }
+    },
+    "demo": {
+      "groupName": "The house",
+      "toBuy": "{count} to buy",
+      "doneRatio": "{done} / {total} done",
+      "items": {
+        "bananas": "Bananas",
+        "oatMilk": "Oat milk",
+        "avocados": "Avocados",
+        "sourdough": "Sourdough bread",
+        "coffeeBeans": "Coffee beans",
+        "cherryTomatoes": "Cherry tomatoes",
+        "milk": "Milk",
+        "eggs": "Eggs"
+      },
+      "suggestions": {
+        "tomatoes": "Tomatoes",
+        "pasta": "Pasta",
+        "greekYogurt": "Greek yogurt",
+        "bananas": "Bananas"
+      }
+    },
+    "how": {
+      "badge": "How it works",
+      "heading": "Up and running in a minute.",
+      "cta": "Create my first list",
+      "step1": {
+        "tagline": "No account juggling",
+        "title": "Create a list",
+        "desc": "Your household's list in seconds. A name, a color, and you're off."
+      },
+      "step2": {
+        "tagline": "Just a link",
+        "title": "Invite your people",
+        "desc": "Partner, kids, roommates — one link and everyone's on the same list."
+      },
+      "step3": {
+        "tagline": "In real time",
+        "title": "Go shopping",
+        "desc": "Add, check off, tweak quantities — everything updates everywhere, instantly."
+      }
+    },
+    "closing": {
+      "title": "Stop texting each other grocery lists.",
+      "subtitle": "Create your free account — and the whole house stays on the same page, and the same list.",
+      "ctaPrimary": "Create my account",
+      "ctaSecondary": "I already have an account",
+      "note": "Free forever · No ads · No card"
+    },
+    "footer": {
+      "features": "Features",
+      "how": "How it works",
+      "login": "Sign in",
+      "copyright": "© {year} SharedCart"
+    }
+  },
   "profile": {
     "title": "Profile",
     "language": "Language",

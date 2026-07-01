@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { LoginForm } from "@/components/LoginForm";
 
@@ -13,6 +14,8 @@ export default async function LoginPage({
 
   const user = await getCurrentUser();
   if (user) redirect(safeNext ?? "/");
+
+  const t = await getTranslations("auth.page");
 
   return (
     <main style={{
@@ -44,7 +47,7 @@ export default async function LoginPage({
             SharedCart
           </h1>
           <p style={{ margin: "8px 0 0", fontSize: 15, fontWeight: 500, color: "#807C72", lineHeight: 1.4 }}>
-            Une liste. Tout votre foyer. En temps réel.
+            {t("tagline")}
           </p>
         </div>
 
@@ -60,7 +63,7 @@ export default async function LoginPage({
         </div>
 
         <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, fontWeight: 600, color: "#A8A498" }}>
-          © 2026 SharedCart · Gratuit pour toujours
+          {t("footer", { year: 2026 })}
         </p>
       </div>
     </main>

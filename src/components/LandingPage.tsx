@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode, type CSSProperties } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Star, ChecklistMinimalistic, Calendar, Widget, Cart3, Refresh, DangerTriangle } from "@/lib/icons";
 import { AddItemForm } from "@/components/AddItemForm";
@@ -52,30 +53,6 @@ function demoItem(over: Partial<ItemView> & { id: string; label: string }): Item
   };
 }
 
-const HERO_GROUPS = [
-  { tag: tagOf("Fruits & légumes"), items: [
-    demoItem({ id: "h1", label: "Bananes", tagId: tagId("Fruits & légumes"), quantity: 2 }),
-  ] },
-  { tag: tagOf("Crémerie & frais"), items: [
-    demoItem({ id: "h2", label: "Lait d'avoine", tagId: tagId("Crémerie & frais"), participants: both }),
-  ] },
-];
-
-const SYNC_ITEMS = [
-  demoItem({ id: "y1", label: "Avocats", status: "bought", tagId: tagId("Fruits & légumes") }),
-  demoItem({ id: "y2", label: "Pain au levain", tagId: tagId("Boulangerie"), quantity: 2, addedByUserId: "jordan", addedByName: "Jordan", participants: [{ userId: "jordan", name: "Jordan", parts: 1 }] }),
-];
-
-const MERGE_GROUPS = [
-  { tag: tagOf("Crémerie & frais"), items: [
-    demoItem({ id: "z1", label: "Lait", tagId: tagId("Crémerie & frais"), participants: both }),
-    demoItem({ id: "z2", label: "Œufs", tagId: tagId("Crémerie & frais") }),
-  ] },
-];
-
-const SAT_LEFT = demoItem({ id: "sl", label: "Café en grains", status: "bought", tagId: tagId("Épicerie salée") });
-const SAT_RIGHT = demoItem({ id: "sr", label: "Tomates cerises", tagId: tagId("Fruits & légumes"), participants: both });
-
 /** Enveloppe display-only : rend un vrai composant sans interaction (aucune action serveur). */
 function DemoStage({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
@@ -86,7 +63,36 @@ function DemoStage({ children, style }: { children: ReactNode; style?: CSSProper
 }
 
 export function LandingPage() {
+  const t = useTranslations("landing");
   const rootRef = useRef<HTMLDivElement>(null);
+
+  // Données de démo (composants réels, non interactifs) — libellés traduits.
+  const HERO_GROUPS = [
+    { tag: tagOf("Fruits & légumes"), items: [
+      demoItem({ id: "h1", label: t("demo.items.bananas"), tagId: tagId("Fruits & légumes"), quantity: 2 }),
+    ] },
+    { tag: tagOf("Crémerie & frais"), items: [
+      demoItem({ id: "h2", label: t("demo.items.oatMilk"), tagId: tagId("Crémerie & frais"), participants: both }),
+    ] },
+  ];
+
+  const SYNC_ITEMS = [
+    demoItem({ id: "y1", label: t("demo.items.avocados"), status: "bought", tagId: tagId("Fruits & légumes") }),
+    demoItem({ id: "y2", label: t("demo.items.sourdough"), tagId: tagId("Boulangerie"), quantity: 2, addedByUserId: "jordan", addedByName: "Jordan", participants: [{ userId: "jordan", name: "Jordan", parts: 1 }] }),
+  ];
+
+  const MERGE_GROUPS = [
+    { tag: tagOf("Crémerie & frais"), items: [
+      demoItem({ id: "z1", label: t("demo.items.milk"), tagId: tagId("Crémerie & frais"), participants: both }),
+      demoItem({ id: "z2", label: t("demo.items.eggs"), tagId: tagId("Crémerie & frais") }),
+    ] },
+  ];
+
+  const SAT_LEFT = demoItem({ id: "sl", label: t("demo.items.coffeeBeans"), status: "bought", tagId: tagId("Épicerie salée") });
+  const SAT_RIGHT = demoItem({ id: "sr", label: t("demo.items.cherryTomatoes"), tagId: tagId("Fruits & légumes"), participants: both });
+
+  const SUGGESTIONS_BASE = [t("demo.suggestions.tomatoes"), t("demo.suggestions.pasta"), t("demo.suggestions.greekYogurt")];
+  const SUGGESTIONS_PLUS = [...SUGGESTIONS_BASE, t("demo.suggestions.bananas")];
 
   useEffect(() => {
     const root = rootRef.current;
@@ -214,9 +220,9 @@ export function LandingPage() {
   });
 
   const HOW_STEPS = [
-    { n: "1", c: ACCENT, tint: "#E2F5EB", tagline: "Sans compte à jongler", title: "Crée une liste", desc: "La liste de ta maison en quelques secondes. Un nom, une couleur, et c'est parti." },
-    { n: "2", c: "#7B6EF6", tint: "#ECEAFE", tagline: "Un simple lien", title: "Invite tes proches", desc: "Partenaire, enfants, colocs — un lien et tout le monde est sur la même liste." },
-    { n: "3", c: "#1F95E8", tint: "#E1F1FD", tagline: "En temps réel", title: "Faites les courses", desc: "Ajoute, coche, ajuste les quantités — tout se met à jour partout, à l'instant." },
+    { n: "1", c: ACCENT, tint: "#E2F5EB", tagline: t("how.step1.tagline"), title: t("how.step1.title"), desc: t("how.step1.desc") },
+    { n: "2", c: "#7B6EF6", tint: "#ECEAFE", tagline: t("how.step2.tagline"), title: t("how.step2.title"), desc: t("how.step2.desc") },
+    { n: "3", c: "#1F95E8", tint: "#E1F1FD", tagline: t("how.step3.tagline"), title: t("how.step3.title"), desc: t("how.step3.desc") },
   ];
 
   return (
@@ -238,8 +244,8 @@ export function LandingPage() {
             <span style={{ fontSize: 21, fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>SharedCart</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Link href="/login" style={{ fontSize: 14, fontWeight: 800, color: "#5A574F", textDecoration: "none", padding: "10px 6px" }}>Se connecter</Link>
-            <Link href="/login?mode=signup" data-soft style={btnPrimarySmall}>Créer un compte</Link>
+            <Link href="/login" style={{ fontSize: 14, fontWeight: 800, color: "#5A574F", textDecoration: "none", padding: "10px 6px" }}>{t("nav.signIn")}</Link>
+            <Link href="/login?mode=signup" data-soft style={btnPrimarySmall}>{t("nav.createAccount")}</Link>
           </div>
         </nav>
       </header>
@@ -248,25 +254,25 @@ export function LandingPage() {
       <section className="cf-hero" style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
         <div data-reveal style={{ ...pastille("#E2F5EB", ACCENT), marginBottom: 28 }}>
           <Star weight="Bold" size={15} color={ACCENT} />
-          Gratuit pour toute la maison
+          {t("hero.badge")}
         </div>
         <h1 className="cf-hero-title" data-reveal style={{ margin: "0 auto", lineHeight: 1.0, fontWeight: 900, letterSpacing: "-0.045em", maxWidth: 880, color: INK }}>
-          Une seule liste que toute la maison partage.
+          {t("hero.title")}
         </h1>
         <p className="cf-hero-subtitle" data-reveal style={{ margin: "26px auto 0", lineHeight: 1.55, color: INK_MUTED, maxWidth: 540, fontWeight: 500 }}>
-          Ajoute tes courses d&apos;où tu veux. Celui qui part au magasin les voit à la seconde où tu les notes.
+          {t("hero.subtitle")}
         </p>
 
         <div className="cf-hero-btns" data-reveal style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 13, marginTop: 38 }}>
           <Link href="/login?mode=signup" style={btnPrimaryLink}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-            Créer mon compte — gratuit
+            {t("hero.ctaPrimary")}
           </Link>
-          <Link href="#how" data-soft style={btnSoftLink}>Voir comment ça marche</Link>
+          <Link href="#how" data-soft style={btnSoftLink}>{t("hero.ctaSecondary")}</Link>
         </div>
         <p data-reveal style={{ margin: "18px 0 0", fontSize: 13, fontWeight: 600, color: INK_FAINT }}>
-          Gratuit pour toujours · déjà un compte ?{" "}
-          <Link href="/login" style={{ color: "#5A574F", fontWeight: 800, textDecoration: "none" }}>Se connecter</Link>
+          {t("hero.freeForever")}{" "}
+          <Link href="/login" style={{ color: "#5A574F", fontWeight: 800, textDecoration: "none" }}>{t("nav.signIn")}</Link>
         </p>
 
         {/* Éventail de cartes flottantes — composants réels (display-only) */}
@@ -291,7 +297,7 @@ export function LandingPage() {
               <div style={{ ...cardRelief, borderRadius: 28, padding: 20, textAlign: "left", boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 2px 4px rgba(30,26,20,0.04), 0 40px 80px rgba(30,26,20,0.16)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                   <span style={pastille("#E2F5EB", ACCENT)}>
-                    <Cart3 weight="Bold" size={15} color={ACCENT} />La maison
+                    <Cart3 weight="Bold" size={15} color={ACCENT} />{t("demo.groupName")}
                   </span>
                   <div style={{ display: "flex" }}>
                     <div style={avatar("#F0813F")}>MK</div>
@@ -301,8 +307,8 @@ export function LandingPage() {
                 {/* Barre de progression (comme l'écran réel) */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: INK_MUTED }}>2 à acheter</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT }}>1 / 3 fait</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: INK_MUTED }}>{t("demo.toBuy", { count: 2 })}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT }}>{t("demo.doneRatio", { done: 1, total: 3 })}</span>
                   </div>
                   <div style={{ height: 8, borderRadius: 999, background: "#E2F5EB", overflow: "hidden" }}>
                     <div style={{ width: "33%", height: "100%", borderRadius: 999, background: ACCENT, boxShadow: "inset 0 -1.5px 0 rgba(0,0,0,0.1)" }} />
@@ -312,7 +318,7 @@ export function LandingPage() {
                 <DemoStage><PendingSections groups={HERO_GROUPS} {...demoProps} /></DemoStage>
                 {/* Vraie barre d'ajout */}
                 <div style={{ marginTop: 10, padding: "6px 8px", background: "rgba(252,251,249,0.92)", border: "1.5px solid #fff", borderRadius: 18, boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 8px 20px rgba(30,26,20,0.08)" }}>
-                  <DemoStage><AddItemForm groupId="demo" tags={DEMO_TAGS} suggestions={["Tomates", "Pâtes", "Yaourt grec"]} /></DemoStage>
+                  <DemoStage><AddItemForm groupId="demo" tags={DEMO_TAGS} suggestions={SUGGESTIONS_BASE} /></DemoStage>
                 </div>
               </div>
             </div>
@@ -323,9 +329,9 @@ export function LandingPage() {
       {/* TRUST STRIP */}
       <section style={{ position: "relative", zIndex: 1 }}>
         <div data-reveal className="cf-trust" style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: INK_FAINT, textAlign: "center" }}>Pensé pour les gens avec qui tu vis</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: INK_FAINT, textAlign: "center" }}>{t("trust.heading")}</span>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: 10 }}>
-            {["Couples", "Familles", "Colocs"].map(l => (
+            {[t("trust.couples"), t("trust.families"), t("trust.roommates")].map(l => (
               <span key={l} style={{ display: "inline-flex", alignItems: "center", padding: "7px 14px", borderRadius: 999, background: "#FFFFFF", border: "1.5px solid #fff", boxShadow: "0 0 0 1px rgba(30,26,20,0.04)", fontSize: 13, fontWeight: 800, color: "#5A574F" }}>{l}</span>
             ))}
           </div>
@@ -336,10 +342,10 @@ export function LandingPage() {
       <section id="features" className="cf-features" style={{ position: "relative", zIndex: 1, maxWidth: 1180, margin: "0 auto" }}>
         <div data-reveal style={{ maxWidth: 680, margin: "0 auto 84px", textAlign: "center" }}>
           <span style={{ ...pastille("#E2F5EB", ACCENT), fontSize: 13, marginBottom: 18 }}>
-            <Widget weight="Bold" size={14} color={ACCENT} />Pourquoi SharedCart
+            <Widget weight="Bold" size={14} color={ACCENT} />{t("features.badge")}
           </span>
           <h2 style={{ margin: 0, fontSize: "clamp(28px, 4vw, 46px)", lineHeight: 1.08, fontWeight: 900, letterSpacing: "-0.04em", color: INK }}>
-            Une liste de courses qui suit enfin le rythme de la maison.
+            {t("features.heading")}
           </h2>
         </div>
 
@@ -347,14 +353,14 @@ export function LandingPage() {
         <div data-reveal className="cf-feature-grid" style={{ display: "grid", alignItems: "center" }}>
           <div>
             <span style={{ ...pastille("#ECEAFE", "#7B6EF6"), marginBottom: 22 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7B6EF6" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>Ajout instantané
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7B6EF6" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>{t("features.instant.badge")}
             </span>
-            <h3 style={{ margin: 0, fontSize: "clamp(22px, 2.5vw, 32px)", fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>Ajoute de n&apos;importe où</h3>
-            <p style={{ margin: "16px 0 0", fontSize: 18, lineHeight: 1.55, color: INK_MUTED, maxWidth: 420, fontWeight: 500 }}>Tape le nom, choisis le rayon, la quantité — l&apos;article arrive sur la liste partagée en un instant. Le même champ que dans l&apos;app, ici en démo.</p>
+            <h3 style={{ margin: 0, fontSize: "clamp(22px, 2.5vw, 32px)", fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>{t("features.instant.title")}</h3>
+            <p style={{ margin: "16px 0 0", fontSize: 18, lineHeight: 1.55, color: INK_MUTED, maxWidth: 420, fontWeight: 500 }}>{t("features.instant.desc")}</p>
           </div>
           <div style={{ ...cardRelief, borderRadius: 24, padding: 22 }}>
             <div style={{ marginBottom: 12 }}>
-              <DemoStage><AddItemForm groupId="demo" tags={DEMO_TAGS} suggestions={["Tomates", "Pâtes", "Yaourt grec", "Bananes"]} /></DemoStage>
+              <DemoStage><AddItemForm groupId="demo" tags={DEMO_TAGS} suggestions={SUGGESTIONS_PLUS} /></DemoStage>
             </div>
             <DemoStage><PendingSections groups={HERO_GROUPS} {...demoProps} /></DemoStage>
           </div>
@@ -364,7 +370,7 @@ export function LandingPage() {
         <div data-reveal className="cf-feature-grid" style={{ display: "grid", alignItems: "center" }}>
           <div className="cf-feature-flip" style={{ ...cardRelief, borderRadius: 24, padding: 22 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-              <span style={pastille("#E2F5EB", ACCENT)}><span style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT }} />Mia fait les courses</span>
+              <span style={pastille("#E2F5EB", ACCENT)}><span style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT }} />{t("features.realtime.shopping", { name: "Mia" })}</span>
             </div>
             <DemoStage>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -373,14 +379,14 @@ export function LandingPage() {
                 ))}
               </div>
             </DemoStage>
-            <div style={{ marginTop: 16, padding: "13px 15px", background: "#E2F5EB", borderRadius: 13, fontSize: 13, color: "#1E8F55", fontWeight: 800 }}>1 sur 2 fait · mis à jour en direct sur chaque téléphone</div>
+            <div style={{ marginTop: 16, padding: "13px 15px", background: "#E2F5EB", borderRadius: 13, fontSize: 13, color: "#1E8F55", fontWeight: 800 }}>{t("features.realtime.syncNote")}</div>
           </div>
           <div>
             <span style={{ ...pastille("#E1F1FD", "#1F95E8"), marginBottom: 22 }}>
-              <Refresh weight="Linear" size={16} color="#1F95E8" />Temps réel
+              <Refresh weight="Linear" size={16} color="#1F95E8" />{t("features.realtime.badge")}
             </span>
-            <h3 style={{ margin: 0, fontSize: "clamp(22px, 2.5vw, 32px)", fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>Synchronisé en direct</h3>
-            <p style={{ margin: "16px 0 0", fontSize: 18, lineHeight: 1.55, color: INK_MUTED, maxWidth: 420, fontWeight: 500 }}>Coche un article et il passe dans le panier pour tout le monde d&apos;un coup. Pas de rafraîchissement, pas de doublons, pas de quiproquo à la caisse.</p>
+            <h3 style={{ margin: 0, fontSize: "clamp(22px, 2.5vw, 32px)", fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>{t("features.realtime.title")}</h3>
+            <p style={{ margin: "16px 0 0", fontSize: 18, lineHeight: 1.55, color: INK_MUTED, maxWidth: 420, fontWeight: 500 }}>{t("features.realtime.desc")}</p>
           </div>
         </div>
 
@@ -388,17 +394,17 @@ export function LandingPage() {
         <div data-reveal className="cf-feature-grid" style={{ display: "grid", alignItems: "center", marginBottom: 0 }}>
           <div>
             <span style={{ ...pastille("#FDF0D6", "#D9921C"), marginBottom: 22 }}>
-              <DangerTriangle weight="Bold" size={16} color="#D9921C" />Anti-doublons
+              <DangerTriangle weight="Bold" size={16} color="#D9921C" />{t("features.dedup.badge")}
             </span>
-            <h3 style={{ margin: 0, fontSize: "clamp(22px, 2.5vw, 32px)", fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>Fini les doubles</h3>
-            <p style={{ margin: "16px 0 0", fontSize: 18, lineHeight: 1.55, color: INK_MUTED, maxWidth: 420, fontWeight: 500 }}>SharedCart repère quand deux personnes ajoutent la même chose et le fusionne discrètement. Les articles restent rangés par rayon. Un seul lait. Toujours.</p>
+            <h3 style={{ margin: 0, fontSize: "clamp(22px, 2.5vw, 32px)", fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>{t("features.dedup.title")}</h3>
+            <p style={{ margin: "16px 0 0", fontSize: 18, lineHeight: 1.55, color: INK_MUTED, maxWidth: 420, fontWeight: 500 }}>{t("features.dedup.desc")}</p>
           </div>
           <div style={{ ...cardRelief, borderRadius: 24, padding: 22 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 13, padding: 15, background: "#FDF0D6", borderRadius: 15, marginBottom: 16 }}>
               <div style={{ width: 36, height: 36, borderRadius: 11, background: "#E8A52A", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.12)" }}>
                 <DangerTriangle weight="Bold" size={18} color="#fff" />
               </div>
-              <div><div style={{ fontSize: 14, fontWeight: 800, color: "#A8731A" }}>Jordan a aussi ajouté « Lait »</div><div style={{ fontSize: 13, fontWeight: 600, color: "#C49A45" }}>Fusionné en un seul article</div></div>
+              <div><div style={{ fontSize: 14, fontWeight: 800, color: "#A8731A" }}>{t("features.dedup.alertTitle", { name: "Jordan", item: t("demo.items.milk") })}</div><div style={{ fontSize: 13, fontWeight: 600, color: "#C49A45" }}>{t("features.dedup.alertSubtitle")}</div></div>
             </div>
             <DemoStage><PendingSections groups={MERGE_GROUPS} {...demoProps} /></DemoStage>
           </div>
@@ -411,9 +417,9 @@ export function LandingPage() {
           <div className="cf-how-wrap">
             <div style={{ maxWidth: 580, margin: "0 auto 56px", textAlign: "center" }}>
               <span style={{ ...pastille("#ECEAFE", "#7B6EF6"), fontSize: 13, marginBottom: 18 }}>
-                <ChecklistMinimalistic weight="Bold" size={14} color="#7B6EF6" />Comment ça marche
+                <ChecklistMinimalistic weight="Bold" size={14} color="#7B6EF6" />{t("how.badge")}
               </span>
-              <h2 style={{ margin: 0, fontSize: "clamp(28px, 3.5vw, 42px)", lineHeight: 1.08, fontWeight: 900, letterSpacing: "-0.04em", color: INK }}>Opérationnel en une minute.</h2>
+              <h2 style={{ margin: 0, fontSize: "clamp(28px, 3.5vw, 42px)", lineHeight: 1.08, fontWeight: 900, letterSpacing: "-0.04em", color: INK }}>{t("how.heading")}</h2>
             </div>
 
             <div style={{ position: "relative", maxWidth: 620, margin: "0 auto" }}>
@@ -437,7 +443,7 @@ export function LandingPage() {
             <div style={{ textAlign: "center", marginTop: 48 }}>
               <Link href="/login?mode=signup" style={btnPrimaryLink}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                Créer ma première liste
+                {t("how.cta")}
               </Link>
             </div>
           </div>
@@ -448,19 +454,19 @@ export function LandingPage() {
       <section id="get" style={{ position: "relative", zIndex: 1, maxWidth: 1180, margin: "0 auto", padding: "130px 40px" }}>
         <div data-reveal style={{ textAlign: "center" }}>
           <h2 className="cf-cta-title" style={{ margin: "0 auto", lineHeight: 1.04, fontWeight: 900, letterSpacing: "-0.045em", maxWidth: 780, color: INK }}>
-            Arrête de vous envoyer des listes par SMS.
+            {t("closing.title")}
           </h2>
           <p style={{ margin: "22px auto 0", fontSize: 19, lineHeight: 1.5, color: INK_MUTED, maxWidth: 480, fontWeight: 500 }}>
-            Crée ton compte gratuit — et toute la maison reste sur la même page, et la même liste.
+            {t("closing.subtitle")}
           </p>
           <div className="cf-cta-btns" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 13, marginTop: 36 }}>
             <Link href="/login?mode=signup" style={btnPrimaryLink}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-              Créer mon compte
+              {t("closing.ctaPrimary")}
             </Link>
-            <Link href="/login" data-soft style={btnSoftLink}>J&apos;ai déjà un compte</Link>
+            <Link href="/login" data-soft style={btnSoftLink}>{t("closing.ctaSecondary")}</Link>
           </div>
-          <p style={{ margin: "22px 0 0", fontSize: 14, fontWeight: 600, color: INK_FAINT }}>Gratuit pour toujours · Sans pub · Sans carte</p>
+          <p style={{ margin: "22px 0 0", fontSize: 14, fontWeight: 600, color: INK_FAINT }}>{t("closing.note")}</p>
         </div>
       </section>
 
@@ -474,11 +480,11 @@ export function LandingPage() {
             <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: "-0.02em", color: INK }}>SharedCart</span>
           </div>
           <div className="cf-footer-links" style={{ display: "flex", gap: 26 }}>
-            {[["Fonctions", "#features"], ["Comment ça marche", "#how"], ["Connexion", "/login"]].map(([label, href]) => (
+            {[[t("footer.features"), "#features"], [t("footer.how"), "#how"], [t("footer.login"), "/login"]].map(([label, href]) => (
               <Link key={label} href={href} style={{ fontSize: 14, fontWeight: 700, color: INK_MUTED, textDecoration: "none" }}>{label}</Link>
             ))}
           </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: INK_FAINT }}>© 2026 SharedCart</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: INK_FAINT }}>{t("footer.copyright", { year: 2026 })}</span>
         </div>
       </footer>
     </div>

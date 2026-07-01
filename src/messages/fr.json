@@ -7,6 +7,143 @@
     "confirm": "Confirmer",
     "add": "Ajouter"
   },
+  "auth": {
+    "tabLogin": "Connexion",
+    "tabSignup": "Inscription",
+    "headingLogin": "Connexion",
+    "headingSignup": "Créer un compte",
+    "loginIntro": "Content de te revoir ! Connecte-toi pour retrouver tes listes.",
+    "signupIntro": "Crée ton compte en quelques secondes.",
+    "email": "Email",
+    "emailPlaceholder": "email@exemple.fr",
+    "password": "Mot de passe",
+    "firstName": "Prénom",
+    "firstNamePlaceholder": "Ton prénom",
+    "passwordMinPlaceholder": "8 caractères minimum",
+    "confirmPassword": "Confirmer le mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion…",
+    "createAccount": "Créer mon compte",
+    "creatingAccount": "Création…",
+    "noAccount": "Pas encore de compte ?",
+    "signUpLink": "Inscris-toi",
+    "haveAccount": "Déjà un compte ?",
+    "signInLink": "Connecte-toi",
+    "page": {
+      "tagline": "Une liste. Tout votre foyer. En temps réel.",
+      "footer": "© {year} SharedCart · Gratuit pour toujours"
+    },
+    "errors": {
+      "invalidEmail": "Adresse email invalide.",
+      "missingPassword": "Saisis ton mot de passe.",
+      "noAccount": "Aucun compte avec cet email. Crée un compte.",
+      "legacyPasswordTooShort": "Choisis un mot de passe d'au moins {min} caractères.",
+      "wrongPassword": "Mot de passe incorrect.",
+      "accountPending": "Votre compte est en cours de vérification… Un administrateur doit l'activer.",
+      "missingFirstName": "Indique ton prénom.",
+      "passwordTooShort": "Le mot de passe doit faire au moins {min} caractères.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "accountExists": "Un compte existe déjà avec cet email. Connecte-toi."
+    },
+    "signupPending": "Compte créé ! Un administrateur va l'activer prochainement. Tu pourras te connecter une fois ton compte vérifié."
+  },
+  "landing": {
+    "nav": {
+      "signIn": "Se connecter",
+      "createAccount": "Créer un compte"
+    },
+    "hero": {
+      "badge": "Gratuit pour toute la maison",
+      "title": "Une seule liste que toute la maison partage.",
+      "subtitle": "Ajoute tes courses d'où tu veux. Celui qui part au magasin les voit à la seconde où tu les notes.",
+      "ctaPrimary": "Créer mon compte — gratuit",
+      "ctaSecondary": "Voir comment ça marche",
+      "freeForever": "Gratuit pour toujours · déjà un compte ?"
+    },
+    "trust": {
+      "heading": "Pensé pour les gens avec qui tu vis",
+      "couples": "Couples",
+      "families": "Familles",
+      "roommates": "Colocs"
+    },
+    "features": {
+      "badge": "Pourquoi SharedCart",
+      "heading": "Une liste de courses qui suit enfin le rythme de la maison.",
+      "instant": {
+        "badge": "Ajout instantané",
+        "title": "Ajoute de n'importe où",
+        "desc": "Tape le nom, choisis le rayon, la quantité — l'article arrive sur la liste partagée en un instant. Le même champ que dans l'app, ici en démo."
+      },
+      "realtime": {
+        "badge": "Temps réel",
+        "title": "Synchronisé en direct",
+        "desc": "Coche un article et il passe dans le panier pour tout le monde d'un coup. Pas de rafraîchissement, pas de doublons, pas de quiproquo à la caisse.",
+        "shopping": "{name} fait les courses",
+        "syncNote": "1 sur 2 fait · mis à jour en direct sur chaque téléphone"
+      },
+      "dedup": {
+        "badge": "Anti-doublons",
+        "title": "Fini les doubles",
+        "desc": "SharedCart repère quand deux personnes ajoutent la même chose et le fusionne discrètement. Les articles restent rangés par rayon. Un seul lait. Toujours.",
+        "alertTitle": "{name} a aussi ajouté « {item} »",
+        "alertSubtitle": "Fusionné en un seul article"
+      }
+    },
+    "demo": {
+      "groupName": "La maison",
+      "toBuy": "{count} à acheter",
+      "doneRatio": "{done} / {total} fait",
+      "items": {
+        "bananas": "Bananes",
+        "oatMilk": "Lait d'avoine",
+        "avocados": "Avocats",
+        "sourdough": "Pain au levain",
+        "coffeeBeans": "Café en grains",
+        "cherryTomatoes": "Tomates cerises",
+        "milk": "Lait",
+        "eggs": "Œufs"
+      },
+      "suggestions": {
+        "tomatoes": "Tomates",
+        "pasta": "Pâtes",
+        "greekYogurt": "Yaourt grec",
+        "bananas": "Bananes"
+      }
+    },
+    "how": {
+      "badge": "Comment ça marche",
+      "heading": "Opérationnel en une minute.",
+      "cta": "Créer ma première liste",
+      "step1": {
+        "tagline": "Sans compte à jongler",
+        "title": "Crée une liste",
+        "desc": "La liste de ta maison en quelques secondes. Un nom, une couleur, et c'est parti."
+      },
+      "step2": {
+        "tagline": "Un simple lien",
+        "title": "Invite tes proches",
+        "desc": "Partenaire, enfants, colocs — un lien et tout le monde est sur la même liste."
+      },
+      "step3": {
+        "tagline": "En temps réel",
+        "title": "Faites les courses",
+        "desc": "Ajoute, coche, ajuste les quantités — tout se met à jour partout, à l'instant."
+      }
+    },
+    "closing": {
+      "title": "Arrête de vous envoyer des listes par SMS.",
+      "subtitle": "Crée ton compte gratuit — et toute la maison reste sur la même page, et la même liste.",
+      "ctaPrimary": "Créer mon compte",
+      "ctaSecondary": "J'ai déjà un compte",
+      "note": "Gratuit pour toujours · Sans pub · Sans carte"
+    },
+    "footer": {
+      "features": "Fonctions",
+      "how": "Comment ça marche",
+      "login": "Connexion",
+      "copyright": "© {year} SharedCart"
+    }
+  },
   "profile": {
     "title": "Profil",
     "language": "Langue",

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { createSession, destroySession, getCurrentUser, isAdminEmail } from "@/lib/auth";
 import { hashPassword, verifyPassword, MIN_PASSWORD_LENGTH } from "@/lib/password";
@@ -36,38 +37,39 @@ function safeNext(raw: string): string {
  * passe saisi devient son mot de passe (le compte est ainsi « revendiqué »).
  */
 export async function login(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const t = await getTranslations("auth.errors");
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const next = safeNext(String(formData.get("next") ?? "/"));
 
   if (!isValidEmail(email)) {
-    return { error: "Adresse email invalide." };
+    return { error: t("invalidEmail") };
   }
   if (!password) {
-    return { error: "Saisis ton mot de passe." };
+    return { error: t("missingPassword") };
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    return { error: "Aucun compte avec cet email. Crée un compte." };
+    return { error: t("noAccount") };
   }
 
   if (!user.passwordHash) {
     // Compte hérité : on définit le mot de passe à cette première connexion.
     if (password.length < MIN_PASSWORD_LENGTH) {
-      return { error: `Choisis un mot de passe d'au moins ${MIN_PASSWORD_LENGTH} caractères.` };
+      return { error: t("legacyPasswordTooShort", { min: MIN_PASSWORD_LENGTH }) };
     }
     await prisma.user.update({
       where: { id: user.id },
       data: { passwordHash: await hashPassword(password) },
     });
   } else if (!(await verifyPassword(password, user.passwordHash))) {
-    return { error: "Mot de passe incorrect." };
+    return { error: t("wrongPassword") };
   }
 
   // Compte non activé : l'admin doit le valider (l'admin lui-même est exempté).
   if (!user.isActive && !isAdminEmail(user.email)) {
-    return { error: "Votre compte est en cours de vérification… Un administrateur doit l'activer." };
+    return { error: t("accountPending") };
   }
 
   await createSession(user.id);
@@ -78,6 +80,7 @@ export async function login(_prev: ActionResult, formData: FormData): Promise<Ac
  * Inscription : crée un nouveau compte avec prénom, email et mot de passe.
  */
 export async function signup(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const t = await getTranslations("auth.errors");
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
@@ -85,16 +88,16 @@ export async function signup(_prev: ActionResult, formData: FormData): Promise<A
   const next = safeNext(String(formData.get("next") ?? "/"));
 
   if (!name) {
-    return { error: "Indique ton prénom." };
+    return { error: t("missingFirstName") };
   }
   if (!isValidEmail(email)) {
-    return { error: "Adresse email invalide." };
+    return { error: t("invalidEmail") };
   }
   if (password.length < MIN_PASSWORD_LENGTH) {
-    return { error: `Le mot de passe doit faire au moins ${MIN_PASSWORD_LENGTH} caractères.` };
+    return { error: t("passwordTooShort", { min: MIN_PASSWORD_LENGTH }) };
   }
   if (password !== confirm) {
-    return { error: "Les mots de passe ne correspondent pas." };
+    return { error: t("passwordMismatch") };
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -106,7 +109,7 @@ export async function signup(_prev: ActionResult, formData: FormData): Promise<A
   let user;
   if (existing) {
     if (existing.passwordHash) {
-      return { error: "Un compte existe déjà avec cet email. Connecte-toi." };
+      return { error: t("accountExists") };
     }
     // Compte hérité sans mot de passe : on le revendique avec ces identifiants
     // (il était déjà actif, on n'y touche pas).
@@ -125,8 +128,7 @@ export async function signup(_prev: ActionResult, formData: FormData): Promise<A
   }
 
   return {
-    pending:
-      "Compte créé ! Un administrateur va l'activer prochainement. Tu pourras te connecter une fois ton compte vérifié.",
+    pending: (await getTranslations("auth"))("signupPending"),
   };
 }
 
