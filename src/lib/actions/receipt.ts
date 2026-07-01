@@ -6,7 +6,6 @@ import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
@@ -15,27 +14,6 @@ import { matchReceiptWithClaude } from "@/lib/matchClaude";
 import type { MatchResult, OcrLine } from "@/lib/matching";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR ?? path.join(os.tmpdir(), "grocyshare-uploads");
-
-/**
- * N2 — base d'aliments perso : à chaque achat, incrémente le compteur et la date
- * de dernier achat dans la base de chaque participant (pour l'autocomplete).
- */
-async function recordPurchases(
-  tx: Prisma.TransactionClient,
-  userIds: string[],
-  label: string,
-  at: Date,
-): Promise<void> {
-  const clean = label.trim();
-  if (!clean) return;
-  for (const userId of userIds) {
-    await tx.userProduct.upsert({
-      where: { userId_label: { userId, label: clean } },
-      create: { userId, label: clean, buyCount: 1, lastBoughtAt: at },
-      update: { buyCount: { increment: 1 }, lastBoughtAt: at },
-    });
-  }
-}
 
 export type DraftMatch = {
   rawLabel: string;
@@ -176,7 +154,6 @@ export async function confirmReceipt(formData: FormData): Promise<void> {
   const total =
     payload.matched.reduce((s, m) => s + m.price, 0) +
     payload.extras.reduce((s, e) => s + e.price, 0);
-  const now = new Date();
 
   await prisma.$transaction(async (tx) => {
     const receipt = await tx.receipt.create({
@@ -190,16 +167,13 @@ export async function confirmReceipt(formData: FormData): Promise<void> {
 
     // Articles planifiés retrouvés sur le ticket → achetés + ligne de ticket.
     for (const m of payload.matched) {
-      const item = await tx.listItem.update({
+      await tx.listItem.update({
         where: { id: m.itemId },
         data: { status: "bought" },
-        include: { participants: { select: { userId: true } } },
       });
       await tx.receiptItem.create({
         data: { receiptId: receipt.id, rawLabel: m.rawLabel, matchedItemId: m.itemId, price: m.price },
       });
-      // N2 : alimente la base perso de chaque participant.
-      await recordPurchases(tx, item.participants.map((p) => p.userId), item.label, now);
     }
 
     // Extras conservés → nouvel article (acheté) + participants choisis.
@@ -217,7 +191,6 @@ export async function confirmReceipt(formData: FormData): Promise<void> {
       await tx.receiptItem.create({
         data: { receiptId: receipt.id, rawLabel: e.rawLabel, matchedItemId: newItem.id, price: e.price },
       });
-      await recordPurchases(tx, participantIds, e.rawLabel, now);
     }
   });
 

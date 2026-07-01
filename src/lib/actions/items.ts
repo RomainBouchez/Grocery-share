@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
+import { normalizeLoose } from "@/lib/matching";
 
 export type ActionResult = { error: string } | undefined;
 
@@ -36,11 +37,17 @@ export async function addItem(_prev: ActionResult, formData: FormData): Promise<
   const list = await getActiveListForGroup(user.id, groupId);
 
   // Mémoire produit→tag : tag du formulaire, sinon tag mémorisé pour ce libellé.
-  const remembered = tagIdRaw ? null : await prisma.groupProductTag.findUnique({
-    where: { groupId_label: { groupId, label } },
-    select: { tagId: true },
-  });
-  const finalTagId = tagIdRaw ?? remembered?.tagId ?? null;
+  // Correspondance insensible au pluriel (« melon » retrouve le rayon de « melons »).
+  let rememberedTagId: string | null = null;
+  if (!tagIdRaw) {
+    const normLabel = normalizeLoose(label);
+    const productTags = await prisma.groupProductTag.findMany({
+      where: { groupId },
+      select: { label: true, tagId: true },
+    });
+    rememberedTagId = productTags.find(pt => normalizeLoose(pt.label) === normLabel)?.tagId ?? null;
+  }
+  const finalTagId = tagIdRaw ?? rememberedTagId ?? null;
 
   // Si un tag est fourni au moment de l'ajout, mettre à jour la mémoire.
   if (finalTagId) {
@@ -49,6 +56,39 @@ export async function addItem(_prev: ActionResult, formData: FormData): Promise<
       create: { groupId, label, tagId: finalTagId },
       update: { tagId: finalTagId },
     });
+  }
+
+  // Historique perso : seuls les aliments saisis à la main alimentent
+  // l'autocomplétion (les tickets scannés n'y contribuent pas).
+  await prisma.userProduct.upsert({
+    where: { userId_label: { userId: user.id, label } },
+    create: { userId: user.id, label, buyCount: 1, lastBoughtAt: new Date() },
+    update: { buyCount: { increment: 1 }, lastBoughtAt: new Date() },
+  });
+
+  // Anti-doublons : si un article « à acheter » identique existe déjà dans la
+  // liste (même libellé, aux accents/casse/ponctuation près), on ne recrée pas.
+  // On incrémente sa quantité et on ajoute l'utilisateur aux participants.
+  const norm = normalizeLoose(label);
+  const pendingItems = await prisma.listItem.findMany({
+    where: { listId: list.id, status: "pending" },
+    select: { id: true, label: true, quantity: true },
+  });
+  const existing = pendingItems.find(it => normalizeLoose(it.label) === norm);
+
+  if (existing) {
+    await prisma.listItem.update({
+      where: { id: existing.id },
+      data: { quantity: Math.min(99, existing.quantity + 1) },
+    });
+    // Ajoute l'utilisateur s'il ne participe pas encore (sinon on ne touche pas ses parts).
+    await prisma.itemParticipant.upsert({
+      where: { itemId_userId: { itemId: existing.id, userId: user.id } },
+      create: { itemId: existing.id, userId: user.id, parts: 1 },
+      update: {},
+    });
+    revalidatePath(`/groups/${groupId}`);
+    return;
   }
 
   await prisma.listItem.create({

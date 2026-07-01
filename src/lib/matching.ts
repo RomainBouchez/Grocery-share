@@ -12,6 +12,20 @@ export function normalize(input: string): string {
     .trim();
 }
 
+/**
+ * Retire la marque de pluriel française d'un token normalisé (approx.) :
+ * -s / -x finaux (tomates→tomate, poireaux→poireau, œufs→œuf).
+ * Garde-fou longueur > 3 pour ne pas mutiler les mots courts (riz, sel, jus).
+ */
+function singularizeToken(t: string): string {
+  return t.length > 3 && (t.endsWith("s") || t.endsWith("x")) ? t.slice(0, -1) : t;
+}
+
+/** Clé de comparaison insensible au pluriel : normalise puis singularise chaque mot. */
+export function normalizeLoose(input: string): string {
+  return normalize(input).split(" ").map(singularizeToken).filter(Boolean).join(" ");
+}
+
 function bigrams(s: string): Map<string, number> {
   const clean = s.replace(/\s+/g, "");
   const map = new Map<string, number>();

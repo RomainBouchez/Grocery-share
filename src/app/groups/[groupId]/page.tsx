@@ -13,6 +13,7 @@ import { PushManager } from "@/components/PushManager";
 import { PendingSections } from "@/components/PendingSections";
 import { ensureDefaultTags, getGroupTags } from "@/lib/serverTags";
 import { type TagView } from "@/lib/tags";
+import { normalizeLoose } from "@/lib/matching";
 import { resolveGroupColors } from "@/lib/colors";
 import {
   colorFor, avatarStyle, tintForColor,
@@ -92,8 +93,9 @@ export default async function GroupPage({
   ]);
   const suggestions = myProducts.map(p => p.label);
   // label (lowercase) → tagId, pour l'auto-complétion du rayon dans le formulaire.
+  // Clé insensible au pluriel : « melons » et « melon » partagent le même rayon mémorisé.
   const productTagMap: Record<string, string> = Object.fromEntries(
-    groupProductTags.map(pt => [pt.label.toLowerCase(), pt.tagId]),
+    groupProductTags.map(pt => [normalizeLoose(pt.label), pt.tagId]),
   );
 
   const pending = itemViews.filter(i => i.status !== "bought");

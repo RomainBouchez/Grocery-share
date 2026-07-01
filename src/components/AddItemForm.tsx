@@ -5,6 +5,7 @@ import { addItem } from "@/lib/actions/items";
 import type { TagView } from "@/lib/tags";
 import { tagIcon, tagBg } from "@/lib/tags";
 import { ACCENT, ACCENT_SOFT, ACCENT_TEXT, INK_FAINT, INK_MUTED, HAIRLINE } from "@/lib/ui";
+import { normalizeLoose } from "@/lib/matching";
 
 export function AddItemForm({
   groupId,
@@ -29,7 +30,7 @@ export function AddItemForm({
 
   function applyAutoTag(label: string) {
     if (tagSetByUser) return;
-    const tagId = productTagMap[label.trim().toLowerCase()] ?? null;
+    const tagId = productTagMap[normalizeLoose(label)] ?? null;
     setSelectedTagId(tagId);
   }
 
@@ -82,7 +83,7 @@ export function AddItemForm({
             Historique
           </div>
           {filteredSuggestions.map((s, i) => {
-            const memTagId = productTagMap[s.toLowerCase()];
+            const memTagId = productTagMap[normalizeLoose(s)];
             const memTag = memTagId ? tags.find(t => t.id === memTagId) ?? null : null;
             const MemIcon = memTag ? tagIcon(memTag.icon) : null;
             return (

@@ -147,8 +147,8 @@ function SignupFields({ next }: { next?: string }) {
   );
 }
 
-export function LoginForm({ next }: { next?: string }) {
-  const [mode, setMode] = useState<Mode>("login");
+export function LoginForm({ next, initialMode = "login" }: { next?: string; initialMode?: Mode }) {
+  const [mode, setMode] = useState<Mode>(initialMode);
 
   const tab = (m: Mode, label: string): React.CSSProperties => ({
     flex: 1, padding: "10px 12px", borderRadius: 12, border: "none", cursor: "pointer",

@@ -5,10 +5,11 @@ import { LoginForm } from "@/components/LoginForm";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; mode?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, mode } = await searchParams;
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
+  const initialMode = mode === "signup" ? "signup" : "login";
 
   const user = await getCurrentUser();
   if (user) redirect(safeNext ?? "/");
@@ -55,7 +56,7 @@ export default async function LoginPage({
           padding: "32px 28px",
           boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 2px 4px rgba(30,26,20,0.04), 0 18px 40px rgba(30,26,20,0.09)",
         }}>
-          <LoginForm next={safeNext} />
+          <LoginForm next={safeNext} initialMode={initialMode} />
         </div>
 
         <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, fontWeight: 600, color: "#A8A498" }}>
