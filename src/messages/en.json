@@ -1,0 +1,18 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "add": "Add"
+  },
+  "profile": {
+    "title": "Profile",
+    "language": "Language",
+    "avatarColor": "Your photo color",
+    "groups": "{count, plural, one {group} other {groups}}",
+    "admin": "Administration",
+    "adminSubtitle": "Enable / disable accounts"
+  }
+}

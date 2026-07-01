@@ -1,3 +1,5 @@
+import createNextIntlPlugin from "next-intl/plugin";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -10,4 +12,7 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Charge la config i18n (locale via cookie, sans routing par locale).
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withNextIntl(nextConfig);

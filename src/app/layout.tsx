@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 
 const hanken = Hanken_Grotesk({
@@ -24,12 +26,15 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
   return (
-    <html lang="fr">
-      <body className={`min-h-dvh antialiased ${hanken.variable}`}>{children}</body>
+    <html lang={locale}>
+      <body className={`min-h-dvh antialiased ${hanken.variable}`}>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+      </body>
     </html>
   );
 }

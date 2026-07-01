@@ -1,0 +1,18 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "add": "Ajouter"
+  },
+  "profile": {
+    "title": "Profil",
+    "language": "Langue",
+    "avatarColor": "Couleur de ta photo",
+    "groups": "{count, plural, one {groupe} other {groupes}}",
+    "admin": "Administration",
+    "adminSubtitle": "Activer / désactiver les comptes"
+  }
+}
