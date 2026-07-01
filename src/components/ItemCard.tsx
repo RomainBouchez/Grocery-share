@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef, useEffect, useLayoutEffect, type CSSProperties } from "react";
-import { setParticipation, setItemStatus, deleteItem } from "@/lib/actions/items";
+import { setParticipation, setItemStatus, deleteItem, updateItem } from "@/lib/actions/items";
 import { TrashBinMinimalistic } from "@/lib/icons";
 import { TagPicker } from "@/components/TagPicker";
 import type { TagView } from "@/lib/tags";
@@ -35,6 +35,11 @@ export function ItemCard({
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
+  // Édition inline du nom + quantité (clic sur le libellé).
+  const [renaming, setRenaming] = useState(false);
+  const [editLabel, setEditLabel] = useState(item.label);
+  const [editQty, setEditQty] = useState(item.quantity);
+  const labelInputRef = useRef<HTMLInputElement>(null);
   // Coche affichée localement avant le collapse (feedback « validé » de 0,5 s).
   const [justChecked, setJustChecked] = useState(false);
   // Animation d'entrée : démarre replié/fondu puis se déploie au montage
@@ -75,6 +80,25 @@ export function ItemCard({
   function handleDelete() {
     collapseThen(() => call(deleteItem, { itemId: item.id }));
   }
+
+  function openRename() {
+    setEditLabel(item.label);
+    setEditQty(item.quantity);
+    setRenaming(true);
+  }
+
+  function saveRename() {
+    const label = editLabel.trim();
+    if (!label) return;
+    setRenaming(false);
+    if (label === item.label && editQty === item.quantity) return; // rien changé
+    call(updateItem, { itemId: item.id, label, quantity: String(editQty) });
+  }
+
+  // Focus + sélection du champ nom à l'ouverture de l'édition.
+  useEffect(() => {
+    if (renaming) { labelInputRef.current?.focus(); labelInputRef.current?.select(); }
+  }, [renaming]);
 
   function toggleBought() {
     if (collapse || justChecked) return; // anti double-clic pendant l'anim
@@ -147,16 +171,53 @@ export function ItemCard({
         >
           {showBought && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
         </span>
-        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: showBought ? INK_DONE : INK, textDecoration: showBought ? "line-through" : "none", display: "flex", alignItems: "center", gap: 5 }}>
-          {item.label}
-          {item.quantity > 1 && (
-            <span style={{ fontSize: 12, fontWeight: 800, color: showBought ? INK_FAINT : ACCENT_TEXT, background: showBought ? "#F0EFEB" : ACCENT_SOFT, padding: "1px 6px", borderRadius: 8 }}>
-              ×{item.quantity}
-            </span>
-          )}
-        </span>
-        <TagPicker itemId={item.id} groupId={groupId} currentTagId={item.tagId} tags={tags} />
-        {item.addedByUserId === currentUserId && (
+        {renaming ? (
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+            <input
+              ref={labelInputRef}
+              value={editLabel}
+              onChange={e => setEditLabel(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") saveRename(); if (e.key === "Escape") setRenaming(false); }}
+              style={{
+                flex: 1, minWidth: 0, padding: "6px 10px", borderRadius: 10,
+                border: `1.5px solid ${ACCENT}`, background: "#fff",
+                color: INK, fontSize: 16, fontWeight: 600, fontFamily: "inherit", outline: "none",
+              }}
+            />
+            <div style={{ display: "flex", alignItems: "center", borderRadius: 10, border: `1.5px solid ${HAIRLINE}`, background: "#fff", overflow: "hidden", flexShrink: 0 }}>
+              <button onClick={() => setEditQty(q => Math.max(1, q - 1))} style={{ padding: "4px 9px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700, fontSize: 15, lineHeight: 1 }}>−</button>
+              <span style={{ minWidth: 22, textAlign: "center", fontSize: 13, fontWeight: 800, color: ACCENT_TEXT }}>×{editQty}</span>
+              <button onClick={() => setEditQty(q => Math.min(99, q + 1))} style={{ padding: "4px 9px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700, fontSize: 15, lineHeight: 1 }}>+</button>
+            </div>
+            <button
+              onClick={saveRename}
+              aria-label="Enregistrer"
+              style={{ flexShrink: 0, width: 34, height: 34, borderRadius: 10, border: "none", background: ACCENT, color: "#fff", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+            </button>
+            <button
+              onClick={() => setRenaming(false)}
+              aria-label="Annuler"
+              style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: INK_FAINT, fontSize: 18, lineHeight: 1, padding: "4px 4px" }}
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <span
+            onClick={openRename}
+            style={{ flex: 1, cursor: "pointer", fontSize: 16, fontWeight: 600, color: showBought ? INK_DONE : INK, textDecoration: showBought ? "line-through" : "none", display: "flex", alignItems: "center", gap: 5 }}>
+            {item.label}
+            {item.quantity > 1 && (
+              <span style={{ fontSize: 12, fontWeight: 800, color: showBought ? INK_FAINT : ACCENT_TEXT, background: showBought ? "#F0EFEB" : ACCENT_SOFT, padding: "1px 6px", borderRadius: 8 }}>
+                ×{item.quantity}
+              </span>
+            )}
+          </span>
+        )}
+        {!renaming && <TagPicker itemId={item.id} groupId={groupId} currentTagId={item.tagId} tags={tags} />}
+        {!renaming && item.addedByUserId === currentUserId && (
           confirmDel ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
               <button

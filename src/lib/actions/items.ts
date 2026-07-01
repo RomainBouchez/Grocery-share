@@ -107,6 +107,20 @@ export async function setParticipation(formData: FormData): Promise<void> {
   revalidatePath(`/groups/${item.list.groupId}`);
 }
 
+/** Modifie le nom et/ou la quantité d'un article (tout membre du groupe). */
+export async function updateItem(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const itemId = String(formData.get("itemId") ?? "");
+  const label = String(formData.get("label") ?? "").trim();
+  const quantity = Math.max(1, Math.min(99, parseInt(String(formData.get("quantity") ?? "1"), 10) || 1));
+
+  if (!label) return;
+
+  const item = await loadItemAndAuthorize(user.id, itemId);
+  await prisma.listItem.update({ where: { id: itemId }, data: { label, quantity } });
+  revalidatePath(`/groups/${item.list.groupId}`);
+}
+
 /** Change le statut d'un article (pending -> bought -> ...). */
 export async function setItemStatus(formData: FormData): Promise<void> {
   const user = await requireUser();
