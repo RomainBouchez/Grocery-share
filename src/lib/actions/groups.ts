@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { generateInviteCode } from "@/lib/utils";
@@ -20,7 +21,7 @@ export async function createGroup(_prev: ActionResult, formData: FormData): Prom
   const color = cleanColor(String(formData.get("color") ?? ""));
   const icon = cleanIcon(String(formData.get("icon") ?? ""));
 
-  if (!name) return { error: "Donne un nom au groupe." };
+  if (!name) return { error: (await getTranslations("group.errors"))("nameRequired") };
 
   // Génère un code d'invitation unique.
   let inviteCode = generateInviteCode();
@@ -68,11 +69,12 @@ export async function updateGroupAppearance(formData: FormData): Promise<void> {
 export async function joinGroup(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   const user = await requireUser();
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
+  const t = await getTranslations("group.errors");
 
-  if (!code) return { error: "Saisis un code d'invitation." };
+  if (!code) return { error: t("codeRequired") };
 
   const group = await prisma.group.findUnique({ where: { inviteCode: code } });
-  if (!group) return { error: "Aucun groupe ne correspond à ce code." };
+  if (!group) return { error: t("noGroupForCode") };
 
   const existing = await prisma.groupMember.findUnique({
     where: { userId_groupId: { userId: user.id, groupId: group.id } },

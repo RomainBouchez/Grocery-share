@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { addItem } from "@/lib/actions/items";
 import type { TagView } from "@/lib/tags";
 import { tagIcon, tagBg } from "@/lib/tags";
@@ -18,6 +19,7 @@ export function AddItemForm({
   tags?: TagView[];
   productTagMap?: Record<string, string>;
 }) {
+  const tr = useTranslations();
   const [inputValue, setInputValue] = useState("");
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [tagSetByUser, setTagSetByUser] = useState(false);
@@ -80,7 +82,7 @@ export function AddItemForm({
           boxShadow: "0 8px 28px rgba(30,26,20,0.13)", overflow: "hidden", zIndex: 50,
         }}>
           <div style={{ padding: "6px 14px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: INK_FAINT }}>
-            Historique
+            {tr("item.history")}
           </div>
           {filteredSuggestions.map((s, i) => {
             const memTagId = productTagMap[normalizeLoose(s)];
@@ -141,7 +143,7 @@ export function AddItemForm({
                   color: INK_FAINT, fontFamily: "inherit",
                 }}
               >
-                ✕ Retirer
+                {tr("tag.remove")}
               </button>
             )}
             {tags.map(tag => {
@@ -178,7 +180,7 @@ export function AddItemForm({
             onChange={e => { setInputValue(e.target.value); applyAutoTag(e.target.value); setShowSuggestions(true); setShowTagPicker(false); }}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => { suggestBlurTimer.current = setTimeout(() => setShowSuggestions(false), 150); }}
-            placeholder="Ajouter un article…"
+            placeholder={tr("item.addPlaceholder")}
             autoComplete="off"
             style={{
               flex: 1, minWidth: 0,
@@ -192,7 +194,7 @@ export function AddItemForm({
           <button
             type="submit"
             disabled={isPending || !inputValue.trim()}
-            aria-label="Ajouter"
+            aria-label={tr("common.add")}
             style={{
               flexShrink: 0, width: 44, height: 44,
               borderRadius: 13, border: "1.5px solid rgba(0,0,0,0.06)",
@@ -233,7 +235,7 @@ export function AddItemForm({
                 );
               })()
             ) : (
-              <span style={{ fontSize: 12, fontWeight: 700, color: INK_FAINT }}>· Rayon</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: INK_FAINT }}>{tr("tag.aisleLabel")}</span>
             )}
           </button>
 

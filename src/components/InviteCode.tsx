@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { LinkRound, CheckCircle } from "@/lib/icons";
 import { btnPrimary, ACCENT_TEXT, ACCENT_SOFT, INK_MUTED, HAIRLINE } from "@/lib/ui";
 
 export function InviteCode({ code, variant = "pill" }: { code: string; variant?: "pill" | "primary" }) {
+  const tr = useTranslations("group");
   const [copied, setCopied] = useState(false);
 
   /** Copie compatible HTTP (Raspberry Pi) : clipboard API → execCommand → prompt. */
@@ -46,7 +48,7 @@ export function InviteCode({ code, variant = "pill" }: { code: string; variant?:
       setTimeout(() => setCopied(false), 1500);
     } else {
       // 3. Dernier recours : on montre le lien pour copie manuelle.
-      window.prompt("Copie ce lien d'invitation :", url);
+      window.prompt(tr("copyLinkPrompt"), url);
     }
   }
 
@@ -56,7 +58,7 @@ export function InviteCode({ code, variant = "pill" }: { code: string; variant?:
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" />
         </svg>
-        {copied ? "Lien copié ✓" : "Inviter quelqu'un"}
+        {copied ? tr("linkCopied") : tr("inviteSomeone")}
       </button>
     );
   }
@@ -64,7 +66,7 @@ export function InviteCode({ code, variant = "pill" }: { code: string; variant?:
   return (
     <button
       onClick={copy}
-      title="Copier le lien d'invitation"
+      title={tr("copyLinkTitle")}
       style={{
         display: "inline-flex", alignItems: "center", gap: 6,
         padding: "6px 12px", borderRadius: 999, cursor: "pointer",
@@ -79,7 +81,7 @@ export function InviteCode({ code, variant = "pill" }: { code: string; variant?:
       {copied
         ? <CheckCircle weight="Bold" size={14} color="currentColor" />
         : <LinkRound weight="Linear" size={14} color="currentColor" />}
-      <span>{copied ? "Copié" : code}</span>
+      <span>{copied ? tr("copied") : code}</span>
     </button>
   );
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
@@ -32,7 +33,7 @@ export async function addItem(_prev: ActionResult, formData: FormData): Promise<
   const tagIdRaw = String(formData.get("tagId") ?? "").trim() || null;
   const quantity = Math.max(1, Math.min(99, parseInt(String(formData.get("quantity") ?? "1"), 10) || 1));
 
-  if (!label) return { error: "Indique le nom de l'article." };
+  if (!label) return { error: (await getTranslations("item.errors"))("labelRequired") };
 
   const list = await getActiveListForGroup(user.id, groupId);
 

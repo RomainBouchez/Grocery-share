@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { AVATAR_COLORS, tintForColor, pastille, INK_FAINT, INK, INK_MUTED, ACCENT, HAIRLINE } from "@/lib/ui";
 import { GROUP_ICONS, GroupIcon } from "@/lib/groupIcons";
 
@@ -21,6 +22,7 @@ export function GroupCustomizer({
   expenseSharingEnabled?: boolean;
   onToggleExpenseSharing?: (next: boolean) => void;
 }) {
+  const tr = useTranslations("group");
   const t = tintForColor(color);
 
   return (
@@ -28,12 +30,12 @@ export function GroupCustomizer({
       {/* Aperçu */}
       <span style={{ ...pastille(t, 16), alignSelf: "flex-start" }}>
         <GroupIcon name={icon} size={16} color={t.text} />
-        {name?.trim() || "Aperçu"}
+        {name?.trim() || tr("preview")}
       </span>
 
       {/* Couleurs */}
       <div>
-        <div style={subLabel}>Couleur</div>
+        <div style={subLabel}>{tr("color")}</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
           {AVATAR_COLORS.map(c => {
             const on = c === color;
@@ -42,7 +44,7 @@ export function GroupCustomizer({
                 key={c}
                 type="button"
                 onClick={() => onChange({ color: c, icon })}
-                aria-label={`Couleur ${c}`}
+                aria-label={tr("colorAria", { color: c })}
                 aria-pressed={on}
                 style={{
                   width: 30, height: 30, borderRadius: "50%", background: c, cursor: "pointer",
@@ -66,7 +68,7 @@ export function GroupCustomizer({
 
       {/* Icônes */}
       <div>
-        <div style={subLabel}>Icône</div>
+        <div style={subLabel}>{tr("icon")}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
           {GROUP_ICONS.map(ic => {
             const on = ic === icon;
@@ -75,7 +77,7 @@ export function GroupCustomizer({
                 key={ic}
                 type="button"
                 onClick={() => onChange({ color, icon: ic })}
-                aria-label={`Icône ${ic}`}
+                aria-label={tr("iconAria", { icon: ic })}
                 aria-pressed={on}
                 style={{
                   aspectRatio: "1", borderRadius: 13, cursor: "pointer", padding: 0,
@@ -96,19 +98,19 @@ export function GroupCustomizer({
       {/* Partage des dépenses (module Tricount) — owner uniquement */}
       {isOwner && onToggleExpenseSharing && (
         <div>
-          <div style={subLabel}>Partage des dépenses</div>
+          <div style={subLabel}>{tr("expenseSharing")}</div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>Balance du groupe</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>{tr("groupBalance")}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: INK_MUTED, marginTop: 2 }}>
-                Calcule qui doit quoi à partir des tickets.
+                {tr("expenseSharingDesc")}
               </div>
             </div>
             <button
               type="button"
               role="switch"
               aria-checked={expenseSharingEnabled}
-              aria-label="Activer le partage des dépenses"
+              aria-label={tr("toggleExpenseSharing")}
               onClick={() => onToggleExpenseSharing(!expenseSharingEnabled)}
               style={{
                 flexShrink: 0, width: 52, height: 30, borderRadius: 999, border: "none",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ItemCard, type ItemView, type MemberView } from "@/components/ItemCard";
 import { RayonGroup } from "@/components/RayonGroup";
 import { tagIcon, tagBg, type TagView } from "@/lib/tags";
@@ -25,6 +26,7 @@ export function PendingSections({
   groupId: string;
   tags: TagView[];
 }) {
+  const tr = useTranslations("tag");
   const [entries, setEntries] = useState<Entry[]>(() =>
     groups.map(g => ({ key: keyOf(g), tag: g.tag, items: g.items, exiting: false })),
   );
@@ -94,7 +96,7 @@ export function PendingSections({
                 </>
               ) : (
                 <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.03em", textTransform: "uppercase", color: INK_FAINT }}>
-                  Sans rayon
+                  {tr("noAisleHeader")}
                 </span>
               )}
               {!e.exiting && <span style={{ fontSize: 12, fontWeight: 700, color: INK_FAINT }}>· {e.items.length}</span>}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -20,6 +21,7 @@ export default async function JoinByLinkPage({
   const group = await prisma.group.findUnique({ where: { inviteCode: normalized } });
 
   if (!group) {
+    const t = await getTranslations("group");
     return (
       <main style={{
         fontFamily: FF, WebkitFontSmoothing: "antialiased",
@@ -35,12 +37,15 @@ export default async function JoinByLinkPage({
           }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🤔</div>
             <h1 style={{ margin: "0 0 8px", fontSize: 21, fontWeight: 900, letterSpacing: "-0.03em", color: "#1B1A16" }}>
-              Invitation introuvable
+              {t("inviteNotFound")}
             </h1>
             <p style={{ margin: 0, fontSize: 14, fontWeight: 500, lineHeight: 1.5, color: "#807C72" }}>
-              Le code{" "}
-              <span style={{ fontFamily: "ui-monospace, monospace", fontWeight: 800, color: "#1B1A16", letterSpacing: "0.05em" }}>{normalized}</span>
-              {" "}ne correspond à aucun groupe.
+              {t.rich("inviteNotFoundDesc", {
+                value: normalized,
+                code: (chunks) => (
+                  <span style={{ fontFamily: "ui-monospace, monospace", fontWeight: 800, color: "#1B1A16", letterSpacing: "0.05em" }}>{chunks}</span>
+                ),
+              })}
             </p>
             <Link href="/" style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -49,7 +54,7 @@ export default async function JoinByLinkPage({
               border: "1.5px solid rgba(0,0,0,0.06)",
               boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 10px 22px rgba(47,179,106,0.3)",
             }}>
-              Retour à l&apos;accueil
+              {t("backHome")}
             </Link>
           </div>
         </div>

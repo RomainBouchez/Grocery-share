@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useLayoutEffect, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { createPortal } from "react-dom";
 import { setItemTag, createTag, deleteTag, renameTag } from "@/lib/actions/tags";
 import { tagIcon, tagBg, pickNewTagColor, TAG_ICON, type TagView } from "@/lib/tags";
@@ -18,6 +19,7 @@ export function TagPicker({
   currentTagId?: string | null;
   tags: TagView[];
 }) {
+  const tr = useTranslations();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<PopoverPos>({ top: 0, right: 0 });
   const orientRef = useRef<"down" | "up">("down");
@@ -221,7 +223,7 @@ export function TagPicker({
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Rechercher ou créer…"
+        placeholder={tr("tag.searchOrCreate")}
         style={{
           width: "100%", boxSizing: "border-box", padding: "8px 10px",
           borderRadius: 10, border: `1.5px solid ${HAIRLINE}`, background: "#F5F5F5",
@@ -232,7 +234,7 @@ export function TagPicker({
 
       {current && (
         <button type="button" onClick={() => apply(null)} style={rowStyle(INK_MUTED)}>
-          ✕ Retirer le rayon
+          {tr("tag.removeAisle")}
         </button>
       )}
 
@@ -290,12 +292,12 @@ export function TagPicker({
                 <button type="button"
                   onClick={() => { setRenamingId(t.id); setRenameValue(t.name); }}
                   style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: `1.5px solid ${HAIRLINE}`, background: "#fff", fontSize: 12, fontWeight: 700, color: INK_MUTED, cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                  <span style={{ display: "inline-block", transform: "rotate(45deg)" }}>✏</span> Modifier
+                  <span style={{ display: "inline-block", transform: "rotate(45deg)" }}>✏</span> {tr("tag.edit")}
                 </button>
                 <button type="button"
                   onClick={() => doDelete(t.id)}
                   style={{ flex: 1, padding: "7px 0", borderRadius: 9, border: "none", background: "#FFEDEB", fontSize: 12, fontWeight: 700, color: "#E8503A", cursor: "pointer", fontFamily: FONT }}>
-                  🗑 Supprimer
+                  🗑 {tr("common.delete")}
                 </button>
               </div>
             </div>
@@ -333,7 +335,7 @@ export function TagPicker({
       {q && !exact && (
         <div style={{ borderTop: filtered.length > 0 ? `1px solid ${HAIRLINE}` : "none", marginTop: filtered.length > 0 ? 4 : 0, paddingTop: 6 }}>
           <div style={{ padding: "0 8px 6px", fontSize: 12, fontWeight: 700, color: INK_MUTED }}>
-            Créer «&nbsp;<span style={{ color: INK }}>{query.trim()}</span>&nbsp;»
+            {tr("tag.create")} «&nbsp;<span style={{ color: INK }}>{query.trim()}</span>&nbsp;»
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5, padding: "0 6px 4px" }}>
             {Object.entries(TAG_ICON).map(([key, Icon]) => (
@@ -358,7 +360,7 @@ export function TagPicker({
       )}
 
       {filtered.length === 0 && !q && (
-        <div style={{ padding: "8px 10px", fontSize: 12, color: INK_FAINT }}>Aucun rayon</div>
+        <div style={{ padding: "8px 10px", fontSize: 12, color: INK_FAINT }}>{tr("tag.noAisle")}</div>
       )}
     </div>,
     document.body
@@ -370,7 +372,7 @@ export function TagPicker({
         ref={triggerRef}
         type="button"
         onClick={() => open ? setOpen(false) : openPopover()}
-        aria-label={current ? `Rayon : ${current.name}` : "Choisir un rayon"}
+        aria-label={current ? tr("tag.aisleAria", { name: current.name }) : tr("tag.chooseAisle")}
         style={{
           display: "inline-flex", alignItems: "center", gap: 5,
           padding: current ? "4px 9px 4px 7px" : "4px 9px",
@@ -388,7 +390,7 @@ export function TagPicker({
             {current.name}
           </>
         ) : (
-          "+ Rayon"
+          tr("tag.addAisle")
         )}
       </button>
       {popover}

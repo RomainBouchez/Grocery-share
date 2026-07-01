@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useLayoutEffect, useEffect, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { updateGroupAppearance, toggleExpenseSharing } from "@/lib/actions/groups";
 import { GroupCustomizer } from "./GroupCustomizer";
 import { GroupIcon, DEFAULT_GROUP_ICON } from "@/lib/groupIcons";
@@ -28,6 +29,7 @@ export function GroupAppearance({
   const [, startTransition] = useTransition();
   const wrapRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tr = useTranslations("group");
   const t = tintForColor(c);
 
   useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
@@ -99,7 +101,7 @@ export function GroupAppearance({
         <button
           onClick={toggle}
           aria-expanded={open}
-          aria-label="Personnaliser le groupe"
+          aria-label={tr("customize")}
           style={{ ...pastille(t, 20), border: "none", cursor: "pointer", fontFamily: "inherit", paddingRight: 13 }}
         >
           <GroupIcon name={i} weight="Bold" size={21} color={t.text} />

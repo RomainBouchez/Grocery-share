@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ItemCard, type ItemView } from "@/components/ItemCard";
@@ -102,6 +103,7 @@ export default async function GroupPage({
   const bought = itemViews.filter(i => i.status === "bought");
   const pct = itemViews.length > 0 ? Math.round((bought.length / itemViews.length) * 100) : 0;
   const t = tintForColor(colorFor(group.id, group.color));
+  const tr = await getTranslations();
 
   // Regroupe les articles « à acheter » par rayon (ordre des tags, sans-rayon en dernier).
   const tagById = new Map(tags.map(tg => [tg.id, tg]));
@@ -131,7 +133,7 @@ export default async function GroupPage({
         {/* Header */}
         <div style={{ padding: "44px 18px 0", marginBottom: 18 }}>
           <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: INK_MUTED, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 16 }}>
-            ‹ Groupes
+            ‹ {tr("nav.groups")}
           </Link>
           <GroupAppearance groupId={groupId} name={group.name} color={colorFor(group.id, group.color)} icon={group.icon} isOwner={membership.role === "owner"} expenseSharingEnabled={group.expenseSharingEnabled}>
             <div style={{ display: "flex", alignItems: "center" }}>
@@ -154,8 +156,8 @@ export default async function GroupPage({
           {itemViews.length > 0 && (
             <div style={{ marginTop: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9 }}>
-                <span style={{ fontSize: 12.5, fontWeight: 700, color: INK_MUTED }}>{pending.length} à acheter</span>
-                <span style={{ fontSize: 12.5, fontWeight: 700, color: t.text }}>{bought.length} / {itemViews.length} fait</span>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: INK_MUTED }}>{tr("group.toBuy", { count: pending.length })}</span>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: t.text }}>{tr("group.doneRatio", { done: bought.length, total: itemViews.length })}</span>
               </div>
               <div style={{ height: 9, borderRadius: 999, background: t.tint, overflow: "hidden" }}>
                 <div style={{ width: `${pct}%`, height: "100%", borderRadius: 999, background: t.text, boxShadow: "inset 0 -1.5px 0 rgba(0,0,0,0.1)", transition: "width .4s" }} />
@@ -172,7 +174,7 @@ export default async function GroupPage({
               fontSize: 13.5, fontWeight: 700, color: "#7A5A00",
             }}>
               <span style={{ fontSize: 18 }}>🛒</span>
-              <span>{shoppingByOther.split(" ")[0]} fait les courses</span>
+              <span>{tr("group.shopping", { name: shoppingByOther.split(" ")[0] })}</span>
             </div>
           )}
 
@@ -190,7 +192,7 @@ export default async function GroupPage({
               boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
             }}>
               <Cart3 weight="Bold" size={18} color="#fff" />
-              J&apos;ai fait les courses
+              {tr("group.iDidShopping")}
             </Link>
           )}
 
@@ -205,7 +207,7 @@ export default async function GroupPage({
               boxShadow: "0 0 0 1px rgba(30,26,20,0.04), 0 6px 14px rgba(30,26,20,0.07)",
             }}>
               <Scale weight="Bold" size={18} color={INK_STRONG} />
-              Équilibre des comptes
+              {tr("group.balances")}
             </Link>
           )}
         </div>
@@ -214,9 +216,9 @@ export default async function GroupPage({
         <div style={{ padding: "8px 18px 0" }}>
           {pending.length === 0 && bought.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 20px", background: "#fff", borderRadius: 22, border: "2px dashed rgba(28,25,20,0.14)" }}>
-              <p style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 800, color: INK_STRONG }}>Liste vide</p>
+              <p style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 800, color: INK_STRONG }}>{tr("home.emptyList")}</p>
               <p style={{ margin: "0 0 18px", fontSize: 13, fontWeight: 600, color: INK_MUTED }}>
-                Ajoute un article ci-dessous{group.members.length <= 1 ? " — ou invite quelqu'un d'abord." : "."}
+                {group.members.length <= 1 ? tr("group.emptyHintInvite") : tr("group.emptyHint")}
               </p>
               {group.members.length <= 1 && (
                 <div style={{ maxWidth: 280, margin: "0 auto" }}>
@@ -231,7 +233,7 @@ export default async function GroupPage({
               {bought.length > 0 && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: INK_FAINT, margin: "20px 4px 12px", paddingTop: 14, borderTop: `1.5px solid ${HAIRLINE}` }}>
-                    Dans le panier ({bought.length})
+                    {tr("group.inCart", { count: bought.length })}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {bought.map(item => (

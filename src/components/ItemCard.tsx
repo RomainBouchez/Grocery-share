@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef, useEffect, useLayoutEffect, type CSSProperties } from "react";
+import { useTranslations } from "next-intl";
 import { setParticipation, setItemStatus, deleteItem, updateItem } from "@/lib/actions/items";
 import { TrashBinMinimalistic } from "@/lib/icons";
 import { TagPicker } from "@/components/TagPicker";
@@ -32,6 +33,7 @@ export function ItemCard({
    *  permet de collapser le header de rayon en synchro si c'est le dernier. */
   onLeaving?: (itemId: string) => void;
 }) {
+  const tr = useTranslations();
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
@@ -191,14 +193,14 @@ export function ItemCard({
             </div>
             <button
               onClick={saveRename}
-              aria-label="Enregistrer"
+              aria-label={tr("common.save")}
               style={{ flexShrink: 0, width: 34, height: 34, borderRadius: 10, border: "none", background: ACCENT, color: "#fff", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
             </button>
             <button
               onClick={() => setRenaming(false)}
-              aria-label="Annuler"
+              aria-label={tr("common.cancel")}
               style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: INK_FAINT, fontSize: 18, lineHeight: 1, padding: "4px 4px" }}
             >
               ×
@@ -222,14 +224,14 @@ export function ItemCard({
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
               <button
                 onClick={handleDelete}
-                aria-label={`Confirmer la suppression de ${item.label}`}
+                aria-label={tr("item.confirmDeleteAria", { label: item.label })}
                 style={{ ...btnDanger, minHeight: 34, padding: "6px 14px", fontSize: 12, display: "inline-flex", alignItems: "center" }}
               >
                 <TrashBinMinimalistic weight="Bold" size={16} color={DANGER} />
               </button>
               <button
                 onClick={() => setConfirmDel(false)}
-                aria-label="Annuler"
+                aria-label={tr("common.cancel")}
                 style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: INK_FAINT, fontSize: 18, lineHeight: 1, padding: "4px 6px" }}
               >
                 ×
@@ -238,7 +240,7 @@ export function ItemCard({
           ) : (
             <button
               onClick={() => setConfirmDel(true)}
-              aria-label={`Supprimer ${item.label}`}
+              aria-label={tr("item.deleteAria", { label: item.label })}
               style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: INK_FAINT, fontSize: 18, lineHeight: 1, padding: "4px 6px" }}
             >
               ×
@@ -260,13 +262,13 @@ export function ItemCard({
           );
         })}
         {item.participants.length === 0 && (
-          <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>personne pour l&apos;instant</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>{tr("item.noParticipants")}</span>
         )}
         <button
           onClick={() => setEditing(v => !v)}
           style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 800, color: ACCENT_TEXT, fontFamily: "inherit", padding: "2px 4px" }}
         >
-          {editing ? "Fermer" : "Qui participe ?"}
+          {editing ? tr("common.close") : tr("item.whoParticipates")}
         </button>
       </div>
 
@@ -282,7 +284,7 @@ export function ItemCard({
                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                   <span style={avatarStyle(c, 26)}>{initials(m.name)}</span>
                   <span style={{ fontSize: 14, fontWeight: 600, color: INK, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {m.name}{isMe && <span style={{ color: INK_FAINT }}> (toi)</span>}
+                    {m.name}{isMe && <span style={{ color: INK_FAINT }}> ({tr("item.you")})</span>}
                   </span>
                 </div>
                 {parts > 0 ? (
@@ -299,7 +301,7 @@ export function ItemCard({
                     onClick={() => setPartsFor(m.userId, 1)}
                     style={{ padding: "5px 12px", borderRadius: 999, border: `1.5px solid rgba(47,179,106,0.4)`, background: ACCENT_SOFT, color: ACCENT, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}
                   >
-                    + Ajouter
+                    {tr("item.addShare")}
                   </button>
                 )}
               </div>
