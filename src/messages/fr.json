@@ -144,6 +144,41 @@
       "copyright": "© {year} SharedCart"
     }
   },
+  "nav": {
+    "groups": "Groupes",
+    "lists": "Listes",
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "signOut": "Se déconnecter",
+    "signOutConfirm": "Se déconnecter de SharedCart ?"
+  },
+  "units": {
+    "items": "{count, plural, one {# article} other {# articles}}",
+    "members": "{count, plural, one {# membre} other {# membres}}"
+  },
+  "home": {
+    "greeting": "Bonjour {name}.",
+    "toBuyToday": "{count, plural, one {# article à acheter aujourd'hui} other {# articles à acheter aujourd'hui}}",
+    "allDone": "Tout est à jour 🎉",
+    "profileAria": "Profil et réglages",
+    "active": "actif",
+    "emptyListAddFirst": "Liste vide — ajoutez le premier article",
+    "noGroups": "Aucun groupe — crée-en un ou rejoins celui d'un ami.",
+    "itemsDone": "{count, plural, one {# article} other {# articles}} · {pct}% fait",
+    "otherGroups": "Tes autres groupes",
+    "emptyList": "Liste vide",
+    "newGroup": "Nouveau groupe",
+    "join": "Rejoindre",
+    "groupNamePlaceholder": "Nom du groupe (Coloc, Famille…)",
+    "create": "Créer",
+    "invitePlaceholder": "Code d'invitation (ex: K7P2QX)",
+    "joinWithCode": "Rejoindre avec ce code"
+  },
+  "listsPage": {
+    "summary": "{listsCount, plural, one {# liste partagée} other {# listes partagées}} · {pending, plural, one {# article à acheter} other {# articles à acheter}}",
+    "open": "Ouvrir",
+    "empty": "Aucune liste — rejoins ou crée un groupe depuis l'onglet Groupes."
+  },
   "profile": {
     "title": "Profil",
     "language": "Langue",

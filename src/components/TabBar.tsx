@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Home, ChecklistMinimalistic, UserRounded } from "@/lib/icons";
 import { ACCENT, INK_FAINT, FONT } from "@/lib/ui";
 
@@ -15,6 +16,7 @@ function label(active: boolean): React.CSSProperties {
 }
 
 export function TabBar() {
+  const t = useTranslations("nav");
   const p = usePathname();
   const onGroups = p === "/";
   const onListes = p === "/listes" || p.startsWith("/groups");
@@ -33,19 +35,19 @@ export function TabBar() {
       display: "flex", justifyContent: "space-between", alignItems: "center",
       fontFamily: FONT,
     }}>
-      <Link href="/" style={tab} aria-label="Groupes">
+      <Link href="/" style={tab} aria-label={t("groups")}>
         <Home weight={onGroups ? "Bold" : "Linear"} size={24} color={onGroups ? ACCENT : INK_FAINT} />
-        <span style={label(onGroups)}>Groupes</span>
+        <span style={label(onGroups)}>{t("groups")}</span>
       </Link>
 
-      <Link href="/listes" style={tab} aria-label="Listes">
+      <Link href="/listes" style={tab} aria-label={t("lists")}>
         <ChecklistMinimalistic weight={onListes ? "Bold" : "Linear"} size={24} color={onListes ? ACCENT : INK_FAINT} />
-        <span style={label(onListes)}>Listes</span>
+        <span style={label(onListes)}>{t("lists")}</span>
       </Link>
 
-      <Link href="/profile" style={tab} aria-label="Profil">
+      <Link href="/profile" style={tab} aria-label={t("profile")}>
         <UserRounded weight={onProfile ? "Bold" : "Linear"} size={24} color={onProfile ? ACCENT : INK_FAINT} />
-        <span style={label(onProfile)}>Profil</span>
+        <span style={label(onProfile)}>{t("profile")}</span>
       </Link>
     </div>
   );

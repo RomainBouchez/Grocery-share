@@ -144,6 +144,41 @@
       "copyright": "© {year} SharedCart"
     }
   },
+  "nav": {
+    "groups": "Groups",
+    "lists": "Lists",
+    "profile": "Profile",
+    "logout": "Log out",
+    "signOut": "Log out",
+    "signOutConfirm": "Log out of SharedCart?"
+  },
+  "units": {
+    "items": "{count, plural, one {# item} other {# items}}",
+    "members": "{count, plural, one {# member} other {# members}}"
+  },
+  "home": {
+    "greeting": "Hello {name}.",
+    "toBuyToday": "{count, plural, one {# item to buy today} other {# items to buy today}}",
+    "allDone": "All caught up 🎉",
+    "profileAria": "Profile and settings",
+    "active": "active",
+    "emptyListAddFirst": "Empty list — add the first item",
+    "noGroups": "No group — create one or join a friend's.",
+    "itemsDone": "{count, plural, one {# item} other {# items}} · {pct}% done",
+    "otherGroups": "Your other groups",
+    "emptyList": "Empty list",
+    "newGroup": "New group",
+    "join": "Join",
+    "groupNamePlaceholder": "Group name (Roommates, Family…)",
+    "create": "Create",
+    "invitePlaceholder": "Invite code (e.g. K7P2QX)",
+    "joinWithCode": "Join with this code"
+  },
+  "listsPage": {
+    "summary": "{listsCount, plural, one {# shared list} other {# shared lists}} · {pending, plural, one {# item to buy} other {# items to buy}}",
+    "open": "Open",
+    "empty": "No list — join or create a group from the Groups tab."
+  },
   "profile": {
     "title": "Profile",
     "language": "Language",

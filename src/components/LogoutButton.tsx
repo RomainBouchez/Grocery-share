@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { logout } from "@/lib/actions/auth";
 import { btnSecondary, btnDanger } from "@/lib/ui";
 
 export function LogoutButton() {
+  const t = useTranslations();
   const [confirm, setConfirm] = useState(false);
 
   if (!confirm) {
     return (
       <button onClick={() => setConfirm(true)} style={{ ...btnSecondary, width: "100%" }}>
-        Se déconnecter
+        {t("nav.signOut")}
       </button>
     );
   }
@@ -24,7 +26,7 @@ export function LogoutButton() {
       `}</style>
 
       <p data-lo style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#807C72", textAlign: "center", animation: "lo-rise .18s ease both" }}>
-        Se déconnecter de SharedCart ?
+        {t("nav.signOutConfirm")}
       </p>
 
       <form action={logout} style={{ display: "flex", gap: 10 }}>
@@ -34,14 +36,14 @@ export function LogoutButton() {
           onClick={() => setConfirm(false)}
           style={{ ...btnSecondary, flex: 1, animation: "lo-rise .24s cubic-bezier(.34,1.56,.64,1) both" }}
         >
-          Annuler
+          {t("common.cancel")}
         </button>
         <button
           type="submit"
           data-lo
           style={{ ...btnDanger, flex: 1, justifyContent: "center", minHeight: 52, animation: "lo-rise .24s cubic-bezier(.34,1.56,.64,1) .04s both, lo-pulse 1.1s ease-out .24s 1" }}
         >
-          Confirmer
+          {t("common.confirm")}
         </button>
       </form>
     </div>

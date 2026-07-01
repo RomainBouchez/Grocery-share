@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
@@ -42,12 +43,14 @@ export default async function ListesPage() {
     return s + (list?.items.length ?? 0);
   }, 0);
 
+  const tr = await getTranslations();
+
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG, position: "relative" }}>
       <div style={{ position: "relative", zIndex: 1, padding: "56px 18px 130px" }}>
-        <h2 style={{ margin: "0 0 4px", fontSize: 28, fontWeight: 900, letterSpacing: "-0.035em" }}>Listes</h2>
+        <h2 style={{ margin: "0 0 4px", fontSize: 28, fontWeight: 900, letterSpacing: "-0.035em" }}>{tr("nav.lists")}</h2>
         <p style={{ margin: "0 0 22px", fontSize: 13, fontWeight: 600, color: INK_FAINT }}>
-          {memberships.length} liste{memberships.length !== 1 ? "s" : ""} partagée{memberships.length !== 1 ? "s" : ""} · {totalPending} article{totalPending !== 1 ? "s" : ""} à acheter
+          {tr("listsPage.summary", { listsCount: memberships.length, pending: totalPending })}
         </p>
 
         {memberships.map(({ group }, idx) => {
@@ -81,9 +84,9 @@ export default async function ListesPage() {
                   </div>
                   {preview && <div style={{ fontSize: 14, fontWeight: 600, color: INK_FAINT, marginBottom: 14 }}>{preview}…</div>}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: INK_FAINT }}>{totalCount} article{totalCount !== 1 ? "s" : ""} · {group.members.length} membre{group.members.length !== 1 ? "s" : ""}</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: INK_FAINT }}>{tr("units.items", { count: totalCount })} · {tr("units.members", { count: group.members.length })}</span>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 800, color: ACCENT }}>
-                      Ouvrir
+                      {tr("listsPage.open")}
                       <ArrowRight weight="Linear" size={15} color={ACCENT} />
                     </span>
                   </div>
@@ -103,7 +106,7 @@ export default async function ListesPage() {
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15.5, fontWeight: 800, color: INK_STRONG }}>{group.name}</div>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: INK_FAINT }}>{totalCount} article{totalCount !== 1 ? "s" : ""} · {group.members.length} membre{group.members.length !== 1 ? "s" : ""}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: INK_FAINT }}>{tr("units.items", { count: totalCount })} · {tr("units.members", { count: group.members.length })}</div>
                 </div>
                 <div style={{ display: "flex" }}>
                   {topMembers.slice(0, 2).map((m, i) => (
@@ -117,7 +120,7 @@ export default async function ListesPage() {
 
         {memberships.length === 0 && (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <p style={{ fontSize: 14, fontWeight: 600, color: INK_MUTED }}>Aucune liste — rejoins ou crée un groupe depuis l&apos;onglet Groupes.</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: INK_MUTED }}>{tr("listsPage.empty")}</p>
           </div>
         )}
       </div>

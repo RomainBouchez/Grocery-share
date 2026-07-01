@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { setItemStatus } from "@/lib/actions/items";
 import { createGroup, joinGroup, type ActionResult } from "@/lib/actions/groups";
 import { useActionState } from "react";
@@ -35,6 +36,7 @@ export function HomeDashboard({
   featured: GroupData | null;
   others: GroupData[];
 }) {
+  const tr = useTranslations();
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
   const [showCreate, setShowCreate] = useState(false);
@@ -68,12 +70,12 @@ export function HomeDashboard({
         {/* Header row */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 52, marginBottom: 22 }}>
           <div>
-            <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.035em", color: INK_STRONG }}>Bonjour {userName.split(" ")[0]}.</div>
+            <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.035em", color: INK_STRONG }}>{tr("home.greeting", { name: userName.split(" ")[0] })}</div>
             <div style={{ fontSize: 13, fontWeight: 600, color: INK_FAINT, marginTop: 3 }}>
-              {totalPending > 0 ? `${totalPending} article${totalPending > 1 ? "s" : ""} à acheter aujourd'hui` : "Tout est à jour 🎉"}
+              {totalPending > 0 ? tr("home.toBuyToday", { count: totalPending }) : tr("home.allDone")}
             </div>
           </div>
-          <Link href="/profile" aria-label="Profil et réglages" style={{
+          <Link href="/profile" aria-label={tr("home.profileAria")} style={{
             width: 42, height: 42, borderRadius: "50%", background: userColor, color: "#fff",
             border: "2.5px solid #fff", boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 6px 16px rgba(30,26,20,0.1)",
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, textDecoration: "none",
@@ -93,7 +95,7 @@ export function HomeDashboard({
                   {featured.name}
                 </span>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, background: ACCENT_SOFT, color: ACCENT }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENT }} />actif
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENT }} />{tr("home.active")}
                 </span>
               </div>
               <div style={{ display: "flex" }}>
@@ -107,7 +109,7 @@ export function HomeDashboard({
             </div>
 
             {featured.pendingItems.length === 0 ? (
-              <p style={{ fontSize: 14, fontWeight: 600, color: INK_FAINT, margin: "0 0 16px" }}>Liste vide — ajoutez le premier article</p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: INK_FAINT, margin: "0 0 16px" }}>{tr("home.emptyListAddFirst")}</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {featured.pendingItems.map(item => {
@@ -136,7 +138,7 @@ export function HomeDashboard({
             <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1.5px solid #F0ECE4" }}>
               <div style={{ marginBottom: 9 }}>
                 <span style={{ fontSize: 12.5, fontWeight: 700, color: INK_FAINT }}>
-                  {featured.totalItems} article{featured.totalItems !== 1 ? "s" : ""} · {Math.round((featured.boughtItems / Math.max(featured.totalItems, 1)) * 100)}% fait
+                  {tr("home.itemsDone", { count: featured.totalItems, pct: Math.round((featured.boughtItems / Math.max(featured.totalItems, 1)) * 100) })}
                 </span>
               </div>
               <div style={{ height: 9, borderRadius: 999, background: ACCENT_SOFT, overflow: "hidden" }}>
@@ -146,7 +148,7 @@ export function HomeDashboard({
           </Link>
         ) : (
           <div style={{ ...cardSm, padding: 24, marginBottom: 16, textAlign: "center" }}>
-            <p style={{ fontSize: 14, fontWeight: 600, color: INK_MUTED, margin: 0 }}>Aucun groupe — crée-en un ou rejoins celui d&apos;un ami.</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: INK_MUTED, margin: 0 }}>{tr("home.noGroups")}</p>
           </div>
         )}
 
@@ -154,7 +156,7 @@ export function HomeDashboard({
         {others.length > 0 && (
           <>
             <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: INK_FAINT, margin: "22px 4px 12px" }}>
-              Tes autres groupes
+              {tr("home.otherGroups")}
             </div>
             {others.map(g => {
               const t = tintForColor(g.color);
@@ -167,7 +169,7 @@ export function HomeDashboard({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 15.5, fontWeight: 800, color: INK_STRONG }}>{g.name}</div>
                       <div style={{ fontSize: 12.5, fontWeight: 600, color: INK_FAINT }}>
-                        {g.pendingItems.length > 0 ? `${g.pendingItems.length} article${g.pendingItems.length > 1 ? "s" : ""}` : "Liste vide"} · {g.memberCount} membre{g.memberCount > 1 ? "s" : ""}
+                        {g.pendingItems.length > 0 ? tr("units.items", { count: g.pendingItems.length }) : tr("home.emptyList")} · {tr("units.members", { count: g.memberCount })}
                       </div>
                     </div>
                     <div style={{ display: "flex" }}>
@@ -186,33 +188,33 @@ export function HomeDashboard({
         <div style={{ display: "flex", gap: 11, marginTop: 24 }}>
           <button onClick={() => { setShowCreate(v => !v); setShowJoin(false); }} style={BTN_ACCENT}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-            Nouveau groupe
+            {tr("home.newGroup")}
           </button>
           <button onClick={() => { setShowJoin(v => !v); setShowCreate(false); }} style={BTN_SOFT}>
-            Rejoindre
+            {tr("home.join")}
           </button>
         </div>
 
         {/* Nouveau groupe form */}
         {showCreate && (
           <form action={createAction} style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
-            <input name="name" value={gName} onChange={e => setGName(e.target.value)} placeholder="Nom du groupe (Coloc, Famille…)" style={input} autoFocus />
+            <input name="name" value={gName} onChange={e => setGName(e.target.value)} placeholder={tr("home.groupNamePlaceholder")} style={input} autoFocus />
             <input type="hidden" name="color" value={gColor} />
             <input type="hidden" name="icon" value={gIcon} />
             <div style={{ ...cardSm, padding: 16 }}>
               <GroupCustomizer name={gName} color={gColor} icon={gIcon} onChange={({ color, icon }) => { setGColor(color); setGIcon(icon); }} />
             </div>
             {createState?.error && <p style={{ fontSize: 13, fontWeight: 600, color: DANGER, margin: 0 }}>{createState.error}</p>}
-            <button type="submit" style={{ ...BTN_ACCENT, flex: "none" }}>Créer</button>
+            <button type="submit" style={{ ...BTN_ACCENT, flex: "none" }}>{tr("home.create")}</button>
           </form>
         )}
 
         {/* Rejoindre form */}
         {showJoin && (
           <form action={joinAction} style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-            <input name="code" placeholder="Code d'invitation (ex: K7P2QX)" autoCapitalize="characters" style={{ ...input, textTransform: "uppercase", letterSpacing: "0.08em" }} autoFocus />
+            <input name="code" placeholder={tr("home.invitePlaceholder")} autoCapitalize="characters" style={{ ...input, textTransform: "uppercase", letterSpacing: "0.08em" }} autoFocus />
             {joinState?.error && <p style={{ fontSize: 13, fontWeight: 600, color: DANGER, margin: 0 }}>{joinState.error}</p>}
-            <button type="submit" style={{ ...BTN_SOFT, width: "100%" }}>Rejoindre avec ce code</button>
+            <button type="submit" style={{ ...BTN_SOFT, width: "100%" }}>{tr("home.joinWithCode")}</button>
           </form>
         )}
       </div>
