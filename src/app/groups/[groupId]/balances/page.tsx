@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { computeGroupBalances } from "@/lib/balances";
@@ -30,16 +31,17 @@ export default async function BalancesPage({
 
   const { nets, suggestions, everyoneSettled } = await computeGroupBalances(groupId);
   const gColors = resolveGroupColors(user.id, user.color, nets.map(n => ({ id: n.userId, color: n.color })));
+  const t = await getTranslations();
 
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG, position: "relative" }}>
       <div style={{ position: "relative", zIndex: 1, padding: "44px 18px 40px", maxWidth: 560, margin: "0 auto" }}>
         <Link href={`/groups/${groupId}`} style={{ fontSize: 13, fontWeight: 700, color: INK_MUTED, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 18 }}>
-          ‹ Retour à la liste
+          {t("receipt.backToList")}
         </Link>
-        <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 900, letterSpacing: "-0.035em" }}>Équilibre des comptes</h1>
+        <h1 style={{ margin: "0 0 4px", fontSize: 26, fontWeight: 900, letterSpacing: "-0.035em" }}>{t("group.balances")}</h1>
         <p style={{ margin: "0 0 24px", fontSize: 13, fontWeight: 500, color: INK_MUTED, lineHeight: 1.5 }}>
-          Calculé à partir des tickets : qui a payé, qui partage chaque article et avec combien de parts.
+          {t("balances.intro")}
         </p>
 
         {/* Balance par membre */}
@@ -48,13 +50,13 @@ export default async function BalancesPage({
             const positive = n.net > 0.005;
             const negative = n.net < -0.005;
             const amountColor = positive ? ACCENT_TEXT : negative ? DANGER : INK_FAINT;
-            const sub = positive ? "on lui doit" : negative ? "doit" : "à jour";
+            const sub = positive ? t("balances.owedToThem") : negative ? t("balances.owes") : t("balances.settled");
             return (
               <div key={n.userId} style={{ display: "flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 16, border: `1.5px solid ${HAIRLINE}`, padding: "12px 14px" }}>
                 <span style={avatarStyle(gColors.get(n.userId) ?? colorFor(n.userId, n.color), 34)}>{initials(n.name)}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: INK, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {n.name}{n.userId === user.id && <span style={{ color: INK_FAINT }}> (toi)</span>}
+                    {n.name}{n.userId === user.id && <span style={{ color: INK_FAINT }}> ({t("item.you")})</span>}
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>{sub}</div>
                 </div>
@@ -68,13 +70,13 @@ export default async function BalancesPage({
 
         {/* Qui paie qui */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: INK_FAINT, margin: "0 4px 12px" }}>
-          Qui paie qui
+          {t("balances.whoPaysWho")}
         </div>
 
         {everyoneSettled || suggestions.length === 0 ? (
           <div style={{ textAlign: "center", padding: "32px 20px", background: "#fff", borderRadius: 22, border: "2px dashed rgba(28,25,20,0.14)" }}>
-            <p style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 800, color: INK_STRONG }}>Tout est équilibré 🎉</p>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: INK_MUTED }}>Personne ne doit rien à personne.</p>
+            <p style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 800, color: INK_STRONG }}>{t("balances.allSettled")}</p>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: INK_MUTED }}>{t("balances.nobodyOwes")}</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -83,9 +85,9 @@ export default async function BalancesPage({
                 <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <span style={{ ...avatarStyle(gColors.get(s.fromUserId) ?? colorFor(s.fromUserId), 26), fontSize: 10 }}>{initials(s.fromName)}</span>
                   <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>{s.fromName.split(" ")[0]}</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>doit</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>{t("balances.owesShort")}</span>
                   <span style={{ fontSize: 14, fontWeight: 900, color: INK_STRONG }}>{formatEuro(s.amount)}</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>à</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: INK_FAINT }}>{t("balances.toShort")}</span>
                   <span style={{ ...avatarStyle(gColors.get(s.toUserId) ?? colorFor(s.toUserId), 26), fontSize: 10 }}>{initials(s.toName)}</span>
                   <span style={{ fontSize: 14, fontWeight: 700, color: INK }}>{s.toName.split(" ")[0]}</span>
                 </div>
@@ -99,7 +101,7 @@ export default async function BalancesPage({
                     background: "#fff", border: `1.5px solid ${HAIRLINE}`, color: ACCENT_TEXT,
                     fontSize: 12.5, fontWeight: 800, fontFamily: "inherit", whiteSpace: "nowrap",
                   }}>
-                    Marquer remboursé
+                    {t("balances.markSettled")}
                   </button>
                 </form>
               </div>

@@ -242,6 +242,72 @@
       "noGroupForCode": "Aucun groupe ne correspond à ce code."
     }
   },
+  "push": {
+    "remindTitle": "Rappeler le groupe ?",
+    "remindDesc": "Tous les membres vont recevoir une notification pour compléter la liste avant que tu partes faire les courses.",
+    "letsGo": "C'est parti !",
+    "cancelShopping": "Annuler les courses",
+    "goShopping": "Je vais faire les courses",
+    "notif": {
+      "body": "{name} fait les courses (pour {group}) ! Remplissez la liste de courses avec ce dont vous avez besoin",
+      "fallbackGroup": "ton groupe"
+    }
+  },
+  "receipt": {
+    "backToList": "‹ Retour à la liste",
+    "intro": "Prends le ticket en photo — Claude en extrait les articles et les prix, puis on les rapproche de la liste.",
+    "ready": "Ticket prêt — appuie sur Analyser",
+    "takePhoto": "Prends le ticket en photo",
+    "orGallery": "ou sélectionne depuis la galerie",
+    "analyzing": "Analyse en cours…",
+    "analyze": "Analyser le ticket",
+    "foundInList": "Trouvés dans la liste ({count})",
+    "offListWho": "Hors liste — qui participe ?",
+    "confirmedTotal": "Total confirmé",
+    "listCount": "{selected}/{total} liste",
+    "extrasCount": "+{count} extras",
+    "seeSummary": "Voir le récap dépenses →",
+    "restart": "Recommencer",
+    "summaryTitle": "Récap des dépenses",
+    "whoPaid": "Qui a payé ?",
+    "advanced": "{name} a avancé",
+    "owes": "doit {amount}",
+    "to": "à {name}",
+    "payer": "(payeur)",
+    "myShare": "ma part {amount}",
+    "saving": "Enregistrement…",
+    "confirmShopping": "Valider les courses ✓",
+    "edit": "‹ Modifier",
+    "errors": {
+      "noPhoto": "Ajoute une photo du ticket.",
+      "notImage": "Le fichier doit être une image.",
+      "accessDenied": "Accès au groupe refusé.",
+      "analysisFailed": "Échec de l'analyse du ticket.",
+      "noItemsDetected": "Aucun article détecté sur le ticket."
+    }
+  },
+  "balances": {
+    "intro": "Calculé à partir des tickets : qui a payé, qui partage chaque article et avec combien de parts.",
+    "owedToThem": "on lui doit",
+    "owes": "doit",
+    "settled": "à jour",
+    "whoPaysWho": "Qui paie qui",
+    "allSettled": "Tout est équilibré 🎉",
+    "nobodyOwes": "Personne ne doit rien à personne.",
+    "owesShort": "doit",
+    "toShort": "à",
+    "markSettled": "Marquer remboursé"
+  },
+  "admin": {
+    "back": "← Retour",
+    "title": "Administration",
+    "subtitle": "Active ou désactive les comptes.",
+    "pendingCount": "{count} en attente.",
+    "pendingSection": "En attente d'activation ({count})",
+    "activeSection": "Comptes actifs ({count})",
+    "activate": "Activer",
+    "deactivate": "Désactiver"
+  },
   "profile": {
     "title": "Profil",
     "language": "Langue",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { scanReceipt, confirmReceipt, type ScanDraft, type DraftExtra } from "@/lib/actions/receipt";
 import { compressImage } from "@/lib/compressImage";
 import { formatEuro } from "@/lib/utils";
@@ -29,6 +30,7 @@ export function ReceiptScanner({
 }: {
   groupId: string; members: Member[]; currentUserId: string;
 }) {
+  const tr = useTranslations("receipt");
   const [draft, setDraft] = useState<ScanDraft | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
   const [phase, setPhase] = useState<0 | 1 | 2>(0);
@@ -138,13 +140,13 @@ export function ReceiptScanner({
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={preview} alt="" style={{ maxHeight: 220, maxWidth: "100%", borderRadius: 12, objectFit: "contain" }} />
-              <span style={{ fontSize: 13, fontWeight: 800, color: ACCENT_TEXT }}>Ticket prêt — appuie sur Analyser</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: ACCENT_TEXT }}>{tr("ready")}</span>
             </>
           ) : (
             <>
               <Camera weight="Linear" size={44} color={INK_FAINT} />
-              <span style={{ fontSize: 16, fontWeight: 800, color: INK_STRONG }}>Prends le ticket en photo</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: INK_FAINT }}>ou sélectionne depuis la galerie</span>
+              <span style={{ fontSize: 16, fontWeight: 800, color: INK_STRONG }}>{tr("takePhoto")}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: INK_FAINT }}>{tr("orGallery")}</span>
             </>
           )}
         </div>
@@ -158,9 +160,9 @@ export function ReceiptScanner({
           {scanning ? (
             <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "rs-spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
-              Analyse en cours…
+              {tr("analyzing")}
             </span>
-          ) : "Analyser le ticket"}
+          ) : tr("analyze")}
         </button>
         <style>{`@keyframes rs-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
       </form>
@@ -175,7 +177,7 @@ export function ReceiptScanner({
       <div style={{ ...FF, display: "flex", flexDirection: "column", gap: 22 }}>
         {draft.matched.length > 0 && (
           <div>
-            <div style={sectionLabel}>Trouvés dans la liste ({draft.matched.length})</div>
+            <div style={sectionLabel}>{tr("foundInList", { count: draft.matched.length })}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
               {draft.matched.map(m => {
                 const sel = selectedMatchIds.has(m.itemId);
@@ -202,7 +204,7 @@ export function ReceiptScanner({
 
         {draft.extras.length > 0 && (
           <div>
-            <div style={sectionLabel}>Hors liste — qui participe ?</div>
+            <div style={sectionLabel}>{tr("offListWho")}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {draft.extras.map((ex, i) => {
                 const key = extraKey(ex, i);
@@ -237,16 +239,16 @@ export function ReceiptScanner({
 
         <div style={{ ...card, padding: "15px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT }}>Total confirmé</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: INK_FAINT }}>{tr("confirmedTotal")}</div>
             <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", color: INK_STRONG }}>{formatEuro(matchedTotal + extrasTotal)}</div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 600, color: INK_FAINT, textAlign: "right", lineHeight: 1.5 }}>
-            {selectedMatchIds.size}/{draft.matched.length} liste<br />+{draft.extras.filter((_, i) => (extrasParticipants.get(extraKey(_, i))?.size ?? 0) > 0).length} extras
+            {tr("listCount", { selected: selectedMatchIds.size, total: draft.matched.length })}<br />{tr("extrasCount", { count: draft.extras.filter((_, i) => (extrasParticipants.get(extraKey(_, i))?.size ?? 0) > 0).length })}
           </div>
         </div>
 
-        <button type="button" onClick={() => setPhase(2)} style={BTN_ACCENT}>Voir le récap dépenses →</button>
-        <button type="button" onClick={() => { setPhase(0); setDraft(null); setScanError(null); setPreview(null); }} style={BTN_SOFT}>Recommencer</button>
+        <button type="button" onClick={() => setPhase(2)} style={BTN_ACCENT}>{tr("seeSummary")}</button>
+        <button type="button" onClick={() => { setPhase(0); setDraft(null); setScanError(null); setPreview(null); }} style={BTN_SOFT}>{tr("restart")}</button>
       </div>
     );
   }
@@ -259,10 +261,10 @@ export function ReceiptScanner({
     const nonPayers = summary.filter(m => !m.isPayer);
     return (
       <div style={{ ...FF, display: "flex", flexDirection: "column", gap: 20 }}>
-        <div style={sectionLabel}>Récap des dépenses</div>
+        <div style={sectionLabel}>{tr("summaryTitle")}</div>
 
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: INK_MUTED, marginBottom: 8 }}>Qui a payé ?</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: INK_MUTED, marginBottom: 8 }}>{tr("whoPaid")}</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {members.map(m => {
               const on = m.userId === paidByUserId;
@@ -282,7 +284,7 @@ export function ReceiptScanner({
         </div>
 
         <div style={{ ...card, padding: "18px", textAlign: "center" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: INK_FAINT, marginBottom: 2 }}>{payer?.name.split(" ")[0]} a avancé</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: INK_FAINT, marginBottom: 2 }}>{tr("advanced", { name: payer?.name.split(" ")[0] ?? "" })}</div>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 3, lineHeight: 0.95 }}>
             <span style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.04em", color: INK_STRONG }}>{formatEuro(total)}</span>
           </div>
@@ -293,23 +295,23 @@ export function ReceiptScanner({
             <div key={m.userId} style={{ ...SURFACE, padding: "13px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: INK_STRONG }}>{m.name}</span>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 17, fontWeight: 900, color: DANGER }}>doit {formatEuro(m.owes)}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: INK_FAINT }}>à {payer?.name.split(" ")[0]}</div>
+                <div style={{ fontSize: 17, fontWeight: 900, color: DANGER }}>{tr("owes", { amount: formatEuro(m.owes) })}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: INK_FAINT }}>{tr("to", { name: payer?.name.split(" ")[0] ?? "" })}</div>
               </div>
             </div>
           ))}
           {payer && (
             <div style={{ ...SURFACE, padding: "13px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", background: ACCENT_SOFT, border: "1.5px solid rgba(47,179,106,0.25)" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: INK_STRONG }}>{payer.name} <span style={{ fontSize: 11, fontWeight: 600, color: INK_FAINT }}>(payeur)</span></span>
-              <div style={{ fontSize: 17, fontWeight: 900, color: ACCENT_TEXT }}>ma part {formatEuro(payer.owes)}</div>
+              <span style={{ fontSize: 15, fontWeight: 700, color: INK_STRONG }}>{payer.name} <span style={{ fontSize: 11, fontWeight: 600, color: INK_FAINT }}>{tr("payer")}</span></span>
+              <div style={{ fontSize: 17, fontWeight: 900, color: ACCENT_TEXT }}>{tr("myShare", { amount: formatEuro(payer.owes) })}</div>
             </div>
           )}
         </div>
 
         <button type="button" onClick={handleConfirm} disabled={confirming} style={{ ...BTN_ACCENT, opacity: confirming ? 0.55 : 1 }}>
-          {confirming ? "Enregistrement…" : "Valider les courses ✓"}
+          {confirming ? tr("saving") : tr("confirmShopping")}
         </button>
-        <button type="button" onClick={() => setPhase(1)} style={BTN_SOFT}>‹ Modifier</button>
+        <button type="button" onClick={() => setPhase(1)} style={BTN_SOFT}>{tr("edit")}</button>
       </div>
     );
   }

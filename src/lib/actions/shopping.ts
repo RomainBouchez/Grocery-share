@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendPushToUsers } from "@/lib/push";
@@ -48,14 +49,17 @@ export async function announceGoShopping(groupId: string): Promise<void> {
     .filter(id => id !== user.id);
 
   if (otherUserIds.length > 0) {
+    // La notif est rédigée dans la langue de l'expéditeur (celui qui part faire
+    // les courses) : on ne stocke pas la langue par destinataire.
+    const t = await getTranslations("push.notif");
     const firstName = user.name.split(" ")[0];
     // Nom de groupe robuste : trim, repli si vide, troncature si trop long.
     const rawName = (membership.group.name ?? "").trim();
-    const safeName = rawName.length === 0 ? "ton groupe" : rawName;
+    const safeName = rawName.length === 0 ? t("fallbackGroup") : rawName;
     const groupName = safeName.length > 40 ? `${safeName.slice(0, 39)}…` : safeName;
     await sendPushToUsers(otherUserIds, {
       title: "GrocyShare",
-      body: `${firstName} fait les courses (pour ${groupName}) ! Remplissez la liste de courses avec ce dont vous avez besoin`,
+      body: t("body", { name: firstName, group: groupName }),
       url: `/groups/${groupId}`,
       tag: `shopping-${groupId}`,
     });

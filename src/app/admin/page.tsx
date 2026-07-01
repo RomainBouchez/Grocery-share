@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { getCurrentUser, isAdmin, isAdminEmail } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { setUserActive } from "@/lib/actions/admin";
@@ -20,33 +21,35 @@ export default async function AdminPage() {
 
   const pending = users.filter((u) => !u.isActive);
   const activeUsers = users.filter((u) => u.isActive);
+  const t = await getTranslations("admin");
+  const rowLabels = { activate: t("activate"), deactivate: t("deactivate") };
 
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG }}>
       <div style={{ padding: "56px 18px 60px", maxWidth: 560, margin: "0 auto" }}>
         <Link href="/" style={{ fontSize: 13, fontWeight: 800, color: ACCENT_TEXT, textDecoration: "none" }}>
-          ← Retour
+          {t("back")}
         </Link>
         <h1 style={{ margin: "14px 0 4px", fontSize: 28, fontWeight: 900, letterSpacing: "-0.035em" }}>
-          Administration
+          {t("title")}
         </h1>
         <p style={{ margin: "0 0 24px", fontSize: 14, fontWeight: 500, color: INK_MUTED }}>
-          Active ou désactive les comptes. {pending.length > 0 && (
-            <strong style={{ color: DANGER }}>{pending.length} en attente.</strong>
+          {t("subtitle")} {pending.length > 0 && (
+            <strong style={{ color: DANGER }}>{t("pendingCount", { count: pending.length })}</strong>
           )}
         </p>
 
         {pending.length > 0 && (
-          <Section title={`En attente d'activation (${pending.length})`}>
+          <Section title={t("pendingSection", { count: pending.length })}>
             {pending.map((u) => (
-              <UserRow key={u.id} u={u} />
+              <UserRow key={u.id} u={u} labels={rowLabels} />
             ))}
           </Section>
         )}
 
-        <Section title={`Comptes actifs (${activeUsers.length})`}>
+        <Section title={t("activeSection", { count: activeUsers.length })}>
           {activeUsers.map((u) => (
-            <UserRow key={u.id} u={u} />
+            <UserRow key={u.id} u={u} labels={rowLabels} />
           ))}
         </Section>
       </div>
@@ -65,7 +68,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function UserRow({ u }: { u: { id: string; name: string; email: string; color: string | null; isActive: boolean } }) {
+function UserRow({ u, labels }: { u: { id: string; name: string; email: string; color: string | null; isActive: boolean }; labels: { activate: string; deactivate: string } }) {
   const color = colorFor(u.id, u.color);
   const admin = isAdminEmail(u.email);
 
@@ -97,7 +100,7 @@ function UserRow({ u }: { u: { id: string; name: string; email: string; color: s
               ? { ...btnSecondary, minHeight: 40, padding: "8px 16px", fontSize: 13, color: DANGER, background: DANGER_SOFT, border: "1.5px solid rgba(232,80,58,0.3)", boxShadow: "none" }
               : { ...btnPrimary, minHeight: 40, padding: "8px 18px", fontSize: 13 }}
           >
-            {u.isActive ? "Désactiver" : "Activer"}
+            {u.isActive ? labels.deactivate : labels.activate}
           </button>
         </form>
       )}

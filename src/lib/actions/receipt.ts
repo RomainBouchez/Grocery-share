@@ -6,6 +6,7 @@ import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
@@ -55,21 +56,22 @@ async function getActiveList(userId: string, groupId: string) {
  */
 export async function scanReceipt(_prev: unknown, formData: FormData): Promise<ScanDraft | ScanError> {
   const user = await requireUser();
+  const t = await getTranslations("receipt.errors");
   const groupId = String(formData.get("groupId") ?? "");
   const photo = formData.get("photo");
 
   if (!(photo instanceof File) || photo.size === 0) {
-    return { ok: false, error: "Ajoute une photo du ticket." };
+    return { ok: false, error: t("noPhoto") };
   }
   if (!photo.type.startsWith("image/")) {
-    return { ok: false, error: "Le fichier doit être une image." };
+    return { ok: false, error: t("notImage") };
   }
 
   let list;
   try {
     list = await getActiveList(user.id, groupId);
   } catch {
-    return { ok: false, error: "Accès au groupe refusé." };
+    return { ok: false, error: t("accessDenied") };
   }
 
   // Sauvegarde l'image dans un dossier accessible par le CLI Claude.
@@ -95,11 +97,11 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
       lines = await extractReceiptItems(filepath);
       result = await matchReceiptWithClaude(lines, plannedItems);
     } catch (e) {
-      return { ok: false, error: e instanceof Error ? e.message : "Échec de l'analyse du ticket." };
+      return { ok: false, error: e instanceof Error ? e.message : t("analysisFailed") };
     }
   }
   if (lines.length === 0) {
-    return { ok: false, error: "Aucun article détecté sur le ticket." };
+    return { ok: false, error: t("noItemsDetected") };
   }
 
   const labelById = new Map(plannedItems.map((p) => [p.id, p.label]));

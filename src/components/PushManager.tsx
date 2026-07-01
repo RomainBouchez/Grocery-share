@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import { savePushSubscription, announceGoShopping, cancelGoShopping } from "@/lib/actions/shopping";
 import { Bell, Cart3 } from "@/lib/icons";
 import { ACCENT, INK_MUTED, INK_STRONG, HAIRLINE, FONT } from "@/lib/ui";
@@ -21,6 +22,8 @@ type Props = {
 };
 
 export function PushManager({ groupId, iAmShopping }: Props) {
+  const tr = useTranslations("push");
+  const tc = useTranslations("common");
   const [subscribed, setSubscribed] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [busy, setBusy] = useState(false);
@@ -119,10 +122,10 @@ export function PushManager({ groupId, iAmShopping }: Props) {
               </span>
             </div>
             <p style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: INK_STRONG, textAlign: "center" }}>
-              Rappeler le groupe ?
+              {tr("remindTitle")}
             </p>
             <p style={{ margin: "0 0 24px", fontSize: 14, fontWeight: 500, color: INK_MUTED, textAlign: "center", lineHeight: 1.5 }}>
-              Tous les membres vont recevoir une notification pour compléter la liste avant que tu partes faire les courses.
+              {tr("remindDesc")}
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
@@ -134,7 +137,7 @@ export function PushManager({ groupId, iAmShopping }: Props) {
                   cursor: "pointer", fontFamily: FONT,
                 }}
               >
-                Annuler
+                {tc("cancel")}
               </button>
               <button
                 onClick={doAnnounce}
@@ -146,7 +149,7 @@ export function PushManager({ groupId, iAmShopping }: Props) {
                   boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.3), 0 6px 14px rgba(47,179,106,0.3)",
                 }}
               >
-                C&apos;est parti !
+                {tr("letsGo")}
               </button>
             </div>
           </div>
@@ -170,7 +173,7 @@ export function PushManager({ groupId, iAmShopping }: Props) {
           }}
         >
           <Cart3 weight="Bold" size={17} />
-          {loading ? "…" : "Annuler les courses"}
+          {loading ? "…" : tr("cancelShopping")}
         </button>
       ) : (
         <button
@@ -188,7 +191,7 @@ export function PushManager({ groupId, iAmShopping }: Props) {
           }}
         >
           <Bell weight="Bold" size={17} color="#fff" />
-          {loading ? "…" : "Je vais faire les courses"}
+          {loading ? "…" : tr("goShopping")}
         </button>
       )}
     </>

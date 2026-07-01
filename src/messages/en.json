@@ -242,6 +242,72 @@
       "noGroupForCode": "No group matches this code."
     }
   },
+  "push": {
+    "remindTitle": "Remind the group?",
+    "remindDesc": "All members will get a notification to finish the list before you head out shopping.",
+    "letsGo": "Let's go!",
+    "cancelShopping": "Cancel shopping",
+    "goShopping": "I'll do the shopping",
+    "notif": {
+      "body": "{name} is shopping (for {group})! Fill in the shopping list with what you need",
+      "fallbackGroup": "your group"
+    }
+  },
+  "receipt": {
+    "backToList": "‹ Back to the list",
+    "intro": "Take a photo of the receipt — Claude extracts the items and prices, then we match them against the list.",
+    "ready": "Receipt ready — tap Analyze",
+    "takePhoto": "Take a photo of the receipt",
+    "orGallery": "or pick from the gallery",
+    "analyzing": "Analyzing…",
+    "analyze": "Analyze the receipt",
+    "foundInList": "Found in the list ({count})",
+    "offListWho": "Off the list — who's in?",
+    "confirmedTotal": "Confirmed total",
+    "listCount": "{selected}/{total} list",
+    "extrasCount": "+{count} extras",
+    "seeSummary": "See expense summary →",
+    "restart": "Start over",
+    "summaryTitle": "Expense summary",
+    "whoPaid": "Who paid?",
+    "advanced": "{name} paid",
+    "owes": "owes {amount}",
+    "to": "to {name}",
+    "payer": "(payer)",
+    "myShare": "my share {amount}",
+    "saving": "Saving…",
+    "confirmShopping": "Confirm shopping ✓",
+    "edit": "‹ Edit",
+    "errors": {
+      "noPhoto": "Add a photo of the receipt.",
+      "notImage": "The file must be an image.",
+      "accessDenied": "Access to the group denied.",
+      "analysisFailed": "Failed to analyze the receipt.",
+      "noItemsDetected": "No item detected on the receipt."
+    }
+  },
+  "balances": {
+    "intro": "Calculated from receipts: who paid, who shares each item and with how many shares.",
+    "owedToThem": "is owed",
+    "owes": "owes",
+    "settled": "settled",
+    "whoPaysWho": "Who pays who",
+    "allSettled": "Everything's settled 🎉",
+    "nobodyOwes": "Nobody owes anyone.",
+    "owesShort": "owes",
+    "toShort": "to",
+    "markSettled": "Mark settled"
+  },
+  "admin": {
+    "back": "← Back",
+    "title": "Administration",
+    "subtitle": "Enable or disable accounts.",
+    "pendingCount": "{count} pending.",
+    "pendingSection": "Awaiting activation ({count})",
+    "activeSection": "Active accounts ({count})",
+    "activate": "Enable",
+    "deactivate": "Disable"
+  },
   "profile": {
     "title": "Profile",
     "language": "Language",
