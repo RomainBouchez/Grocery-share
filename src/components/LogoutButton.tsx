@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { logout } from "@/lib/actions/auth";
-import { btnSecondary, btnDanger } from "@/lib/ui";
+import { btnSecondary, btnCancel, btnDangerSolid } from "@/lib/ui";
 
 export function LogoutButton() {
   const t = useTranslations();
@@ -34,14 +34,14 @@ export function LogoutButton() {
           type="button"
           data-lo
           onClick={() => setConfirm(false)}
-          style={{ ...btnSecondary, flex: 1, animation: "lo-rise .24s cubic-bezier(.34,1.56,.64,1) both" }}
+          style={{ ...btnCancel, flex: 1, animation: "lo-rise .24s cubic-bezier(.34,1.56,.64,1) both" }}
         >
           {t("common.cancel")}
         </button>
         <button
           type="submit"
           data-lo
-          style={{ ...btnDanger, flex: 1, justifyContent: "center", minHeight: 52, animation: "lo-rise .24s cubic-bezier(.34,1.56,.64,1) .04s both, lo-pulse 1.1s ease-out .24s 1" }}
+          style={{ ...btnDangerSolid, flex: 1.6, animation: "lo-rise .24s cubic-bezier(.34,1.56,.64,1) .04s both, lo-pulse 1.1s ease-out .24s 1" }}
         >
           {t("common.confirm")}
         </button>

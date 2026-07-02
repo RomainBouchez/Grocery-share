@@ -119,6 +119,24 @@ export const btnDanger: CSSProperties = {
   color: DANGER, fontSize: 14, fontWeight: 800, fontFamily: "inherit",
 };
 
+/* — Paire annuler / action d'une confirmation inline (profil, logout…) —
+   Même gabarit pilule que btnPrimary, hauteur 48. */
+export const btnCancel: CSSProperties = {
+  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+  minHeight: 48, padding: "12px 18px", borderRadius: 999, cursor: "pointer",
+  background: "none", border: `1.5px solid ${HAIRLINE}`,
+  color: INK_MUTED, fontSize: 14.5, fontWeight: 800, fontFamily: "inherit",
+};
+
+export const btnDangerSolid: CSSProperties = {
+  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+  minHeight: 48, padding: "12px 20px", borderRadius: 999, cursor: "pointer",
+  background: DANGER, color: "#FFFFFF", fontSize: 15, fontWeight: 800, fontFamily: "inherit",
+  border: "1.5px solid rgba(0,0,0,0.06)",
+  boxShadow:
+    "inset 0 1.5px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.12), 0 10px 22px rgba(232,80,58,0.28)",
+};
+
 /* — Champ de saisie — */
 export const input: CSSProperties = {
   width: "100%", padding: "13px 15px", borderRadius: 14, boxSizing: "border-box",

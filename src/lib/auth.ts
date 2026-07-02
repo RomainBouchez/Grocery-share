@@ -32,6 +32,18 @@ export async function createSession(userId: string): Promise<void> {
   });
 }
 
+/**
+ * Révoque toutes les sessions de l'utilisateur sauf la session courante.
+ * Utilisé après un changement de mot de passe pour déconnecter les autres appareils.
+ */
+export async function revokeOtherSessions(userId: string): Promise<void> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  await prisma.session.deleteMany({
+    where: { userId, ...(token ? { token: { not: token } } : {}) },
+  });
+}
+
 /** Détruit la session courante (logout). */
 export async function destroySession(): Promise<void> {
   const cookieStore = await cookies();

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
-import { createSession, destroySession, getCurrentUser, isAdminEmail } from "@/lib/auth";
+import { createSession, destroySession, getCurrentUser, isAdminEmail, revokeOtherSessions } from "@/lib/auth";
 import { hashPassword, verifyPassword, MIN_PASSWORD_LENGTH } from "@/lib/password";
 import { sendPushToUsers } from "@/lib/push";
 import { AVATAR_COLORS } from "@/lib/ui";
@@ -161,6 +161,72 @@ export async function signup(_prev: ActionResult, formData: FormData): Promise<A
 export async function logout(): Promise<void> {
   await destroySession();
   redirect("/login");
+}
+
+/** Résultat des actions du profil : erreur, succès, ou rien (état initial). */
+export type ProfileActionResult = { error: string } | { success: true } | undefined;
+
+/** Met à jour le prénom de l'utilisateur connecté. */
+export async function updateProfileName(
+  _prev: ProfileActionResult,
+  formData: FormData
+): Promise<ProfileActionResult> {
+  const user = await getCurrentUser();
+  if (!user) return undefined;
+
+  const t = await getTranslations("auth.errors");
+  const name = String(formData.get("name") ?? "").trim().slice(0, 50);
+  if (!name) {
+    return { error: t("missingFirstName") };
+  }
+
+  if (name !== user.name) {
+    await prisma.user.update({ where: { id: user.id }, data: { name } });
+    revalidatePath("/");
+    revalidatePath("/profile");
+    revalidatePath("/listes");
+  }
+  return { success: true };
+}
+
+/**
+ * Changement de mot de passe depuis le profil.
+ * Exige le mot de passe actuel, puis révoque les sessions des autres appareils.
+ */
+export async function changePassword(
+  _prev: ProfileActionResult,
+  formData: FormData
+): Promise<ProfileActionResult> {
+  const user = await getCurrentUser();
+  if (!user) return undefined;
+
+  const t = await getTranslations("auth.errors");
+  const current = String(formData.get("current") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  // Un compte connecté a toujours un hash (les comptes hérités le définissent
+  // à la connexion), mais on reste défensif.
+  if (!user.passwordHash || !(await verifyPassword(current, user.passwordHash))) {
+    return { error: t("wrongCurrentPassword") };
+  }
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    return { error: t("passwordTooShort", { min: MIN_PASSWORD_LENGTH }) };
+  }
+  if (password !== confirm) {
+    return { error: t("passwordMismatch") };
+  }
+  if (password === current) {
+    return { error: t("samePassword") };
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: await hashPassword(password) },
+  });
+  await revokeOtherSessions(user.id);
+
+  return { success: true };
 }
 
 /** Met à jour la couleur d'avatar choisie par l'utilisateur connecté. */

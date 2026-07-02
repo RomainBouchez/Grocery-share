@@ -43,7 +43,9 @@
       "missingFirstName": "Enter your first name.",
       "passwordTooShort": "The password must be at least {min} characters.",
       "passwordMismatch": "The passwords don't match.",
-      "accountExists": "An account already exists with this email. Sign in."
+      "accountExists": "An account already exists with this email. Sign in.",
+      "wrongCurrentPassword": "Current password is incorrect.",
+      "samePassword": "The new password must be different from the current one."
     },
     "signupPending": "Account created! An administrator will activate it soon. You'll be able to sign in once your account is verified."
   },
@@ -339,7 +341,21 @@
     "language": "Language",
     "avatarColor": "Your photo color",
     "groups": "{count, plural, one {group} other {groups}}",
+    "memberSince": "member since",
     "admin": "Administration",
-    "adminSubtitle": "Enable / disable accounts"
+    "adminSubtitle": "Enable / disable accounts",
+    "editName": "Edit first name",
+    "saveName": "Save first name",
+    "cancel": "Cancel",
+    "security": "Security",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "At least 8 characters",
+    "confirmNewPassword": "Confirm new password",
+    "passwordHint": "After the change, your other devices will be signed out.",
+    "passwordChanged": "Password updated. Your other devices have been signed out.",
+    "update": "Update",
+    "updating": "Updating…"
   }
 }
