@@ -228,7 +228,7 @@ export default async function GroupPage({
             </div>
           ) : (
             <>
-              <PendingSections groups={pendingGroups} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} />
+              <PendingSections groups={pendingGroups} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} showParticipants={group.expenseSharingEnabled} />
 
               {bought.length > 0 && (
                 <>
@@ -237,7 +237,7 @@ export default async function GroupPage({
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {bought.map(item => (
-                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} gap={8} />
+                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} gap={8} showParticipants={group.expenseSharingEnabled} />
                     ))}
                   </div>
                 </>

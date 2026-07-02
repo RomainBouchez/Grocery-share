@@ -18,7 +18,7 @@ const keyOf = (g: Group) => (g.tag ? g.tag.id : "__none");
  * un rayon qui apparaît se déploie, un rayon vidé collapse avant de partir.
  */
 export function PendingSections({
-  groups, currentUserId, members, memberColors, groupId, tags,
+  groups, currentUserId, members, memberColors, groupId, tags, showParticipants = true,
 }: {
   groups: Group[];
   currentUserId: string;
@@ -26,6 +26,7 @@ export function PendingSections({
   memberColors: Record<string, string>;
   groupId: string;
   tags: TagView[];
+  showParticipants?: boolean;
 }) {
   const tr = useTranslations("tag");
   const tagName = useTagName();
@@ -105,7 +106,7 @@ export function PendingSections({
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {e.items.map(item => (
-                <ItemCard key={item.id} item={item} currentUserId={currentUserId} members={members} memberColors={memberColors} groupId={groupId} tags={tags} onLeaving={handleLeaving} />
+                <ItemCard key={item.id} item={item} currentUserId={currentUserId} members={members} memberColors={memberColors} groupId={groupId} tags={tags} onLeaving={handleLeaving} showParticipants={showParticipants} />
               ))}
             </div>
           </RayonGroup>

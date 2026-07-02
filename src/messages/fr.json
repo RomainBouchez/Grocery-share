@@ -186,6 +186,7 @@
     "addPlaceholder": "Ajouter un article…",
     "noParticipants": "personne pour l'instant",
     "whoParticipates": "Qui participe ?",
+    "addedBy": "Ajouté par {name}",
     "you": "toi",
     "addShare": "+ Ajouter",
     "confirmDeleteAria": "Confirmer la suppression de {label}",

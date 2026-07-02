@@ -25,6 +25,7 @@ export type ItemView = {
 
 export function ItemCard({
   item, currentUserId, members, memberColors = {}, groupId, tags, gap = 10, onLeaving,
+  showParticipants = true,
 }: {
   item: ItemView; currentUserId: string; members: MemberView[];
   memberColors?: Record<string, string>;
@@ -32,6 +33,9 @@ export function ItemCard({
   /** Notifie le parent qu'un item quitte sa section (collapse qui démarre) →
    *  permet de collapser le header de rayon en synchro si c'est le dernier. */
   onLeaving?: (itemId: string) => void;
+  /** false quand le partage de dépenses (balance) du groupe est désactivé :
+   *  masque les participants, affiche seulement qui a ajouté l'article. */
+  showParticipants?: boolean;
 }) {
   const tr = useTranslations();
   const [pending, startTransition] = useTransition();
@@ -249,7 +253,23 @@ export function ItemCard({
         )}
       </div>
 
+      {/* Balance désactivée : juste qui a ajouté l'article */}
+      {!showParticipants && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, paddingLeft: 36 }}>
+          {(() => {
+            const t = tintForColor(memberColors[item.addedByUserId] ?? avatarColor(item.addedByUserId));
+            return (
+              <span style={memberChip(t)}>
+                <span style={{ ...avatarStyle(t.avatar, 14), border: "none", fontSize: 8 }}>{item.addedByName[0]?.toUpperCase()}</span>
+                {tr("item.addedBy", { name: item.addedByName.split(" ")[0] })}
+              </span>
+            );
+          })()}
+        </div>
+      )}
+
       {/* Participants badges */}
+      {showParticipants && (
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, marginTop: 10, paddingLeft: 36 }}>
         {item.participants.map(p => {
           const t = tintForColor(memberColors[p.userId] ?? avatarColor(p.userId));
@@ -271,9 +291,10 @@ export function ItemCard({
           {editing ? tr("common.close") : tr("item.whoParticipates")}
         </button>
       </div>
+      )}
 
       {/* Participant editor */}
-      {editing && (
+      {showParticipants && editing && (
         <div style={{ marginTop: 10, marginLeft: 36, padding: 12, borderRadius: 14, background: "#F5F5F5", border: `1.5px solid ${HAIRLINE}` }}>
           {members.map(m => {
             const parts = partsByUser.get(m.userId) ?? 0;

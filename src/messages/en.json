@@ -186,6 +186,7 @@
     "addPlaceholder": "Add an item…",
     "noParticipants": "no one yet",
     "whoParticipates": "Who's in?",
+    "addedBy": "Added by {name}",
     "you": "you",
     "addShare": "+ Add",
     "confirmDeleteAria": "Confirm deletion of {label}",
