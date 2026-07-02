@@ -20,6 +20,7 @@ model User {
   email        String   @unique
   passwordHash String?  // hash scrypt "salt:clé" — null pour les comptes hérités (à définir à la 1re connexion)
   isActive     Boolean  @default(true) // un compte doit être activé par l'admin ; l'inscription force `false`, les comptes hérités restent `true`
+  isPremium    Boolean  @default(false) // accès aux fonctionnalités premium (dictée, recettes) ; l'admin l'est toujours
   color        String?  // couleur d'avatar choisie (sinon dérivée de l'id)
   createdAt    DateTime @default(now())
 

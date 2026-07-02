@@ -99,11 +99,11 @@ export function isAdmin(user: { email: string }): boolean {
 
 /**
  * Accès aux fonctionnalités premium (dictée vocale, import de recettes).
- * Pour l'instant réservé à l'admin ; à remplacer par un vrai statut
- * d'abonnement quand la partie payante sera branchée.
+ * L'admin l'a toujours ; les autres via le drapeau `isPremium` accordé
+ * depuis la page admin (en attendant le branchement de l'abonnement payant).
  */
-export function hasPremiumAccess(user: { email: string }): boolean {
-  return isAdmin(user);
+export function hasPremiumAccess(user: { email: string; isPremium?: boolean }): boolean {
+  return isAdmin(user) || user.isPremium === true;
 }
 
 /** Garantit un utilisateur admin (zones d'administration). */

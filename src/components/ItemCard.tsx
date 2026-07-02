@@ -27,7 +27,7 @@ export type ItemView = {
 
 export function ItemCard({
   item, currentUserId, members, memberColors = {}, groupId, tags, gap = 10, onLeaving,
-  showParticipants = true,
+  showParticipants = true, canModerate = false,
 }: {
   item: ItemView; currentUserId: string; members: MemberView[];
   memberColors?: Record<string, string>;
@@ -38,6 +38,8 @@ export function ItemCard({
   /** false quand le partage de dépenses (balance) du groupe est désactivé :
    *  masque les participants, affiche seulement qui a ajouté l'article. */
   showParticipants?: boolean;
+  /** true pour le propriétaire du groupe (ou admin) : peut supprimer tout article. */
+  canModerate?: boolean;
 }) {
   const tr = useTranslations();
   const [pending, startTransition] = useTransition();
@@ -236,7 +238,7 @@ export function ItemCard({
           </span>
         )}
         {!renaming && <TagPicker itemId={item.id} groupId={groupId} currentTagId={item.tagId} tags={tags} />}
-        {!renaming && item.addedByUserId === currentUserId && (
+        {!renaming && (item.addedByUserId === currentUserId || canModerate) && (
           confirmDel ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
               <button

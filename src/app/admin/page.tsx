@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { getCurrentUser, isAdmin, isAdminEmail } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { setUserActive } from "@/lib/actions/admin";
+import { setUserActive, setUserPremium } from "@/lib/actions/admin";
 import { AdminPushToggle } from "@/components/AdminPushToggle";
 import { initials } from "@/lib/utils";
 import {
@@ -23,7 +23,11 @@ export default async function AdminPage() {
   const pending = users.filter((u) => !u.isActive);
   const activeUsers = users.filter((u) => u.isActive);
   const t = await getTranslations("admin");
-  const rowLabels = { activate: t("activate"), deactivate: t("deactivate") };
+  const rowLabels = {
+    activate: t("activate"), deactivate: t("deactivate"),
+    grantPremium: t("grantPremium"), revokePremium: t("revokePremium"),
+    premiumBadge: t("premiumBadge"),
+  };
 
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG }}>
@@ -71,21 +75,25 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function UserRow({ u, labels }: { u: { id: string; name: string; email: string; color: string | null; isActive: boolean }; labels: { activate: string; deactivate: string } }) {
+function UserRow({ u, labels }: { u: { id: string; name: string; email: string; color: string | null; isActive: boolean; isPremium: boolean }; labels: { activate: string; deactivate: string; grantPremium: string; revokePremium: string; premiumBadge: string } }) {
   const color = colorFor(u.id, u.color);
   const admin = isAdminEmail(u.email);
+  const premium = admin || u.isPremium;
 
   return (
-    <div style={{ ...card, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13 }}>
+    <div style={{ ...card, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13, flexWrap: "wrap" }}>
       <div style={{ width: 42, height: 42, borderRadius: "50%", background: color, color: "#fff", fontSize: 15, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "2.5px solid #fff", boxShadow: "0 0 0 1px rgba(30,26,20,0.05)" }}>
         {initials(u.name)}
       </div>
 
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
           <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.name}</span>
           {admin && (
             <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 999, background: ACCENT_SOFT, color: ACCENT_TEXT }}>ADMIN</span>
+          )}
+          {premium && (
+            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.05em", padding: "2px 7px", borderRadius: 999, background: "#FDF0D6", color: "#D9921C" }}>{labels.premiumBadge}</span>
           )}
         </div>
         <div style={{ fontSize: 12.5, fontWeight: 600, color: INK_MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.email}</div>
@@ -94,18 +102,34 @@ function UserRow({ u, labels }: { u: { id: string; name: string; email: string; 
       {admin ? (
         <span style={{ fontSize: 12, fontWeight: 800, color: INK_FAINT, flexShrink: 0 }}>—</span>
       ) : (
-        <form action={setUserActive} style={{ flexShrink: 0 }}>
-          <input type="hidden" name="userId" value={u.id} />
-          <input type="hidden" name="active" value={u.isActive ? "false" : "true"} />
-          <button
-            type="submit"
-            style={u.isActive
-              ? { ...btnSecondary, minHeight: 40, padding: "8px 16px", fontSize: 13, color: DANGER, background: DANGER_SOFT, border: "1.5px solid rgba(232,80,58,0.3)", boxShadow: "none" }
-              : { ...btnPrimary, minHeight: 40, padding: "8px 18px", fontSize: 13 }}
-          >
-            {u.isActive ? labels.deactivate : labels.activate}
-          </button>
-        </form>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          {/* Toggle premium — indépendant de l'activation du compte. */}
+          <form action={setUserPremium}>
+            <input type="hidden" name="userId" value={u.id} />
+            <input type="hidden" name="premium" value={u.isPremium ? "false" : "true"} />
+            <button
+              type="submit"
+              style={u.isPremium
+                ? { ...btnSecondary, minHeight: 40, padding: "8px 14px", fontSize: 12.5, color: "#D9921C", background: "#FDF0D6", border: "1.5px solid rgba(217,146,28,0.3)", boxShadow: "none" }
+                : { ...btnSecondary, minHeight: 40, padding: "8px 14px", fontSize: 12.5 }}
+            >
+              {u.isPremium ? labels.revokePremium : labels.grantPremium}
+            </button>
+          </form>
+
+          <form action={setUserActive}>
+            <input type="hidden" name="userId" value={u.id} />
+            <input type="hidden" name="active" value={u.isActive ? "false" : "true"} />
+            <button
+              type="submit"
+              style={u.isActive
+                ? { ...btnSecondary, minHeight: 40, padding: "8px 16px", fontSize: 13, color: DANGER, background: DANGER_SOFT, border: "1.5px solid rgba(232,80,58,0.3)", boxShadow: "none" }
+                : { ...btnPrimary, minHeight: 40, padding: "8px 18px", fontSize: 13 }}
+            >
+              {u.isActive ? labels.deactivate : labels.activate}
+            </button>
+          </form>
+        </div>
       )}
     </div>
   );

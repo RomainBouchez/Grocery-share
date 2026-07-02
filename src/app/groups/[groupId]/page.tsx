@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getCurrentUser, hasPremiumAccess } from "@/lib/auth";
+import { getCurrentUser, hasPremiumAccess, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ItemCard, type ItemView } from "@/components/ItemCard";
 import { InviteCode } from "@/components/InviteCode";
@@ -39,6 +39,9 @@ export default async function GroupPage({
   if (!membership) notFound();
 
   const { group } = membership;
+  // Propriétaire du groupe (ou admin de l'app) : peut supprimer n'importe quel article.
+  const canModerate = membership.role === "owner" || isAdmin(user);
+  const premium = hasPremiumAccess(user);
 
   let list = await prisma.shoppingList.findFirst({
     where: { groupId, status: { in: ["planning", "shopping"] } },
@@ -135,7 +138,7 @@ export default async function GroupPage({
 
   return (
     <div style={{ fontFamily: FONT, WebkitFontSmoothing: "antialiased", minHeight: "100dvh", background: "#F5F5F5", color: INK_STRONG, position: "relative" }}>
-      <div style={{ position: "relative", zIndex: 1, paddingBottom: 210 }}>
+      <div style={{ position: "relative", zIndex: 1, paddingBottom: premium ? 262 : 210 }}>
         {/* Header */}
         <div style={{ padding: "44px 18px 0", marginBottom: 18 }}>
           <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: INK_MUTED, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 16 }}>
@@ -234,7 +237,7 @@ export default async function GroupPage({
             </div>
           ) : (
             <>
-              <PendingSections groups={pendingGroups} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} showParticipants={group.expenseSharingEnabled} />
+              <PendingSections groups={pendingGroups} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} showParticipants={group.expenseSharingEnabled} canModerate={canModerate} />
 
               {bought.length > 0 && (
                 <>
@@ -243,7 +246,7 @@ export default async function GroupPage({
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {bought.map(item => (
-                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} gap={8} showParticipants={group.expenseSharingEnabled} />
+                      <ItemCard key={item.id} item={item} currentUserId={user.id} members={memberViews} memberColors={memberColors} groupId={groupId} tags={tags} gap={8} showParticipants={group.expenseSharingEnabled} canModerate={canModerate} />
                     ))}
                   </div>
                 </>
@@ -264,7 +267,7 @@ export default async function GroupPage({
         boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 10px 30px rgba(30,26,20,0.12)",
         fontFamily: FONT,
       }}>
-        {hasPremiumAccess(user) ? (
+        {premium ? (
           <PremiumTools groupId={groupId} suggestions={suggestions} tags={tags} productTagMap={productTagMap} />
         ) : (
           <AddItemForm groupId={groupId} suggestions={suggestions} tags={tags} productTagMap={productTagMap} />

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireUser, isAdmin } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
 import { normalizeLoose } from "@/lib/matching";
 import { parseUnit, clampQuantity, MAX_PIECES, MAX_GRAMS } from "@/lib/units";
@@ -186,13 +186,23 @@ export async function setItemStatus(formData: FormData): Promise<void> {
   revalidatePath(`/groups/${item.list.groupId}`);
 }
 
-/** Supprime un article (réservé à son créateur). */
+/**
+ * Supprime un article. Autorisé pour son créateur, le propriétaire du groupe
+ * (rôle "owner"), ou l'admin de l'application.
+ */
 export async function deleteItem(formData: FormData): Promise<void> {
   const user = await requireUser();
   const itemId = String(formData.get("itemId") ?? "");
 
   const item = await loadItemAndAuthorize(user.id, itemId);
-  if (item.addedByUserId !== user.id) throw new Error("FORBIDDEN");
+
+  if (item.addedByUserId !== user.id && !isAdmin(user)) {
+    const membership = await prisma.groupMember.findUnique({
+      where: { userId_groupId: { userId: user.id, groupId: item.list.groupId } },
+      select: { role: true },
+    });
+    if (membership?.role !== "owner") throw new Error("FORBIDDEN");
+  }
 
   await prisma.listItem.delete({ where: { id: itemId } });
   revalidatePath(`/groups/${item.list.groupId}`);
