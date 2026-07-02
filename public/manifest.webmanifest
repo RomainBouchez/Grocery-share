@@ -8,7 +8,19 @@
   "theme_color": "#2FB36A",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "/icon-light-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-light-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-light.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

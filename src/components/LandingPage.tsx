@@ -239,7 +239,7 @@ export function LandingPage() {
         <nav className="cf-nav" style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: "#FFFFFF", border: "1.5px solid #fff", boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 4px 12px rgba(30,26,20,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+              <img src="/mark.svg" alt="" width={26} height={26} style={{ display: "block" }} />
             </div>
             <span style={{ fontSize: 21, fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>SharedCart</span>
           </div>
@@ -475,7 +475,7 @@ export function LandingPage() {
         <div className="cf-footer-inner" style={{ maxWidth: 1180, margin: "0 auto", padding: "40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 30, height: 30, borderRadius: 10, background: "#FFFFFF", border: "1.5px solid #fff", boxShadow: "0 0 0 1px rgba(30,26,20,0.05)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+              <img src="/mark.svg" alt="" width={21} height={21} style={{ display: "block" }} />
             </div>
             <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: "-0.02em", color: INK }}>SharedCart</span>
           </div>
