@@ -35,6 +35,7 @@ model User {
   products        UserProduct[]
   sessions        Session[]
   pushSubscriptions PushSubscription[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 // Abonnement Web Push (PWA) d'un appareil/navigateur de l'utilisateur.
@@ -45,6 +46,22 @@ model PushSubscription {
   p256dh    String
   auth      String
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Jeton de réinitialisation de mot de passe (envoyé par email).
+// On stocke le hash SHA-256 du jeton, jamais le jeton en clair : une fuite de
+// la base ne permet pas de réinitialiser les comptes. Usage unique, expire 1 h.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

@@ -100,6 +100,10 @@ function LoginFields({ next }: { next?: string }) {
         <SoftInput name="password" type="password" required autoComplete="current-password" placeholder="••••••••" />
       </label>
 
+      <a href="/forgot-password" style={{ alignSelf: "flex-end", marginTop: -10, fontSize: 13, fontWeight: 800, color: ACCENT_TEXT, textDecoration: "none" }}>
+        {t("forgotPassword")}
+      </a>
+
       {state && "error" in state && <ErrorBox message={state.error} />}
 
       <SubmitBtn pending={pending} label={t("signIn")} pendingLabel={t("signingIn")} />

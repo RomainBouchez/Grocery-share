@@ -23,6 +23,7 @@
     "confirmPassword": "Confirm password",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
+    "forgotPassword": "Forgot password?",
     "createAccount": "Create my account",
     "creatingAccount": "Creating…",
     "noAccount": "No account yet?",
@@ -45,7 +46,38 @@
       "passwordMismatch": "The passwords don't match.",
       "accountExists": "An account already exists with this email. Sign in.",
       "wrongCurrentPassword": "Current password is incorrect.",
-      "samePassword": "The new password must be different from the current one."
+      "samePassword": "The new password must be different from the current one.",
+      "mailNotConfigured": "Email sending is not configured on this server. Contact the administrator.",
+      "resetTokenInvalid": "This reset link is invalid or has expired. Request a new one."
+    },
+    "forgot": {
+      "heading": "Forgot password",
+      "intro": "Enter your email: we'll send you a link to choose a new password.",
+      "email": "Email",
+      "emailPlaceholder": "email@example.com",
+      "send": "Send the link",
+      "sending": "Sending…",
+      "sent": "If an account exists with this email, a reset link has just been sent. Remember to check your spam folder.",
+      "backToLogin": "← Back to sign in"
+    },
+    "reset": {
+      "heading": "New password",
+      "intro": "Choose your new password.",
+      "newPassword": "New password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm password",
+      "reset": "Reset",
+      "resetting": "Resetting…",
+      "done": "Password reset! You can now sign in.",
+      "goToLogin": "Sign in"
+    },
+    "resetMail": {
+      "subject": "Reset your SharedCart password",
+      "greeting": "Hi {name},",
+      "intro": "You asked to reset your SharedCart password. Click the button below to choose a new one.",
+      "button": "Choose a new password",
+      "expiry": "This link expires in 1 hour and can only be used once.",
+      "ignore": "If you didn't request this, simply ignore this email."
     },
     "signupPending": "Account created! An administrator will activate it soon. You'll be able to sign in once your account is verified."
   },

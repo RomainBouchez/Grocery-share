@@ -2,10 +2,13 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { createHash, randomBytes } from "crypto";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { createSession, destroySession, getCurrentUser, isAdminEmail, revokeOtherSessions } from "@/lib/auth";
 import { hashPassword, verifyPassword, MIN_PASSWORD_LENGTH } from "@/lib/password";
+import { sendMail, isMailConfigured, passwordResetEmailHtml } from "@/lib/mail";
 import { sendPushToUsers } from "@/lib/push";
 import { AVATAR_COLORS } from "@/lib/ui";
 
@@ -161,6 +164,128 @@ export async function signup(_prev: ActionResult, formData: FormData): Promise<A
 export async function logout(): Promise<void> {
   await destroySession();
   redirect("/login");
+}
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 h
+
+function hashResetToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+/** URL de base de l'app : APP_URL si défini, sinon dérivée de la requête. */
+async function appBaseUrl(): Promise<string> {
+  const fromEnv = process.env.APP_URL?.trim().replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  return `${proto}://${host}`;
+}
+
+/**
+ * Demande de réinitialisation : envoie un email avec un lien à usage unique.
+ *
+ * Anti-énumération : la réponse est identique que le compte existe ou non.
+ * Le jeton est stocké hashé (SHA-256), expire au bout d'une heure.
+ */
+export async function requestPasswordReset(
+  _prev: ProfileActionResult,
+  formData: FormData
+): Promise<ProfileActionResult> {
+  const t = await getTranslations("auth.errors");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+
+  if (!isValidEmail(email)) {
+    return { error: t("invalidEmail") };
+  }
+  if (!isMailConfigured()) {
+    return { error: t("mailNotConfigured") };
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  // Compte inexistant ou hérité sans mot de passe : on répond succès sans rien
+  // envoyer, pour ne pas révéler l'existence (ou non) d'un compte.
+  if (user && user.passwordHash) {
+    const token = randomBytes(32).toString("hex");
+    await prisma.passwordResetToken.create({
+      data: {
+        tokenHash: hashResetToken(token),
+        userId: user.id,
+        expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+      },
+    });
+
+    const tm = await getTranslations("auth.resetMail");
+    const resetUrl = `${await appBaseUrl()}/reset-password/${token}`;
+    const firstName = user.name.split(" ")[0];
+    await sendMail({
+      to: user.email,
+      subject: tm("subject"),
+      html: passwordResetEmailHtml({
+        greeting: tm("greeting", { name: firstName }),
+        intro: tm("intro"),
+        buttonLabel: tm("button"),
+        resetUrl,
+        expiry: tm("expiry"),
+        ignore: tm("ignore"),
+      }),
+      text: `${tm("greeting", { name: firstName })}\n\n${tm("intro")}\n\n${resetUrl}\n\n${tm("expiry")}\n${tm("ignore")}`,
+    });
+  }
+
+  return { success: true };
+}
+
+/**
+ * Réinitialisation effective depuis le lien reçu par email.
+ * Vérifie le jeton (hash, expiration, usage unique), applique le nouveau mot
+ * de passe puis révoque toutes les sessions existantes de l'utilisateur.
+ */
+export async function resetPassword(
+  _prev: ProfileActionResult,
+  formData: FormData
+): Promise<ProfileActionResult> {
+  const t = await getTranslations("auth.errors");
+  const token = String(formData.get("token") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  if (!token) {
+    return { error: t("resetTokenInvalid") };
+  }
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    return { error: t("passwordTooShort", { min: MIN_PASSWORD_LENGTH }) };
+  }
+  if (password !== confirm) {
+    return { error: t("passwordMismatch") };
+  }
+
+  const record = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash: hashResetToken(token) },
+  });
+  if (!record || record.usedAt || record.expiresAt < new Date()) {
+    return { error: t("resetTokenInvalid") };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: record.userId },
+      data: { passwordHash: await hashPassword(password) },
+    }),
+    prisma.passwordResetToken.update({
+      where: { id: record.id },
+      data: { usedAt: new Date() },
+    }),
+    // Toutes les sessions sont révoquées : l'utilisateur se reconnecte
+    // avec son nouveau mot de passe.
+    prisma.session.deleteMany({ where: { userId: record.userId } }),
+    // Nettoyage des autres jetons encore actifs pour ce compte.
+    prisma.passwordResetToken.deleteMany({
+      where: { userId: record.userId, usedAt: null, id: { not: record.id } },
+    }),
+  ]);
+
+  return { success: true };
 }
 
 /** Résultat des actions du profil : erreur, succès, ou rien (état initial). */

@@ -23,6 +23,7 @@
     "confirmPassword": "Confirmer le mot de passe",
     "signIn": "Se connecter",
     "signingIn": "Connexion…",
+    "forgotPassword": "Mot de passe oublié ?",
     "createAccount": "Créer mon compte",
     "creatingAccount": "Création…",
     "noAccount": "Pas encore de compte ?",
@@ -45,7 +46,38 @@
       "passwordMismatch": "Les mots de passe ne correspondent pas.",
       "accountExists": "Un compte existe déjà avec cet email. Connecte-toi.",
       "wrongCurrentPassword": "Mot de passe actuel incorrect.",
-      "samePassword": "Le nouveau mot de passe doit être différent de l'actuel."
+      "samePassword": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "mailNotConfigured": "L'envoi d'email n'est pas configuré sur ce serveur. Contacte l'administrateur.",
+      "resetTokenInvalid": "Ce lien de réinitialisation est invalide ou a expiré. Refais une demande."
+    },
+    "forgot": {
+      "heading": "Mot de passe oublié",
+      "intro": "Indique ton email : on t'envoie un lien pour choisir un nouveau mot de passe.",
+      "email": "Email",
+      "emailPlaceholder": "email@exemple.fr",
+      "send": "Envoyer le lien",
+      "sending": "Envoi…",
+      "sent": "Si un compte existe avec cet email, un lien de réinitialisation vient d'être envoyé. Pense à vérifier tes spams.",
+      "backToLogin": "← Retour à la connexion"
+    },
+    "reset": {
+      "heading": "Nouveau mot de passe",
+      "intro": "Choisis ton nouveau mot de passe.",
+      "newPassword": "Nouveau mot de passe",
+      "passwordPlaceholder": "8 caractères minimum",
+      "confirmPassword": "Confirmer le mot de passe",
+      "reset": "Réinitialiser",
+      "resetting": "Réinitialisation…",
+      "done": "Mot de passe réinitialisé ! Tu peux maintenant te connecter.",
+      "goToLogin": "Se connecter"
+    },
+    "resetMail": {
+      "subject": "Réinitialise ton mot de passe SharedCart",
+      "greeting": "Salut {name},",
+      "intro": "Tu as demandé à réinitialiser ton mot de passe SharedCart. Clique sur le bouton ci-dessous pour en choisir un nouveau.",
+      "button": "Choisir un nouveau mot de passe",
+      "expiry": "Ce lien expire dans 1 heure et ne peut être utilisé qu'une fois.",
+      "ignore": "Si tu n'es pas à l'origine de cette demande, ignore simplement cet email."
     },
     "signupPending": "Compte créé ! Un administrateur va l'activer prochainement. Tu pourras te connecter une fois ton compte vérifié."
   },
