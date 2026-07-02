@@ -99,7 +99,8 @@ export async function parseDictation(groupId: string, transcript: string): Promi
     const items = sanitizeItems(JSON.parse(extractJson(out, "[", "]")));
     if (items.length === 0) return { error: t("nothingParsed") };
     return { items };
-  } catch {
+  } catch (err) {
+    console.error("[premium] parseDictation fallback", err);
     // Filet de secours : découpage par virgules / « et ».
     const items = sanitizeItems(
       text.split(/,|\bet\b|\band\b/i).map(part => ({ label: part.trim(), quantity: 1 })),

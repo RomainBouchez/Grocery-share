@@ -264,8 +264,11 @@ export default async function GroupPage({
         boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 10px 30px rgba(30,26,20,0.12)",
         fontFamily: FONT,
       }}>
-        {hasPremiumAccess(user) && <PremiumTools groupId={groupId} />}
-        <AddItemForm groupId={groupId} suggestions={suggestions} tags={tags} productTagMap={productTagMap} />
+        {hasPremiumAccess(user) ? (
+          <PremiumTools groupId={groupId} suggestions={suggestions} tags={tags} productTagMap={productTagMap} />
+        ) : (
+          <AddItemForm groupId={groupId} suggestions={suggestions} tags={tags} productTagMap={productTagMap} />
+        )}
       </div>
 
       <TabBar />

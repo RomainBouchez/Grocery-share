@@ -373,9 +373,11 @@
   "premium": {
     "premiumBadge": "PREMIUM",
     "dictate": "Dicter",
+    "stop": "Arrêter",
     "listening": "Je t'écoute… liste tes courses",
     "done": "Terminé",
     "parsing": "Analyse…",
+    "dictPreviewTitle": "Articles dictés",
     "dictationAdded": "{count, plural, one {# article ajouté} other {# articles ajoutés}} depuis la dictée 🎙️",
     "importRecipe": "Recette",
     "recipeTitle": "Importer une recette",
