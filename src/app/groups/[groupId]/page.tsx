@@ -15,6 +15,7 @@ import { PendingSections } from "@/components/PendingSections";
 import { ensureDefaultTags, getGroupTags } from "@/lib/serverTags";
 import { type TagView } from "@/lib/tags";
 import { normalizeLoose } from "@/lib/matching";
+import { expireStaleShopping } from "@/lib/shopping";
 import { resolveGroupColors } from "@/lib/colors";
 import {
   colorFor, avatarStyle, tintForColor,
@@ -45,6 +46,9 @@ export default async function GroupPage({
   if (!list) {
     list = await prisma.shoppingList.create({ data: { groupId, status: "planning" } });
   }
+
+  // Session « je fais les courses » oubliée (> 2 h) : libérée automatiquement.
+  list = await expireStaleShopping(list);
 
   const iAmShopping = list.shoppingByUserId === user.id;
   const shoppingByOther: string | null = (() => {
