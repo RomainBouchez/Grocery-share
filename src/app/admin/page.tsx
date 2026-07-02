@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentUser, isAdmin, isAdminEmail } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { setUserActive } from "@/lib/actions/admin";
+import { AdminPushToggle } from "@/components/AdminPushToggle";
 import { initials } from "@/lib/utils";
 import {
   colorFor, card, btnPrimary, btnSecondary,
@@ -38,6 +39,8 @@ export default async function AdminPage() {
             <strong style={{ color: DANGER }}>{t("pendingCount", { count: pending.length })}</strong>
           )}
         </p>
+
+        <AdminPushToggle />
 
         {pending.length > 0 && (
           <Section title={t("pendingSection", { count: pending.length })}>

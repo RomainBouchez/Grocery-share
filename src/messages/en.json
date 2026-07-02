@@ -250,7 +250,9 @@
     "goShopping": "I'll do the shopping",
     "notif": {
       "body": "{name} is shopping (for {group})! Fill in the shopping list with what you need",
-      "fallbackGroup": "your group"
+      "fallbackGroup": "your group",
+      "pendingTitle": "New account to activate",
+      "pendingBody": "{name} just signed up and is waiting for account activation."
     }
   },
   "receipt": {
@@ -306,7 +308,11 @@
     "pendingSection": "Awaiting activation ({count})",
     "activeSection": "Active accounts ({count})",
     "activate": "Enable",
-    "deactivate": "Disable"
+    "deactivate": "Disable",
+    "enableNotifs": "Enable notifications",
+    "notifsEnabled": "Notifications enabled",
+    "notifsBlocked": "Notifications blocked by the browser",
+    "notifsHint": "Get notified as soon as an account is awaiting your activation."
   },
   "tags": {
     "defaults": {
