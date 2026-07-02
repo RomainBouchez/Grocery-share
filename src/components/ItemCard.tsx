@@ -7,6 +7,7 @@ import { TrashBinMinimalistic } from "@/lib/icons";
 import { TagPicker } from "@/components/TagPicker";
 import type { TagView } from "@/lib/tags";
 import { initials } from "@/lib/utils";
+import { formatQuantity, GRAM_STEP, DEFAULT_GRAMS, MAX_GRAMS, type ItemUnit } from "@/lib/units";
 import {
   btnDanger, checkbox, cardSm, memberChip, avatarStyle,
   tintForColor, avatarColor, ACCENT, ACCENT_TEXT, ACCENT_SOFT,
@@ -20,6 +21,7 @@ export type ItemView = {
   addedByUserId: string; addedByName: string;
   tagId?: string | null;
   quantity: number;
+  unit?: ItemUnit;
   participants: ParticipantView[];
 };
 
@@ -45,6 +47,7 @@ export function ItemCard({
   const [renaming, setRenaming] = useState(false);
   const [editLabel, setEditLabel] = useState(item.label);
   const [editQty, setEditQty] = useState(item.quantity);
+  const [editUnit, setEditUnit] = useState<ItemUnit>(item.unit ?? null);
   const labelInputRef = useRef<HTMLInputElement>(null);
   // Coche affichée localement avant le collapse (feedback « validé » de 0,5 s).
   const [justChecked, setJustChecked] = useState(false);
@@ -90,6 +93,7 @@ export function ItemCard({
   function openRename() {
     setEditLabel(item.label);
     setEditQty(item.quantity);
+    setEditUnit(item.unit ?? null);
     setRenaming(true);
   }
 
@@ -97,8 +101,8 @@ export function ItemCard({
     const label = editLabel.trim();
     if (!label) return;
     setRenaming(false);
-    if (label === item.label && editQty === item.quantity) return; // rien changé
-    call(updateItem, { itemId: item.id, label, quantity: String(editQty) });
+    if (label === item.label && editQty === item.quantity && editUnit === (item.unit ?? null)) return; // rien changé
+    call(updateItem, { itemId: item.id, label, quantity: String(editQty), unit: editUnit ?? "" });
   }
 
   // Focus + sélection du champ nom à l'ouverture de l'édition.
@@ -191,9 +195,18 @@ export function ItemCard({
               }}
             />
             <div style={{ display: "flex", alignItems: "center", borderRadius: 10, border: `1.5px solid ${HAIRLINE}`, background: "#fff", overflow: "hidden", flexShrink: 0 }}>
-              <button onClick={() => setEditQty(q => Math.max(1, q - 1))} style={{ padding: "4px 9px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700, fontSize: 15, lineHeight: 1 }}>−</button>
-              <span style={{ minWidth: 22, textAlign: "center", fontSize: 13, fontWeight: 800, color: ACCENT_TEXT }}>×{editQty}</span>
-              <button onClick={() => setEditQty(q => Math.min(99, q + 1))} style={{ padding: "4px 9px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700, fontSize: 15, lineHeight: 1 }}>+</button>
+              <button onClick={() => setEditQty(q => Math.max(editUnit === "g" ? GRAM_STEP : 1, q - (editUnit === "g" ? GRAM_STEP : 1)))} style={{ padding: "4px 9px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700, fontSize: 15, lineHeight: 1 }}>−</button>
+              <button
+                onClick={() => {
+                  // Bascule pièces ↔ grammes (500 g par défaut).
+                  if (editUnit === "g") { setEditUnit(null); setEditQty(1); }
+                  else { setEditUnit("g"); setEditQty(DEFAULT_GRAMS); }
+                }}
+                style={{ minWidth: 36, textAlign: "center", padding: "4px 2px", background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 800, color: ACCENT_TEXT, fontFamily: "inherit" }}
+              >
+                {formatQuantity(editQty, editUnit)}
+              </button>
+              <button onClick={() => setEditQty(q => Math.min(editUnit === "g" ? MAX_GRAMS : 99, q + (editUnit === "g" ? GRAM_STEP : 1)))} style={{ padding: "4px 9px", background: "none", border: "none", cursor: "pointer", color: INK_MUTED, fontFamily: "inherit", fontWeight: 700, fontSize: 15, lineHeight: 1 }}>+</button>
             </div>
             <button
               onClick={saveRename}
@@ -215,9 +228,9 @@ export function ItemCard({
             onClick={openRename}
             style={{ flex: 1, cursor: "pointer", fontSize: 16, fontWeight: 600, color: showBought ? INK_DONE : INK, textDecoration: showBought ? "line-through" : "none", display: "flex", alignItems: "center", gap: 5 }}>
             {item.label}
-            {item.quantity > 1 && (
-              <span style={{ fontSize: 12, fontWeight: 800, color: showBought ? INK_FAINT : ACCENT_TEXT, background: showBought ? "#F0EFEB" : ACCENT_SOFT, padding: "1px 6px", borderRadius: 8 }}>
-                ×{item.quantity}
+            {(item.quantity > 1 || item.unit === "g") && (
+              <span style={{ fontSize: 12, fontWeight: 800, color: showBought ? INK_FAINT : ACCENT_TEXT, background: showBought ? "#F0EFEB" : ACCENT_SOFT, padding: "1px 6px", borderRadius: 8, whiteSpace: "nowrap" }}>
+                {formatQuantity(item.quantity, item.unit ?? null)}
               </span>
             )}
           </span>

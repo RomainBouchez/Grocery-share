@@ -216,6 +216,7 @@
   "item": {
     "history": "History",
     "addPlaceholder": "Add an item…",
+    "unitToggle": "Toggle pieces / weight",
     "noParticipants": "no one yet",
     "whoParticipates": "Who's in?",
     "addedBy": "Added by {name}",
@@ -368,6 +369,34 @@
   "metadata": {
     "title": "SharedCart — one list your whole house shares",
     "description": "Add groceries from anywhere. Whoever's heading to the store sees them the second you jot them down."
+  },
+  "premium": {
+    "premiumBadge": "PREMIUM",
+    "dictate": "Dictate",
+    "listening": "Listening… say your groceries",
+    "done": "Done",
+    "parsing": "Parsing…",
+    "dictationAdded": "{count, plural, one {# item added} other {# items added}} from dictation 🎙️",
+    "importRecipe": "Recipe",
+    "recipeTitle": "Import a recipe",
+    "recipePlaceholder": "Paste a recipe link (https://…) or the recipe text",
+    "analyze": "Extract ingredients",
+    "analyzing": "Extracting…",
+    "servings": "{count, plural, one {# serving} other {# servings}}",
+    "previewHint": "Uncheck what you already have, then add to the list.",
+    "back": "Back",
+    "cancel": "Cancel",
+    "adding": "Adding…",
+    "addSelected": "{count, plural, one {Add # item} other {Add # items}}",
+    "recipeAdded": "{count, plural, one {# ingredient added} other {# ingredients added}} 🍳",
+    "errors": {
+      "emptyDictation": "I didn't hear anything — try again.",
+      "nothingParsed": "Couldn't extract any items from the dictation.",
+      "emptyRecipe": "Paste a link or the text of a recipe.",
+      "fetchFailed": "Couldn't fetch that page. Paste the recipe text instead.",
+      "noIngredients": "No ingredients found in this content.",
+      "parseFailed": "Extraction failed — try again or paste the text directly."
+    }
   },
   "profile": {
     "title": "Profile",

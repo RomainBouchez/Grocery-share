@@ -97,6 +97,15 @@ export function isAdmin(user: { email: string }): boolean {
   return isAdminEmail(user.email);
 }
 
+/**
+ * Accès aux fonctionnalités premium (dictée vocale, import de recettes).
+ * Pour l'instant réservé à l'admin ; à remplacer par un vrai statut
+ * d'abonnement quand la partie payante sera branchée.
+ */
+export function hasPremiumAccess(user: { email: string }): boolean {
+  return isAdmin(user);
+}
+
 /** Garantit un utilisateur admin (zones d'administration). */
 export async function requireAdmin(): Promise<User> {
   const user = await requireUser();

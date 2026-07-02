@@ -172,6 +172,7 @@ model ListItem {
   label         String
   addedByUserId String
   status        String   @default("pending") // "pending" | "bought" | "skipped"
+  unit          String?  // null = pièces (quantity = nombre) | "g" = poids (quantity = grammes)
   tagId         String?
   quantity      Int      @default(1)
   createdAt     DateTime @default(now())

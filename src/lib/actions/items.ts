@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
 import { normalizeLoose } from "@/lib/matching";
+import { parseUnit, clampQuantity, MAX_PIECES, MAX_GRAMS } from "@/lib/units";
 
 export type ActionResult = { error: string } | undefined;
 
@@ -31,7 +32,8 @@ export async function addItem(_prev: ActionResult, formData: FormData): Promise<
   const groupId = String(formData.get("groupId") ?? "");
   const label = String(formData.get("label") ?? "").trim();
   const tagIdRaw = String(formData.get("tagId") ?? "").trim() || null;
-  const quantity = Math.max(1, Math.min(99, parseInt(String(formData.get("quantity") ?? "1"), 10) || 1));
+  const unit = parseUnit(formData.get("unit"));
+  const quantity = clampQuantity(parseInt(String(formData.get("quantity") ?? "1"), 10), unit);
 
   if (!label) return { error: (await getTranslations("item.errors"))("labelRequired") };
 
@@ -68,19 +70,26 @@ export async function addItem(_prev: ActionResult, formData: FormData): Promise<
   });
 
   // Anti-doublons : si un article « à acheter » identique existe déjà dans la
-  // liste (même libellé, aux accents/casse/ponctuation près), on ne recrée pas.
-  // On incrémente sa quantité et on ajoute l'utilisateur aux participants.
+  // liste (même libellé, aux accents/casse/ponctuation près) ET même unité,
+  // on ne recrée pas : quantités fusionnées, utilisateur ajouté aux participants.
   const norm = normalizeLoose(label);
   const pendingItems = await prisma.listItem.findMany({
     where: { listId: list.id, status: "pending" },
-    select: { id: true, label: true, quantity: true },
+    select: { id: true, label: true, quantity: true, unit: true },
   });
-  const existing = pendingItems.find(it => normalizeLoose(it.label) === norm);
+  const existing = pendingItems.find(
+    it => normalizeLoose(it.label) === norm && parseUnit(it.unit) === unit,
+  );
 
   if (existing) {
     await prisma.listItem.update({
       where: { id: existing.id },
-      data: { quantity: Math.min(99, existing.quantity + 1) },
+      data: {
+        quantity: Math.min(
+          unit === "g" ? MAX_GRAMS : MAX_PIECES,
+          existing.quantity + (unit === "g" ? quantity : 1),
+        ),
+      },
     });
     // Ajoute l'utilisateur s'il ne participe pas encore (sinon on ne touche pas ses parts).
     await prisma.itemParticipant.upsert({
@@ -99,6 +108,7 @@ export async function addItem(_prev: ActionResult, formData: FormData): Promise<
       addedByUserId: user.id,
       tagId: finalTagId,
       quantity,
+      unit,
       participants: { create: { userId: user.id, parts: 1 } },
     },
   });
@@ -153,12 +163,13 @@ export async function updateItem(formData: FormData): Promise<void> {
   const user = await requireUser();
   const itemId = String(formData.get("itemId") ?? "");
   const label = String(formData.get("label") ?? "").trim();
-  const quantity = Math.max(1, Math.min(99, parseInt(String(formData.get("quantity") ?? "1"), 10) || 1));
+  const unit = parseUnit(formData.get("unit"));
+  const quantity = clampQuantity(parseInt(String(formData.get("quantity") ?? "1"), 10), unit);
 
   if (!label) return;
 
   const item = await loadItemAndAuthorize(user.id, itemId);
-  await prisma.listItem.update({ where: { id: itemId }, data: { label, quantity } });
+  await prisma.listItem.update({ where: { id: itemId }, data: { label, quantity, unit } });
   revalidatePath(`/groups/${item.list.groupId}`);
 }
 

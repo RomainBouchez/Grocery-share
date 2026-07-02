@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, hasPremiumAccess } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ItemCard, type ItemView } from "@/components/ItemCard";
 import { InviteCode } from "@/components/InviteCode";
@@ -12,6 +12,7 @@ import { Cart3, Scale } from "@/lib/icons";
 import { GroupAppearance } from "@/components/GroupAppearance";
 import { PushManager } from "@/components/PushManager";
 import { PendingSections } from "@/components/PendingSections";
+import { PremiumTools } from "@/components/PremiumTools";
 import { ensureDefaultTags, getGroupTags } from "@/lib/serverTags";
 import { type TagView } from "@/lib/tags";
 import { normalizeLoose } from "@/lib/matching";
@@ -71,6 +72,7 @@ export default async function GroupPage({
     addedByUserId: it.addedByUserId, addedByName: it.addedBy.name,
     tagId: it.tagId,
     quantity: it.quantity,
+    unit: it.unit === "g" ? "g" as const : null,
     participants: it.participants.map(p => ({ userId: p.userId, name: p.user.name, parts: p.parts })),
   }));
 
@@ -262,6 +264,7 @@ export default async function GroupPage({
         boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 10px 30px rgba(30,26,20,0.12)",
         fontFamily: FONT,
       }}>
+        {hasPremiumAccess(user) && <PremiumTools groupId={groupId} />}
         <AddItemForm groupId={groupId} suggestions={suggestions} tags={tags} productTagMap={productTagMap} />
       </div>
 

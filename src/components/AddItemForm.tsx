@@ -8,6 +8,7 @@ import { tagIcon, tagBg } from "@/lib/tags";
 import { useTagName } from "@/lib/useTagName";
 import { ACCENT, ACCENT_SOFT, ACCENT_TEXT, INK_FAINT, INK_MUTED, HAIRLINE } from "@/lib/ui";
 import { normalizeLoose } from "@/lib/matching";
+import { formatQuantity, clampQuantity, GRAM_STEP, DEFAULT_GRAMS, type ItemUnit } from "@/lib/units";
 
 export function AddItemForm({
   groupId,
@@ -26,6 +27,7 @@ export function AddItemForm({
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [tagSetByUser, setTagSetByUser] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [unit, setUnit] = useState<ItemUnit>(null);
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -53,6 +55,7 @@ export function AddItemForm({
     fd.append("label", label);
     fd.append("tagId", selectedTagId ?? "");
     fd.append("quantity", String(quantity));
+    fd.append("unit", unit ?? "");
     setShowSuggestions(false);
     setShowTagPicker(false);
     startTransition(async () => {
@@ -62,6 +65,7 @@ export function AddItemForm({
         setSelectedTagId(null);
         setTagSetByUser(false);
         setQuantity(1);
+        setUnit(null);
       }
     });
   }
@@ -243,25 +247,38 @@ export function AddItemForm({
 
           <div style={{ flex: 1 }} />
 
-          {/* Quantity stepper */}
+          {/* Quantity stepper — clic sur la valeur = bascule pièces ↔ grammes */}
           <div style={{ display: "flex", alignItems: "center", borderRadius: 12, border: `1.5px solid ${HAIRLINE}`, background: "#fff", overflow: "hidden" }}>
             <button
               type="button"
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              disabled={quantity <= 1}
+              onClick={() => setQuantity(q => Math.max(unit === "g" ? GRAM_STEP : 1, q - (unit === "g" ? GRAM_STEP : 1)))}
+              disabled={unit === "g" ? quantity <= GRAM_STEP : quantity <= 1}
               style={{
                 padding: "4px 11px", background: "none", border: "none",
-                cursor: quantity > 1 ? "pointer" : "default",
-                color: quantity > 1 ? INK_MUTED : HAIRLINE,
+                cursor: (unit === "g" ? quantity > GRAM_STEP : quantity > 1) ? "pointer" : "default",
+                color: (unit === "g" ? quantity > GRAM_STEP : quantity > 1) ? INK_MUTED : HAIRLINE,
                 fontFamily: "inherit", fontWeight: 700, fontSize: 16, lineHeight: 1,
               }}
             >−</button>
-            <span style={{ minWidth: 24, textAlign: "center", fontSize: 13, fontWeight: 800, color: quantity > 1 ? ACCENT_TEXT : INK_FAINT }}>
-              ×{quantity}
-            </span>
             <button
               type="button"
-              onClick={() => setQuantity(q => Math.min(99, q + 1))}
+              onClick={() => {
+                // Bascule d'unité : pièces ↔ poids (500 g par défaut).
+                if (unit === "g") { setUnit(null); setQuantity(1); }
+                else { setUnit("g"); setQuantity(DEFAULT_GRAMS); }
+              }}
+              title={tr("item.unitToggle")}
+              style={{
+                minWidth: 40, textAlign: "center", padding: "4px 2px", background: "none", border: "none",
+                cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 800,
+                color: unit === "g" || quantity > 1 ? ACCENT_TEXT : INK_FAINT,
+              }}
+            >
+              {formatQuantity(quantity, unit)}
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuantity(q => clampQuantity(q + (unit === "g" ? GRAM_STEP : 1), unit))}
               style={{
                 padding: "4px 11px", background: "none", border: "none", cursor: "pointer",
                 color: INK_MUTED, fontFamily: "inherit", fontWeight: 700, fontSize: 16, lineHeight: 1,

@@ -216,6 +216,7 @@
   "item": {
     "history": "Historique",
     "addPlaceholder": "Ajouter un article…",
+    "unitToggle": "Basculer pièces / poids",
     "noParticipants": "personne pour l'instant",
     "whoParticipates": "Qui participe ?",
     "addedBy": "Ajouté par {name}",
@@ -368,6 +369,34 @@
   "metadata": {
     "title": "SharedCart — une seule liste que toute la maison partage",
     "description": "Ajoute tes courses d'où tu veux. Celui qui part au magasin les voit à la seconde où tu les notes."
+  },
+  "premium": {
+    "premiumBadge": "PREMIUM",
+    "dictate": "Dicter",
+    "listening": "Je t'écoute… liste tes courses",
+    "done": "Terminé",
+    "parsing": "Analyse…",
+    "dictationAdded": "{count, plural, one {# article ajouté} other {# articles ajoutés}} depuis la dictée 🎙️",
+    "importRecipe": "Recette",
+    "recipeTitle": "Importer une recette",
+    "recipePlaceholder": "Colle un lien de recette (https://…) ou le texte de la recette",
+    "analyze": "Extraire les ingrédients",
+    "analyzing": "Extraction…",
+    "servings": "{count, plural, one {# part} other {# parts}}",
+    "previewHint": "Décoche ce que tu as déjà, puis ajoute à la liste.",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "adding": "Ajout…",
+    "addSelected": "{count, plural, one {Ajouter # article} other {Ajouter # articles}}",
+    "recipeAdded": "{count, plural, one {# ingrédient ajouté} other {# ingrédients ajoutés}} 🍳",
+    "errors": {
+      "emptyDictation": "Je n'ai rien entendu — réessaie.",
+      "nothingParsed": "Impossible d'extraire des articles de la dictée.",
+      "emptyRecipe": "Colle un lien ou le texte d'une recette.",
+      "fetchFailed": "Impossible de récupérer cette page. Colle plutôt le texte de la recette.",
+      "noIngredients": "Aucun ingrédient trouvé dans ce contenu.",
+      "parseFailed": "L'extraction a échoué — réessaie ou colle le texte directement."
+    }
   },
   "profile": {
     "title": "Profil",
