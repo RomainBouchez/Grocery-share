@@ -62,8 +62,12 @@ function DemoStage({ children, style }: { children: ReactNode; style?: CSSProper
   );
 }
 
+type FaqItem = { q: string; a: string; href?: string; hrefLabel?: string };
+
 export function LandingPage() {
   const t = useTranslations("landing");
+  const tf = useTranslations("faq");
+  const faqItems = tf.raw("items") as FaqItem[];
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Données de démo (composants réels, non interactifs) — libellés traduits.
@@ -239,7 +243,7 @@ export function LandingPage() {
         <nav className="cf-nav" style={{ maxWidth: 1180, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: "#FFFFFF", border: "1.5px solid #fff", boxShadow: "0 0 0 1px rgba(30,26,20,0.05), 0 4px 12px rgba(30,26,20,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src="/mark.svg" alt="" width={26} height={26} style={{ display: "block" }} />
+              <img src="/mark.svg" alt="Logo SharedCart" width={26} height={26} style={{ display: "block" }} />
             </div>
             <span style={{ fontSize: 21, fontWeight: 900, letterSpacing: "-0.03em", color: INK }}>SharedCart</span>
           </div>
@@ -450,6 +454,36 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ — questions/réponses citables par les moteurs IA (FAQPage JSON-LD associé) */}
+      <section id="faq" style={{ position: "relative", zIndex: 1, maxWidth: 820, margin: "120px auto 0", padding: "0 40px" }}>
+        <div data-reveal style={{ textAlign: "center", marginBottom: 48 }}>
+          <span style={{ ...pastille("#E2F5EB", ACCENT), fontSize: 13, marginBottom: 18 }}>
+            <ChecklistMinimalistic weight="Bold" size={14} color={ACCENT} />{tf("badge")}
+          </span>
+          <h2 style={{ margin: 0, fontSize: "clamp(28px, 3.5vw, 42px)", lineHeight: 1.08, fontWeight: 900, letterSpacing: "-0.04em", color: INK }}>
+            {tf("heading")}
+          </h2>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {faqItems.map((f, i) => (
+            <div key={i} data-reveal data-soft style={{ ...cardRelief, borderRadius: 20, padding: "22px 26px", textAlign: "left" }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900, letterSpacing: "-0.02em", color: INK }}>{f.q}</h3>
+              <p style={{ margin: "10px 0 0", fontSize: 16, lineHeight: 1.55, color: INK_MUTED, fontWeight: 500 }}>
+                {f.a}
+                {f.href && (
+                  <>
+                    {" "}
+                    <a href={f.href} target="_blank" rel="noopener noreferrer" style={{ color: ACCENT, fontWeight: 800, textDecoration: "underline" }}>
+                      {f.hrefLabel ?? f.href}
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* CLOSING CTA */}
       <section id="get" style={{ position: "relative", zIndex: 1, maxWidth: 1180, margin: "0 auto", padding: "130px 40px" }}>
         <div data-reveal style={{ textAlign: "center" }}>
@@ -475,12 +509,12 @@ export function LandingPage() {
         <div className="cf-footer-inner" style={{ maxWidth: 1180, margin: "0 auto", padding: "40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 30, height: 30, borderRadius: 10, background: "#FFFFFF", border: "1.5px solid #fff", boxShadow: "0 0 0 1px rgba(30,26,20,0.05)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src="/mark.svg" alt="" width={21} height={21} style={{ display: "block" }} />
+              <img src="/mark.svg" alt="Logo SharedCart" width={21} height={21} style={{ display: "block" }} />
             </div>
             <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: "-0.02em", color: INK }}>SharedCart</span>
           </div>
           <div className="cf-footer-links" style={{ display: "flex", gap: 26 }}>
-            {[[t("footer.features"), "#features"], [t("footer.how"), "#how"], [t("footer.login"), "/login"]].map(([label, href]) => (
+            {[[t("footer.features"), "#features"], [t("footer.how"), "#how"], [tf("badge"), "#faq"], [t("footer.login"), "/login"]].map(([label, href]) => (
               <Link key={label} href={href} style={{ fontSize: 14, fontWeight: 700, color: INK_MUTED, textDecoration: "none" }}>{label}</Link>
             ))}
           </div>

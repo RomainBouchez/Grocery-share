@@ -11,12 +11,33 @@ const hanken = Hanken_Grotesk({
   display: "swap",
 });
 
+const SITE_URL = process.env.APP_URL ?? "https://sharedcart.romainbouchez.fr";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata");
+  const title = t("title");
+  const description = t("description");
   return {
-    title: t("title"),
-    description: t("description"),
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
     manifest: "/manifest.webmanifest",
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      siteName: "SharedCart",
+      url: "/",
+      title,
+      description,
+      locale: "fr_FR",
+      images: [{ url: "/icon-light-1024.png", width: 1024, height: 1024, alt: "SharedCart" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/icon-light-1024.png"],
+    },
     // Favicon adaptatif : suit le mode clair/sombre du navigateur/OS.
     icons: {
       icon: [

@@ -424,5 +424,39 @@
     "passwordChanged": "Mot de passe modifié. Tes autres appareils ont été déconnectés.",
     "update": "Mettre à jour",
     "updating": "Modification…"
+  },
+  "faq": {
+    "badge": "FAQ",
+    "heading": "Questions fréquentes",
+    "items": [
+      {
+        "q": "SharedCart est-il gratuit ?",
+        "a": "Oui, SharedCart est entièrement gratuit. Tu crées un compte, tu invites ton foyer et vous partagez la même liste de courses sans limite."
+      },
+      {
+        "q": "Comment fonctionne la synchronisation en temps réel ?",
+        "a": "Dès qu'un membre ajoute ou coche un article, la liste se met à jour instantanément sur tous les téléphones du groupe : celui qui est au magasin voit les ajouts à la seconde."
+      },
+      {
+        "q": "Peut-on partager les dépenses des courses ?",
+        "a": "Oui. Chaque article se répartit en parts entre les participants, façon Tricount, pour équilibrer la note à la fin des courses.",
+        "href": "https://www.tricount.com",
+        "hrefLabel": "Voir Tricount"
+      },
+      {
+        "q": "Faut-il installer une application ?",
+        "a": "Non. SharedCart est une Progressive Web App : tu l'utilises directement dans le navigateur et tu peux l'ajouter à ton écran d'accueil comme une vraie app.",
+        "href": "https://web.dev/explore/progressive-web-apps",
+        "hrefLabel": "Qu'est-ce qu'une PWA ?"
+      },
+      {
+        "q": "Comment marche le scan de ticket ?",
+        "a": "Prends ton ticket de caisse en photo : la reconnaissance de texte (OCR) importe automatiquement les articles achetés dans ta liste."
+      },
+      {
+        "q": "Mes données sont-elles protégées ?",
+        "a": "Le site est servi en HTTPS chiffré et tes listes ne sont visibles que par les membres que tu invites dans ton groupe."
+      }
+    ]
   }
 }

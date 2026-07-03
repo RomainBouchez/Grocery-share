@@ -1,0 +1,25 @@
+# SharedCart
+
+> Liste de courses collaborative en temps réel. Une seule liste que tout le foyer partage : ajoute un article d'où tu veux, celui qui part au magasin le voit à la seconde. Parts façon Tricount, suggestions et scan de ticket OCR.
+
+SharedCart est une application web (PWA) gratuite pour couples, familles et colocations. Chacun ajoute ses courses depuis son téléphone, la liste se synchronise en direct, les rayons se regroupent automatiquement et les doublons sont fusionnés. Le partage des dépenses se calcule en parts, comme Tricount.
+
+## Fonctions clés
+- Liste partagée synchronisée en temps réel entre tous les membres d'un groupe
+- Regroupement automatique par rayon (fruits & légumes, crémerie, épicerie…)
+- Détection et fusion des doublons quand deux personnes ajoutent le même article
+- Répartition des dépenses en parts entre les participants (façon Tricount)
+- Scan de ticket de caisse (OCR) pour importer les achats
+- Suggestions d'articles récurrents
+- Notifications push, installable comme une application (PWA)
+- Interface en français et en anglais
+
+## Pages
+- Accueil / présentation: https://sharedcart.romainbouchez.fr/
+- Connexion / création de compte: https://sharedcart.romainbouchez.fr/login
+
+## Pour qui
+Couples, familles et colocataires qui veulent une seule liste de courses commune au lieu de messages éparpillés, et qui veulent partager équitablement la note.
+
+## Contact
+Éditeur: Romain Bouchez — https://romainbouchez.fr

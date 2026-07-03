@@ -424,5 +424,39 @@
     "passwordChanged": "Password updated. Your other devices have been signed out.",
     "update": "Update",
     "updating": "Updating…"
+  },
+  "faq": {
+    "badge": "FAQ",
+    "heading": "Frequently asked questions",
+    "items": [
+      {
+        "q": "Is SharedCart free?",
+        "a": "Yes, SharedCart is completely free. Create an account, invite your household and share the same shopping list with no limits."
+      },
+      {
+        "q": "How does real-time sync work?",
+        "a": "As soon as a member adds or checks off an item, the list updates instantly on every phone in the group — whoever is at the store sees new items the second they are added."
+      },
+      {
+        "q": "Can we split the grocery expenses?",
+        "a": "Yes. Each item is split into shares between participants, Tricount-style, to balance the bill after shopping.",
+        "href": "https://www.tricount.com",
+        "hrefLabel": "See Tricount"
+      },
+      {
+        "q": "Do I need to install an app?",
+        "a": "No. SharedCart is a Progressive Web App: use it right in your browser and add it to your home screen like a real app.",
+        "href": "https://web.dev/explore/progressive-web-apps",
+        "hrefLabel": "What is a PWA?"
+      },
+      {
+        "q": "How does receipt scanning work?",
+        "a": "Take a photo of your receipt: text recognition (OCR) automatically imports the purchased items into your list."
+      },
+      {
+        "q": "Is my data protected?",
+        "a": "The site is served over encrypted HTTPS and your lists are only visible to the members you invite into your group."
+      }
+    ]
   }
 }

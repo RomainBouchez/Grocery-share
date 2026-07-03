@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { LandingPage } from "@/components/LandingPage";
+import { StructuredData } from "@/components/StructuredData";
 import { HomeDashboard, type GroupData, type MemberPreview } from "@/components/HomeDashboard";
 import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
@@ -9,7 +10,13 @@ import { resolveGroupColors } from "@/lib/colors";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
-  if (!user) return <LandingPage />;
+  if (!user)
+    return (
+      <>
+        <StructuredData />
+        <LandingPage />
+      </>
+    );
 
   const memberships = await prisma.groupMember.findMany({
     where: { userId: user.id },
