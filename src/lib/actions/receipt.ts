@@ -8,7 +8,7 @@ import os from "os";
 import path from "path";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireUser, hasPremiumAccess } from "@/lib/auth";
 import { assertMembership } from "@/lib/actions/groups";
 import { extractAndMatchReceipt, extractReceiptItems } from "@/lib/ocr";
 import { matchReceiptWithClaude } from "@/lib/matchClaude";
@@ -57,6 +57,12 @@ async function getActiveList(userId: string, groupId: string) {
 export async function scanReceipt(_prev: unknown, formData: FormData): Promise<ScanDraft | ScanError> {
   const user = await requireUser();
   const t = await getTranslations("receipt.errors");
+
+  // Scan OCR + Claude : fonctionnalité Premium (comme dictée / recette).
+  if (!hasPremiumAccess(user)) {
+    return { ok: false, error: t("premiumOnly") };
+  }
+
   const groupId = String(formData.get("groupId") ?? "");
   const photo = formData.get("photo");
 

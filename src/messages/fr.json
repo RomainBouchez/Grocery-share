@@ -325,8 +325,11 @@
       "notImage": "Le fichier doit être une image.",
       "accessDenied": "Accès au groupe refusé.",
       "analysisFailed": "Échec de l'analyse du ticket.",
-      "noItemsDetected": "Aucun article détecté sur le ticket."
-    }
+      "noItemsDetected": "Aucun article détecté sur le ticket.",
+      "premiumOnly": "Le scan de ticket est réservé aux comptes Premium."
+    },
+    "premiumRequiredTitle": "Scan de ticket Premium",
+    "premiumRequiredDesc": "L'analyse du ticket par Claude (OCR + rapprochement automatique avec ta liste) est réservée aux comptes Premium."
   },
   "balances": {
     "intro": "Calculé à partir des tickets : qui a payé, qui partage chaque article et avec combien de parts.",
@@ -405,7 +408,8 @@
       "fetchFailed": "Impossible de récupérer cette page. Colle plutôt le texte de la recette.",
       "noIngredients": "Aucun ingrédient trouvé dans ce contenu.",
       "parseFailed": "L'extraction a échoué — réessaie ou colle le texte directement."
-    }
+    },
+    "premiumOnlyHint": "Réservé aux comptes Premium"
   },
   "profile": {
     "title": "Profil",

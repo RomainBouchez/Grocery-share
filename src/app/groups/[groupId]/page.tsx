@@ -190,19 +190,41 @@ export default async function GroupPage({
           {/* Je vais faire les courses (push PWA) */}
           <PushManager groupId={groupId} iAmShopping={iAmShopping} />
 
-          {/* Faire les courses button — uniquement si partage de dépenses activé */}
+          {/* Faire les courses (scan ticket OCR + Claude) — Premium, et si le
+              partage de dépenses est activé. Non-Premium : bouton verrouillé. */}
           {group.expenseSharingEnabled && (
-            <Link href={`/groups/${groupId}/receipt`} style={{
-              width: "100%", boxSizing: "border-box", marginTop: 10,
-              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
-              padding: "15px", borderRadius: 16, textDecoration: "none",
-              background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 800,
-              border: "1.5px solid rgba(0,0,0,0.06)",
-              boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
-            }}>
-              <Cart3 weight="Bold" size={18} color="#fff" />
-              {tr("group.iDidShopping")}
-            </Link>
+            premium ? (
+              <Link href={`/groups/${groupId}/receipt`} style={{
+                width: "100%", boxSizing: "border-box", marginTop: 10,
+                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
+                padding: "15px", borderRadius: 16, textDecoration: "none",
+                background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 800,
+                border: "1.5px solid rgba(0,0,0,0.06)",
+                boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
+              }}>
+                <Cart3 weight="Bold" size={18} color="#fff" />
+                {tr("group.iDidShopping")}
+              </Link>
+            ) : (
+              <div
+                title={tr("premium.premiumOnlyHint")}
+                style={{
+                  width: "100%", boxSizing: "border-box", marginTop: 10,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
+                  padding: "15px", borderRadius: 16, cursor: "not-allowed",
+                  background: "#9A968A", color: "#fff", fontSize: 15, fontWeight: 800,
+                  border: "1.5px solid rgba(0,0,0,0.06)",
+                  boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(30,26,20,0.22)",
+                }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                </svg>
+                {tr("group.iDidShopping")}
+                <span style={{ padding: "3px 9px", borderRadius: 999, background: "rgba(255,255,255,0.25)", color: "#fff", fontSize: 10, fontWeight: 900, letterSpacing: "0.05em" }}>
+                  {tr("premium.premiumBadge")}
+                </span>
+              </div>
+            )
           )}
 
           {/* Balance du groupe — uniquement si le module est activé */}

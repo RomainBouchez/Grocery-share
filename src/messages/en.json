@@ -325,8 +325,11 @@
       "notImage": "The file must be an image.",
       "accessDenied": "Access to the group denied.",
       "analysisFailed": "Failed to analyze the receipt.",
-      "noItemsDetected": "No item detected on the receipt."
-    }
+      "noItemsDetected": "No item detected on the receipt.",
+      "premiumOnly": "Receipt scanning is reserved for Premium accounts."
+    },
+    "premiumRequiredTitle": "Premium receipt scan",
+    "premiumRequiredDesc": "Scanning your receipt with Claude (OCR + automatic matching against your list) is reserved for Premium accounts."
   },
   "balances": {
     "intro": "Calculated from receipts: who paid, who shares each item and with how many shares.",
@@ -405,7 +408,8 @@
       "fetchFailed": "Couldn't fetch that page. Paste the recipe text instead.",
       "noIngredients": "No ingredients found in this content.",
       "parseFailed": "Extraction failed — try again or paste the text directly."
-    }
+    },
+    "premiumOnlyHint": "Premium accounts only"
   },
   "profile": {
     "title": "Profile",
