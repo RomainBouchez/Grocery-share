@@ -276,7 +276,11 @@
       "nameRequired": "Donne un nom au groupe.",
       "codeRequired": "Saisis un code d'invitation.",
       "noGroupForCode": "Aucun groupe ne correspond à ce code."
-    }
+    },
+    "invitePreviewTitle": "Tu es invité·e à rejoindre « {name} »",
+    "invitePreviewDesc": "Connecte-toi ou crée ton compte pour partager la liste de courses du groupe, en temps réel.",
+    "invitePreviewSignIn": "Se connecter pour rejoindre",
+    "invitePreviewCreate": "Créer un compte"
   },
   "push": {
     "remindTitle": "Rappeler le groupe ?",

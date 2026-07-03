@@ -276,7 +276,11 @@
       "nameRequired": "Give the group a name.",
       "codeRequired": "Enter an invite code.",
       "noGroupForCode": "No group matches this code."
-    }
+    },
+    "invitePreviewTitle": "You're invited to join « {name} »",
+    "invitePreviewDesc": "Sign in or create your account to share the group's shopping list in real time.",
+    "invitePreviewSignIn": "Sign in to join",
+    "invitePreviewCreate": "Create an account"
   },
   "push": {
     "remindTitle": "Remind the group?",

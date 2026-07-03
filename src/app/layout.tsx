@@ -23,6 +23,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     manifest: "/manifest.webmanifest",
     alternates: { canonical: "/" },
+    // Les images OG/Twitter sont fournies par les fichiers opengraph-image.tsx
+    // (racine + /join/[code]) via la convention Next — pas d'URL en dur ici.
     openGraph: {
       type: "website",
       siteName: "SharedCart",
@@ -30,13 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       locale: "fr_FR",
-      images: [{ url: "/icon-light-1024.png", width: 1024, height: 1024, alt: "SharedCart" }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/icon-light-1024.png"],
     },
     // Favicon adaptatif : suit le mode clair/sombre du navigateur/OS.
     icons: {

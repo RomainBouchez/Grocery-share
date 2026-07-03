@@ -26,12 +26,14 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
+        // /join volontairement absent : les pages d'invitation sont en noindex
+        // par page, mais doivent rester accessibles aux robots d'aperçu
+        // (WhatsApp, iMessage, Slack…) pour générer la vignette de partage.
         disallow: [
           "/admin",
           "/api/",
           "/profile",
           "/groups",
-          "/join",
           "/listes",
           "/forgot-password",
           "/reset-password",
