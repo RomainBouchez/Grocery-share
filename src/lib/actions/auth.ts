@@ -9,34 +9,10 @@ import { prisma } from "@/lib/db";
 import { createSession, destroySession, getCurrentUser, isAdminEmail, revokeOtherSessions } from "@/lib/auth";
 import { hashPassword, verifyPassword, MIN_PASSWORD_LENGTH } from "@/lib/password";
 import { sendMail, isMailConfigured, passwordResetEmailHtml } from "@/lib/mail";
-import { sendPushToUsers } from "@/lib/push";
 import { AVATAR_COLORS } from "@/lib/ui";
-
-/**
- * Notifie l'administrateur (ADMIN_EMAIL) qu'un nouveau compte attend activation.
- * Tolérant aux pannes : toute erreur est avalée pour ne pas casser l'inscription.
- */
-async function notifyAdminPendingSignup(name: string): Promise<void> {
-  try {
-    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-    if (!adminEmail) return;
-    const admin = await prisma.user.findUnique({ where: { email: adminEmail }, select: { id: true } });
-    if (!admin) return;
-    const t = await getTranslations("push.notif");
-    await sendPushToUsers([admin.id], {
-      title: t("pendingTitle"),
-      body: t("pendingBody", { name: name.split(" ")[0] }),
-      url: "/admin",
-      tag: "admin-pending",
-    });
-  } catch (err) {
-    console.warn("[auth] notif admin (compte en attente) échouée", err);
-  }
-}
 
 export type ActionResult =
   | { error: string }
-  | { pending: string } // compte créé mais en attente d'activation par l'admin
   | undefined;
 
 function isValidEmail(email: string): boolean {
@@ -93,7 +69,7 @@ export async function login(_prev: ActionResult, formData: FormData): Promise<Ac
     return { error: t("wrongPassword") };
   }
 
-  // Compte non activé : l'admin doit le valider (l'admin lui-même est exempté).
+  // Compte désactivé par un administrateur (l'admin lui-même est exempté).
   if (!user.isActive && !isAdminEmail(user.email)) {
     return { error: t("accountPending") };
   }
@@ -128,37 +104,23 @@ export async function signup(_prev: ActionResult, formData: FormData): Promise<A
 
   const existing = await prisma.user.findUnique({ where: { email } });
   const passwordHash = await hashPassword(password);
-  // L'admin (ADMIN_EMAIL) est actif d'office ; tout autre nouveau compte attend
-  // la validation d'un administrateur.
-  const active = isAdminEmail(email);
 
   let user;
   if (existing) {
     if (existing.passwordHash) {
       return { error: t("accountExists") };
     }
-    // Compte hérité sans mot de passe : on le revendique avec ces identifiants
-    // (il était déjà actif, on n'y touche pas).
+    // Compte hérité sans mot de passe : on le revendique avec ces identifiants.
     user = await prisma.user.update({
       where: { id: existing.id },
       data: { name, passwordHash },
     });
   } else {
-    user = await prisma.user.create({ data: { name, email, passwordHash, isActive: active } });
+    user = await prisma.user.create({ data: { name, email, passwordHash } });
   }
 
-  // Compte actif (admin ou compte hérité revendiqué) : connexion directe.
-  if (user.isActive) {
-    await createSession(user.id);
-    redirect(next);
-  }
-
-  // Compte en attente : prévenir l'admin qu'il y a une activation à faire.
-  await notifyAdminPendingSignup(user.name);
-
-  return {
-    pending: (await getTranslations("auth"))("signupPending"),
-  };
+  await createSession(user.id);
+  redirect(next);
 }
 
 export async function logout(): Promise<void> {

@@ -40,7 +40,7 @@
       "noAccount": "No account with this email. Create an account.",
       "legacyPasswordTooShort": "Choose a password of at least {min} characters.",
       "wrongPassword": "Incorrect password.",
-      "accountPending": "Your account is being verified… An administrator must activate it.",
+      "accountPending": "Your account has been deactivated by an administrator.",
       "missingFirstName": "Enter your first name.",
       "passwordTooShort": "The password must be at least {min} characters.",
       "passwordMismatch": "The passwords don't match.",
@@ -78,8 +78,7 @@
       "button": "Choose a new password",
       "expiry": "This link expires in 1 hour and can only be used once.",
       "ignore": "If you didn't request this, simply ignore this email."
-    },
-    "signupPending": "Account created! An administrator will activate it soon. You'll be able to sign in once your account is verified."
+    }
   },
   "landing": {
     "nav": {
@@ -290,9 +289,7 @@
     "goShopping": "I'll do the shopping",
     "notif": {
       "body": "{name} is shopping (for {group})! Fill in the shopping list with what you need",
-      "fallbackGroup": "your group",
-      "pendingTitle": "New account to activate",
-      "pendingBody": "{name} just signed up and is waiting for account activation."
+      "fallbackGroup": "your group"
     }
   },
   "receipt": {

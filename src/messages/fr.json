@@ -40,7 +40,7 @@
       "noAccount": "Aucun compte avec cet email. Crée un compte.",
       "legacyPasswordTooShort": "Choisis un mot de passe d'au moins {min} caractères.",
       "wrongPassword": "Mot de passe incorrect.",
-      "accountPending": "Votre compte est en cours de vérification… Un administrateur doit l'activer.",
+      "accountPending": "Votre compte a été désactivé par un administrateur.",
       "missingFirstName": "Indique ton prénom.",
       "passwordTooShort": "Le mot de passe doit faire au moins {min} caractères.",
       "passwordMismatch": "Les mots de passe ne correspondent pas.",
@@ -78,8 +78,7 @@
       "button": "Choisir un nouveau mot de passe",
       "expiry": "Ce lien expire dans 1 heure et ne peut être utilisé qu'une fois.",
       "ignore": "Si tu n'es pas à l'origine de cette demande, ignore simplement cet email."
-    },
-    "signupPending": "Compte créé ! Un administrateur va l'activer prochainement. Tu pourras te connecter une fois ton compte vérifié."
+    }
   },
   "landing": {
     "nav": {
@@ -290,9 +289,7 @@
     "goShopping": "Je vais faire les courses",
     "notif": {
       "body": "{name} fait les courses (pour {group}) ! Remplissez la liste de courses avec ce dont vous avez besoin",
-      "fallbackGroup": "ton groupe",
-      "pendingTitle": "Nouveau compte à activer",
-      "pendingBody": "{name} vient de s'inscrire et attend l'activation de son compte."
+      "fallbackGroup": "ton groupe"
     }
   },
   "receipt": {

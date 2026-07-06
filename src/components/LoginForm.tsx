@@ -3,7 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { login, signup, type ActionResult } from "@/lib/actions/auth";
-import { input, btnPrimary, INK_STRONG, INK_MUTED, INK_FAINT, DANGER, DANGER_SOFT, ACCENT_TEXT, ACCENT_SOFT, HAIRLINE, BG } from "@/lib/ui";
+import { input, btnPrimary, INK_STRONG, INK_MUTED, INK_FAINT, DANGER, DANGER_SOFT, ACCENT_TEXT, HAIRLINE, BG } from "@/lib/ui";
 
 type Mode = "login" | "signup";
 
@@ -39,20 +39,6 @@ function ErrorBox({ message }: { message: string }) {
       fontSize: 13, color: DANGER, fontWeight: 700,
     }}>
       {message}
-    </div>
-  );
-}
-
-function PendingBox({ message }: { message: string }) {
-  return (
-    <div style={{
-      padding: "14px 16px", borderRadius: 12,
-      background: ACCENT_SOFT, border: `1.5px solid rgba(47,179,106,0.3)`,
-      fontSize: 13.5, color: ACCENT_TEXT, fontWeight: 700, lineHeight: 1.45,
-      display: "flex", alignItems: "flex-start", gap: 9,
-    }}>
-      <span style={{ fontSize: 16, lineHeight: 1.2 }}>⏳</span>
-      <span>{message}</span>
     </div>
   );
 }
@@ -114,11 +100,6 @@ function LoginFields({ next }: { next?: string }) {
 function SignupFields({ next }: { next?: string }) {
   const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(signup, undefined);
-
-  // Inscription réussie mais en attente d'activation par l'admin.
-  if (state && "pending" in state) {
-    return <PendingBox message={state.pending} />;
-  }
 
   return (
     <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
