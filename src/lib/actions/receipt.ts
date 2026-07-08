@@ -28,6 +28,9 @@ export type DraftMatch = {
   itemId: string;
   itemLabel: string;
   score: number;
+  // participants réels de l'article sur la liste (ItemParticipant, avec leurs
+  // parts) — sert de défaut à l'assignation par produit côté client, éditable.
+  participants: { userId: string; parts: number }[];
 };
 export type DraftExtra = { rawLabel: string; price: number; quantity?: number };
 
@@ -97,7 +100,7 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
 
   const plannedItems = await prisma.listItem.findMany({
     where: { listId: list.id, status: { not: "bought" } },
-    select: { id: true, label: true },
+    select: { id: true, label: true, participants: { select: { userId: true, parts: true } } },
   });
 
   // Lecture + matching en UN seul appel (un seul démarrage du CLI ≈ moitié du
@@ -119,6 +122,7 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
   }
 
   const labelById = new Map(plannedItems.map((p) => [p.id, p.label]));
+  const participantsById = new Map(plannedItems.map((p) => [p.id, p.participants]));
 
   const matched: DraftMatch[] = result.matches.map((m) => ({
     rawLabel: lines[m.ocrIndex].label,
@@ -127,6 +131,7 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
     itemId: m.itemId,
     itemLabel: labelById.get(m.itemId) ?? "",
     score: Math.round(m.score * 100) / 100,
+    participants: participantsById.get(m.itemId) ?? [],
   }));
   const extras: DraftExtra[] = result.extras.map((i) => ({
     rawLabel: lines[i].label,
@@ -149,9 +154,9 @@ type ConfirmPayload = {
   groupId: string;
   photoFile: string;
   paidByUserId: string;
-  matched: { itemId: string; rawLabel: string; price: number }[];
-  // extras conservés, avec les participants choisis (façon Tricount)
-  extras: { rawLabel: string; price: number; participantIds: string[] }[];
+  matched: { itemId: string; rawLabel: string; price: number; quantity: number }[];
+  // extras conservés, avec les participants choisis et leurs parts (façon Tricount)
+  extras: { rawLabel: string; price: number; quantity: number; participants: { userId: string; parts: number }[] }[];
   // part de chaque débiteur (hors payeur), calculée côté client par ReceiptScanner
   debts: { userId: string; amount: number }[];
 };
@@ -177,8 +182,8 @@ export async function confirmReceipt(formData: FormData): Promise<TicketActionRe
 
   const list = await getActiveList(user.id, groupId);
   const total = round2(
-    payload.matched.reduce((s, m) => s + m.price, 0) +
-    payload.extras.reduce((s, e) => s + e.price, 0),
+    payload.matched.reduce((s, m) => s + m.price * (m.quantity || 1), 0) +
+    payload.extras.reduce((s, e) => s + e.price * (e.quantity || 1), 0),
   );
   if (total <= 0) {
     return { error: t("nothingSelected") };
@@ -218,16 +223,16 @@ export async function confirmReceipt(formData: FormData): Promise<TicketActionRe
       });
     }
 
-    // Extras conservés → nouvel article (acheté) + participants choisis.
+    // Extras conservés → nouvel article (acheté) + participants choisis, avec leurs parts.
     for (const e of payload.extras) {
-      const participantIds = e.participantIds.length > 0 ? e.participantIds : [payload.paidByUserId];
+      const participants = e.participants.length > 0 ? e.participants : [{ userId: payload.paidByUserId, parts: 1 }];
       await tx.listItem.create({
         data: {
           listId: list.id,
           label: e.rawLabel,
           addedByUserId: user.id,
           status: "bought",
-          participants: { create: participantIds.map((uid) => ({ userId: uid, parts: 1 })) },
+          participants: { create: participants.map((p) => ({ userId: p.userId, parts: p.parts })) },
         },
       });
     }
