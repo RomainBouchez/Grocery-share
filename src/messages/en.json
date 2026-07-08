@@ -252,7 +252,7 @@
     "iconAria": "Icon {icon}",
     "expenseSharing": "Expense sharing",
     "groupBalance": "Group balance",
-    "expenseSharingDesc": "Works out who owes what from receipts.",
+    "expenseSharingDesc": "Shows who's sharing each item on the list.",
     "toggleExpenseSharing": "Enable expense sharing",
     "customize": "Customize the group",
     "inviteNotFound": "Invitation not found",
@@ -289,7 +289,9 @@
     "goShopping": "I'll do the shopping",
     "notif": {
       "body": "{name} is shopping (for {group})! Fill in the shopping list with what you need",
-      "fallbackGroup": "your group"
+      "fallbackGroup": "your group",
+      "ticketAssigned": "{name} added you for {amount} on a ticket ({group})",
+      "ticketReimbursed": "Your {amount} share was marked as reimbursed ({group})"
     }
   },
   "receipt": {
@@ -323,6 +325,7 @@
       "accessDenied": "Access to the group denied.",
       "analysisFailed": "Failed to analyze the receipt.",
       "noItemsDetected": "No item detected on the receipt.",
+      "nothingSelected": "Select at least one item or keep an extra before confirming.",
       "premiumOnly": "Receipt scanning is reserved for Premium accounts."
     },
     "premiumRequiredTitle": "Premium receipt scan",
@@ -339,6 +342,51 @@
     "owesShort": "owes",
     "toShort": "to",
     "markSettled": "Mark settled"
+  },
+  "tickets": {
+    "navCta": "Grocery receipts",
+    "title": "Grocery receipts",
+    "intro": "Add a ticket, split it between members, and track who's reimbursed their share.",
+    "addCta": "Add a grocery receipt",
+    "empty": "No tickets awaiting reimbursement.",
+    "emptyHint": "Add a ticket above to split an expense.",
+    "paidBy": "Paid by {name}",
+    "total": "Total",
+    "owes": "owes {amount}",
+    "markReimbursed": "Mark reimbursed",
+    "reimbursed": "Reimbursed",
+    "progress": "{done}/{total} reimbursed",
+    "detailTitle": "Ticket details",
+    "addedOn": "Added on {date}",
+    "photoAlt": "Ticket photo",
+    "new": {
+      "backToTickets": "‹ Back to tickets",
+      "title": "Add a grocery receipt",
+      "intro": "Choose how to add the expense: automatic scan or manual entry.",
+      "takePhoto": "Take a photo of the ticket",
+      "orGallery": "or pick from the gallery",
+      "totalAmount": "Total amount",
+      "whoPaid": "Who paid?",
+      "whoOwes": "Who owes money?",
+      "remaining": "Left to allocate: {amount}",
+      "save": "Save the ticket",
+      "saving": "Saving…",
+      "chooser": {
+        "back": "‹ Choose another method",
+        "scanOption": "Scan with AI",
+        "scanOptionHint": "Take a photo of the receipt — AI detects the items and prices.",
+        "manualOption": "Manual entry",
+        "manualOptionHint": "Enter the total amount and split it yourself."
+      }
+    },
+    "errors": {
+      "noPhoto": "Add a photo of the ticket.",
+      "notImage": "The file must be an image.",
+      "accessDenied": "Access to the group denied.",
+      "noDebtors": "Choose at least one person who owes money.",
+      "invalidAmount": "Enter a valid total amount.",
+      "amountsDontMatch": "The shares ({sum}) don't add up to the total ({total})."
+    }
   },
   "admin": {
     "back": "← Back",

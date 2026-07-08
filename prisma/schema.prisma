@@ -33,6 +33,8 @@ model User {
   settlementsFrom     Settlement[]  @relation("SettlementFrom")
   settlementsTo       Settlement[]  @relation("SettlementTo")
   settlementsRecorded Settlement[]  @relation("SettlementBy")
+  ticketsPaid  Ticket[]     @relation("TicketPaidBy")
+  ticketDebts  TicketDebt[] @relation("TicketDebtor")
   products        UserProduct[]
   sessions        Session[]
   pushSubscriptions PushSubscription[]
@@ -98,6 +100,7 @@ model Group {
   lists       ShoppingList[]
   balances    Balance[]
   settlements Settlement[]
+  tickets     Ticket[]
   tags        Tag[]
   productTags GroupProductTag[]
 }
@@ -266,6 +269,42 @@ model Settlement {
   createdBy User  @relation("SettlementBy", fields: [createdById], references: [id])
 
   @@index([groupId])
+}
+
+// ---------------------------------------------------------------------------
+// Tickets rapides : partage de dépense ponctuel et autonome. Aucun lien avec
+// ShoppingList/Receipt/computeGroupBalances/Settlement ci-dessus — ardoise
+// strictement séparée, sa propre page. Ne pas fusionner avec Receipt.
+// ---------------------------------------------------------------------------
+
+model Ticket {
+  id           String   @id @default(cuid())
+  groupId      String
+  paidByUserId String
+  totalAmount  Float
+  photoUrl     String?
+  createdAt    DateTime @default(now())
+
+  group  Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  paidBy User         @relation("TicketPaidBy", fields: [paidByUserId], references: [id])
+  debts  TicketDebt[]
+
+  @@index([groupId])
+}
+
+// Part d'un débiteur sur un ticket : combien il doit, et si c'est remboursé.
+model TicketDebt {
+  id           String    @id @default(cuid())
+  ticketId     String
+  userId       String
+  amount       Float
+  reimbursedAt DateTime?
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation("TicketDebtor", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, userId])
+  @@index([ticketId])
 }
 
 // ---------------------------------------------------------------------------

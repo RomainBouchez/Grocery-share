@@ -24,6 +24,8 @@ export {
   Scale,
   TrashBinMinimalistic,
   Bell,
+  Ticket,
+  Pen2,
   // — Rayons / tags (Solar) —
   Leaf,
   Bone,

@@ -252,7 +252,7 @@
     "iconAria": "Icône {icon}",
     "expenseSharing": "Partage des dépenses",
     "groupBalance": "Balance du groupe",
-    "expenseSharingDesc": "Calcule qui doit quoi à partir des tickets.",
+    "expenseSharingDesc": "Affiche qui participe à chaque article de la liste.",
     "toggleExpenseSharing": "Activer le partage des dépenses",
     "customize": "Personnaliser le groupe",
     "inviteNotFound": "Invitation introuvable",
@@ -289,7 +289,9 @@
     "goShopping": "Je vais faire les courses",
     "notif": {
       "body": "{name} fait les courses (pour {group}) ! Remplissez la liste de courses avec ce dont vous avez besoin",
-      "fallbackGroup": "ton groupe"
+      "fallbackGroup": "ton groupe",
+      "ticketAssigned": "{name} t'a mis {amount} sur un ticket ({group})",
+      "ticketReimbursed": "Ta part de {amount} a été marquée remboursée ({group})"
     }
   },
   "receipt": {
@@ -323,6 +325,7 @@
       "accessDenied": "Accès au groupe refusé.",
       "analysisFailed": "Échec de l'analyse du ticket.",
       "noItemsDetected": "Aucun article détecté sur le ticket.",
+      "nothingSelected": "Sélectionne au moins un article ou garde un extra avant de valider.",
       "premiumOnly": "Le scan de ticket est réservé aux comptes Premium."
     },
     "premiumRequiredTitle": "Scan de ticket Premium",
@@ -339,6 +342,51 @@
     "owesShort": "doit",
     "toShort": "à",
     "markSettled": "Marquer remboursé"
+  },
+  "tickets": {
+    "navCta": "Tickets de course",
+    "title": "Tickets de course",
+    "intro": "Ajoute un ticket, répartis-le entre les membres, et suis qui a remboursé sa part.",
+    "addCta": "Ajouter un ticket de course",
+    "empty": "Aucun ticket en attente de remboursement.",
+    "emptyHint": "Ajoute un ticket ci-dessus pour partager une dépense.",
+    "paidBy": "Payé par {name}",
+    "total": "Total",
+    "owes": "doit {amount}",
+    "markReimbursed": "Marquer remboursé",
+    "reimbursed": "Remboursé",
+    "progress": "{done}/{total} remboursés",
+    "detailTitle": "Détail du ticket",
+    "addedOn": "Ajouté le {date}",
+    "photoAlt": "Photo du ticket",
+    "new": {
+      "backToTickets": "‹ Retour aux tickets",
+      "title": "Ajouter un ticket de course",
+      "intro": "Choisis comment ajouter la dépense : scan automatique ou saisie manuelle.",
+      "takePhoto": "Prends le ticket en photo",
+      "orGallery": "ou sélectionne depuis la galerie",
+      "totalAmount": "Montant total",
+      "whoPaid": "Qui a payé ?",
+      "whoOwes": "Qui doit rembourser ?",
+      "remaining": "Reste à répartir : {amount}",
+      "save": "Enregistrer le ticket",
+      "saving": "Enregistrement…",
+      "chooser": {
+        "back": "‹ Choisir une autre méthode",
+        "scanOption": "Scanner avec l'IA",
+        "scanOptionHint": "Prends le ticket en photo, l'IA détecte les articles et les prix.",
+        "manualOption": "Saisie manuelle",
+        "manualOptionHint": "Indique le montant total et répartis-le toi-même."
+      }
+    },
+    "errors": {
+      "noPhoto": "Ajoute une photo du ticket.",
+      "notImage": "Le fichier doit être une image.",
+      "accessDenied": "Accès au groupe refusé.",
+      "noDebtors": "Choisis au moins une personne qui doit rembourser.",
+      "invalidAmount": "Indique un montant total valide.",
+      "amountsDontMatch": "La somme des parts ({sum}) ne correspond pas au montant total ({total})."
+    }
   },
   "admin": {
     "back": "← Retour",

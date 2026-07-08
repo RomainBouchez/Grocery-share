@@ -8,7 +8,7 @@ import { InviteCode } from "@/components/InviteCode";
 import { AddItemForm } from "@/components/AddItemForm";
 import { TabBar } from "@/components/TabBar";
 import { initials } from "@/lib/utils";
-import { Cart3, Scale } from "@/lib/icons";
+import { Ticket } from "@/lib/icons";
 import { GroupAppearance } from "@/components/GroupAppearance";
 import { PushManager } from "@/components/PushManager";
 import { PendingSections } from "@/components/PendingSections";
@@ -20,7 +20,7 @@ import { expireStaleShopping } from "@/lib/shopping";
 import { resolveGroupColors } from "@/lib/colors";
 import {
   colorFor, avatarStyle, tintForColor,
-  ACCENT, INK_STRONG, INK_MUTED, INK_FAINT, HAIRLINE, FONT,
+  INK_STRONG, INK_MUTED, INK_FAINT, HAIRLINE, FONT,
 } from "@/lib/ui";
 
 export default async function GroupPage({
@@ -190,57 +190,18 @@ export default async function GroupPage({
           {/* Je vais faire les courses (push PWA) */}
           <PushManager groupId={groupId} iAmShopping={iAmShopping} />
 
-          {/* Faire les courses (scan ticket OCR + Claude) — Premium, et si le
-              partage de dépenses est activé. Non-Premium : bouton verrouillé. */}
-          {group.expenseSharingEnabled && (
-            premium ? (
-              <Link href={`/groups/${groupId}/receipt`} style={{
-                width: "100%", boxSizing: "border-box", marginTop: 10,
-                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
-                padding: "15px", borderRadius: 16, textDecoration: "none",
-                background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 800,
-                border: "1.5px solid rgba(0,0,0,0.06)",
-                boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(47,179,106,0.3)",
-              }}>
-                <Cart3 weight="Bold" size={18} color="#fff" />
-                {tr("group.iDidShopping")}
-              </Link>
-            ) : (
-              <div
-                title={tr("premium.premiumOnlyHint")}
-                style={{
-                  width: "100%", boxSizing: "border-box", marginTop: 10,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
-                  padding: "15px", borderRadius: 16, cursor: "not-allowed",
-                  background: "#9A968A", color: "#fff", fontSize: 15, fontWeight: 800,
-                  border: "1.5px solid rgba(0,0,0,0.06)",
-                  boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(30,26,20,0.22)",
-                }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
-                </svg>
-                {tr("group.iDidShopping")}
-                <span style={{ padding: "3px 9px", borderRadius: 999, background: "rgba(255,255,255,0.25)", color: "#fff", fontSize: 10, fontWeight: 900, letterSpacing: "0.05em" }}>
-                  {tr("premium.premiumBadge")}
-                </span>
-              </div>
-            )
-          )}
-
-          {/* Balance du groupe — uniquement si le module est activé */}
-          {group.expenseSharingEnabled && (
-            <Link href={`/groups/${groupId}/balances`} style={{
-              width: "100%", boxSizing: "border-box", marginTop: 10,
-              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
-              padding: "14px", borderRadius: 16, textDecoration: "none",
-              background: "#fff", color: INK_STRONG, fontSize: 15, fontWeight: 800,
-              border: `1.5px solid ${HAIRLINE}`,
-              boxShadow: "0 0 0 1px rgba(30,26,20,0.04), 0 6px 14px rgba(30,26,20,0.07)",
-            }}>
-              <Scale weight="Bold" size={18} color={INK_STRONG} />
-              {tr("group.balances")}
-            </Link>
-          )}
+          {/* Tickets — un seul registre, ajout (scan IA ou saisie manuelle) depuis la liste */}
+          <Link href={`/groups/${groupId}/tickets`} style={{
+            width: "100%", boxSizing: "border-box", marginTop: 10,
+            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9,
+            padding: "14px", borderRadius: 16, textDecoration: "none",
+            background: "#fff", color: INK_STRONG, fontSize: 15, fontWeight: 800,
+            border: `1.5px solid ${HAIRLINE}`,
+            boxShadow: "0 0 0 1px rgba(30,26,20,0.04), 0 6px 14px rgba(30,26,20,0.07)",
+          }}>
+            <Ticket weight="Bold" size={18} color={INK_STRONG} />
+            {tr("tickets.navCta")}
+          </Link>
         </div>
 
         {/* Items */}

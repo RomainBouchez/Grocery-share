@@ -33,6 +33,7 @@ export function ReceiptScanner({
   const tr = useTranslations("receipt");
   const [draft, setDraft] = useState<ScanDraft | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [phase, setPhase] = useState<0 | 1 | 2>(0);
   const [scanning, startScan] = useTransition();
   const [confirming, startConfirm] = useTransition();
@@ -113,9 +114,16 @@ export function ReceiptScanner({
     if (!draft) return;
     const matched = draft.matched.filter(m => selectedMatchIds.has(m.itemId)).map(m => ({ itemId: m.itemId, rawLabel: m.rawLabel, price: m.price }));
     const extras = draft.extras.map((ex, i) => ({ rawLabel: ex.rawLabel, price: ex.price, participantIds: Array.from(extrasParticipants.get(extraKey(ex, i)) ?? []) })).filter(ex => ex.participantIds.length > 0);
+    const debts = computeSummary()
+      .filter(m => !m.isPayer && m.owes > 0.005)
+      .map(m => ({ userId: m.userId, amount: Math.round(m.owes * 100) / 100 }));
     const fd = new FormData();
-    fd.append("payload", JSON.stringify({ groupId, photoFile: draft.photoFile, paidByUserId, matched, extras }));
-    startConfirm(() => confirmReceipt(fd));
+    fd.append("payload", JSON.stringify({ groupId, photoFile: draft.photoFile, paidByUserId, matched, extras, debts }));
+    setConfirmError(null);
+    startConfirm(async () => {
+      const result = await confirmReceipt(fd);
+      if (result?.error) setConfirmError(result.error);
+    });
   }
 
   const sectionLabel: React.CSSProperties = { fontSize: 11, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase", color: INK_FAINT, marginBottom: 12 };
@@ -308,10 +316,15 @@ export function ReceiptScanner({
           )}
         </div>
 
+        {confirmError && (
+          <div style={{ padding: "13px 16px", borderRadius: 14, background: DANGER_SOFT, border: `1.5px solid rgba(232,80,58,0.3)` }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: DANGER }}>{confirmError}</p>
+          </div>
+        )}
         <button type="button" onClick={handleConfirm} disabled={confirming} style={{ ...BTN_ACCENT, opacity: confirming ? 0.55 : 1 }}>
           {confirming ? tr("saving") : tr("confirmShopping")}
         </button>
-        <button type="button" onClick={() => setPhase(1)} style={BTN_SOFT}>{tr("edit")}</button>
+        <button type="button" onClick={() => { setPhase(1); setConfirmError(null); }} style={BTN_SOFT}>{tr("edit")}</button>
       </div>
     );
   }

@@ -13,6 +13,11 @@ import { assertMembership } from "@/lib/actions/groups";
 import { extractAndMatchReceipt, extractReceiptItems } from "@/lib/ocr";
 import { matchReceiptWithClaude } from "@/lib/matchClaude";
 import type { MatchResult, OcrLine } from "@/lib/matching";
+import { pushGroupName, type TicketActionResult } from "@/lib/actions/tickets";
+import { sendPushToUsers } from "@/lib/push";
+import { formatEuro } from "@/lib/utils";
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR ?? path.join(os.tmpdir(), "grocyshare-uploads");
 
@@ -80,11 +85,14 @@ export async function scanReceipt(_prev: unknown, formData: FormData): Promise<S
     return { ok: false, error: t("accessDenied") };
   }
 
-  // Sauvegarde l'image dans un dossier accessible par le CLI Claude.
+  // Sauvegarde l'image dans un dossier accessible par le CLI Claude. Sous
+  // tickets/ : la photo finira par appuyer un Ticket (voir confirmReceipt),
+  // servie ensuite par /api/tickets/[ticketId]/photo qui lit ce même sous-dossier.
   const ext = (photo.name.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "").slice(0, 5) || "jpg";
   const filename = `${randomUUID()}.${ext}`;
-  const filepath = path.join(UPLOAD_DIR, filename);
-  await mkdir(UPLOAD_DIR, { recursive: true });
+  const dir = path.join(UPLOAD_DIR, "tickets");
+  const filepath = path.join(dir, filename);
+  await mkdir(dir, { recursive: true });
   await writeFile(filepath, Buffer.from(await photo.arrayBuffer()));
 
   const plannedItems = await prisma.listItem.findMany({
@@ -144,50 +152,76 @@ type ConfirmPayload = {
   matched: { itemId: string; rawLabel: string; price: number }[];
   // extras conservés, avec les participants choisis (façon Tricount)
   extras: { rawLabel: string; price: number; participantIds: string[] }[];
+  // part de chaque débiteur (hors payeur), calculée côté client par ReceiptScanner
+  debts: { userId: string; amount: number }[];
 };
 
 /**
- * Valide le ticket : crée le Receipt + ReceiptItems, marque les articles
- * matchés comme achetés, et matérialise les extras conservés en articles.
+ * Valide le ticket : marque les articles matchés comme achetés, matérialise
+ * les extras conservés en articles, et enregistre la dépense comme Ticket
+ * (même registre que la saisie manuelle — un seul endroit pour "qui doit quoi").
  */
-export async function confirmReceipt(formData: FormData): Promise<void> {
+export async function confirmReceipt(formData: FormData): Promise<TicketActionResult> {
   const user = await requireUser();
+  const t = await getTranslations("receipt.errors");
+  const tTickets = await getTranslations("tickets.errors");
   const payload = JSON.parse(String(formData.get("payload") ?? "{}")) as ConfirmPayload;
   const { groupId } = payload;
 
-  await assertMembership(user.id, groupId);
-  await assertMembership(payload.paidByUserId, groupId);
+  try {
+    await assertMembership(user.id, groupId);
+    await assertMembership(payload.paidByUserId, groupId);
+  } catch {
+    return { error: t("accessDenied") };
+  }
 
   const list = await getActiveList(user.id, groupId);
-  const total =
+  const total = round2(
     payload.matched.reduce((s, m) => s + m.price, 0) +
-    payload.extras.reduce((s, e) => s + e.price, 0);
+    payload.extras.reduce((s, e) => s + e.price, 0),
+  );
+  if (total <= 0) {
+    return { error: t("nothingSelected") };
+  }
 
-  await prisma.$transaction(async (tx) => {
-    const receipt = await tx.receipt.create({
+  const debts = (payload.debts ?? []).filter((d) => d.userId !== payload.paidByUserId && d.amount > 0);
+  try {
+    for (const d of debts) {
+      await assertMembership(d.userId, groupId);
+    }
+  } catch {
+    return { error: t("accessDenied") };
+  }
+
+  const debtSum = round2(debts.reduce((s, d) => s + d.amount, 0));
+  // <= et non === : le payeur peut avoir sa propre part auto-financée (non trackée comme dette).
+  if (debtSum > total + 0.01) {
+    return { error: tTickets("amountsDontMatch", { sum: formatEuro(debtSum), total: formatEuro(total) }) };
+  }
+
+  const ticket = await prisma.$transaction(async (tx) => {
+    const created = await tx.ticket.create({
       data: {
-        listId: list.id,
+        groupId,
         paidByUserId: payload.paidByUserId,
-        totalAmount: Math.round(total * 100) / 100,
+        totalAmount: total,
         photoUrl: payload.photoFile,
+        debts: { create: debts.map((d) => ({ userId: d.userId, amount: round2(d.amount) })) },
       },
     });
 
-    // Articles planifiés retrouvés sur le ticket → achetés + ligne de ticket.
+    // Articles planifiés retrouvés sur le ticket → marqués achetés.
     for (const m of payload.matched) {
       await tx.listItem.update({
         where: { id: m.itemId },
         data: { status: "bought" },
-      });
-      await tx.receiptItem.create({
-        data: { receiptId: receipt.id, rawLabel: m.rawLabel, matchedItemId: m.itemId, price: m.price },
       });
     }
 
     // Extras conservés → nouvel article (acheté) + participants choisis.
     for (const e of payload.extras) {
       const participantIds = e.participantIds.length > 0 ? e.participantIds : [payload.paidByUserId];
-      const newItem = await tx.listItem.create({
+      await tx.listItem.create({
         data: {
           listId: list.id,
           label: e.rawLabel,
@@ -196,10 +230,9 @@ export async function confirmReceipt(formData: FormData): Promise<void> {
           participants: { create: participantIds.map((uid) => ({ userId: uid, parts: 1 })) },
         },
       });
-      await tx.receiptItem.create({
-        data: { receiptId: receipt.id, rawLabel: e.rawLabel, matchedItemId: newItem.id, price: e.price },
-      });
     }
+
+    return created;
   });
 
   // Courses terminées : efface l'annonce « je vais faire les courses ».
@@ -208,6 +241,23 @@ export async function confirmReceipt(formData: FormData): Promise<void> {
     data: { shoppingByUserId: null, shoppingStartedAt: null, status: "planning" },
   });
 
+  if (debts.length > 0) {
+    const tPush = await getTranslations("push.notif");
+    const firstName = user.name.split(" ")[0];
+    const groupName = await pushGroupName(groupId);
+    await Promise.all(
+      debts.map((d) =>
+        sendPushToUsers([d.userId], {
+          title: "GrocyShare",
+          body: tPush("ticketAssigned", { name: firstName, amount: formatEuro(d.amount), group: groupName }),
+          url: `/groups/${groupId}/tickets`,
+          tag: `ticket-${ticket.id}`,
+        }),
+      ),
+    );
+  }
+
   revalidatePath(`/groups/${groupId}`);
-  redirect(`/groups/${groupId}`);
+  revalidatePath(`/groups/${groupId}/tickets`);
+  redirect(`/groups/${groupId}/tickets/${ticket.id}`);
 }
